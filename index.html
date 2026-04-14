@@ -15,7 +15,7 @@
             margin: 0;
             font-family: Arial, Helvetica, sans-serif;
             background: #f6f3ef;
-            color: #6b1f2a;
+            color: #5b3a42;
         }
 
         .contenedor {
@@ -25,32 +25,36 @@
         }
 
         .cabecera {
-            background: linear-gradient(135deg, #7a2230, #9a3143, #b44b5b);
-            color: white;
-            padding: 26px 24px;
+            background: #4b5563;
+            color: #ffffff;
+            padding: 24px 22px;
             border-radius: 20px;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.10);
             margin-bottom: 22px;
+            text-align: center;
         }
 
         .cabecera h1 {
             margin: 0 0 10px 0;
             font-size: 30px;
+            color: #ffffff;
         }
 
         .cabecera p {
             margin: 0;
             line-height: 1.6;
             font-size: 16px;
+            color: #ffffff;
         }
 
         .subcabecera {
             margin-top: 14px;
-            background: rgba(255, 255, 255, 0.14);
-            border: 1px solid rgba(255, 255, 255, 0.24);
+            background: rgba(255, 255, 255, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             border-radius: 14px;
             padding: 12px 14px;
             font-size: 14px;
+            color: #ffffff;
         }
 
         .panel {
@@ -64,7 +68,7 @@
         .panel h2 {
             margin: 0 0 14px 0;
             font-size: 22px;
-            color: #7a2230;
+            color: #4b5563;
         }
 
         .filtros {
@@ -82,7 +86,7 @@
             font-weight: bold;
             margin-bottom: 6px;
             font-size: 14px;
-            color: #7a2230;
+            color: #4b5563;
         }
 
         input[type="text"],
@@ -93,7 +97,7 @@
             border-radius: 10px;
             font-size: 15px;
             background: white;
-            color: #6b1f2a;
+            color: #5b3a42;
         }
 
         .estadisticas {
@@ -113,12 +117,12 @@
         .stat .numero {
             font-size: 28px;
             font-weight: bold;
-            color: #7a2230;
+            color: #5b3a42;
         }
 
         .stat .texto {
             font-size: 13px;
-            color: #7a2230;
+            color: #4b5563;
             margin-top: 4px;
         }
 
@@ -135,8 +139,8 @@
         }
 
         thead th {
-            background: #7a2230;
-            color: white;
+            background: #4b5563;
+            color: #ffffff;
             text-align: left;
             padding: 12px 10px;
             font-size: 14px;
@@ -148,21 +152,21 @@
         tbody td {
             padding: 12px 10px;
             font-size: 14px;
-            color: #6b1f2a;
+            color: #5b3a42;
             border-bottom: 1px solid #e8dccb;
             vertical-align: middle;
         }
 
         tbody tr:nth-child(odd) {
-            background: #eef9ee;
+            background: #f6fcf6;
         }
 
         tbody tr:nth-child(even) {
-            background: #fff9db;
+            background: #fffdf0;
         }
 
         tbody tr:hover {
-            background: #f8eef0;
+            background: #f4f4f4;
         }
 
         .badge {
@@ -202,7 +206,7 @@
         .boton {
             display: inline-block;
             text-decoration: none;
-            background: #8f2f41;
+            background: #7b3140;
             color: white;
             padding: 8px 12px;
             border-radius: 10px;
@@ -213,7 +217,7 @@
         }
 
         .boton:hover {
-            background: #7a2230;
+            background: #682431;
         }
 
         .sin-resultados {
@@ -221,7 +225,7 @@
             border-radius: 16px;
             padding: 24px;
             text-align: center;
-            color: #7a2230;
+            color: #4b5563;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
         }
 
@@ -232,19 +236,19 @@
             padding: 18px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             font-size: 14px;
-            color: #6b1f2a;
+            color: #5b3a42;
             line-height: 1.7;
         }
 
         .pie strong {
-            color: #7a2230;
+            color: #4b5563;
         }
 
         code {
             background: #f7efe8;
             padding: 2px 6px;
             border-radius: 6px;
-            color: #7a2230;
+            color: #5b3a42;
         }
 
         @media (max-width: 980px) {
@@ -350,18 +354,10 @@
         </div>
 
         <div class="pie">
-            <strong>Cómo actualizar este índice:</strong><br>
-            Solo tenés que agregar un nuevo objeto dentro del arreglo <code>ACTIVIDADES</code>.<br><br>
-
-            <strong>Ejemplo básico:</strong><br>
-            <code>
-      { id: "ACT-MAT-0004", titulo: "Restas simples", area: "Matemática", grado: "3", division: "B", tema: "Resta", descripcion: "Actividad para reforzar restas simples.", estado: "Disponible", fecha: "15/04/2026", enlace: "actividad-matematica-restas-simples.html" }
-      </code><br><br>
-
-            <strong>Si todas las actividades están en la raíz del sitio</strong>, alcanza con poner el nombre del
-            archivo en <code>enlace</code>.
-            Si más adelante usás carpetas, ahí sí ponés la ruta relativa.
+            <strong>Escuela 1-077 "Provincia de Buenos Aires"</strong><br>
+            <strong>Dudas o consultas:</strong> jmbruunc@gmail.com
         </div>
+
     </div>
 
     <script>
@@ -376,7 +372,7 @@
                 descripcion: "Actividad digital para reforzar el conteo y la numeración hasta 100.",
                 estado: "Disponible",
                 fecha: "12/04/2026",
-                enlace: "actividad-matematica-contar-1-100.html"
+                enlace: "actividad-contar-del-1-al-100.html"
             },
             {
                 id: "ACT-LEN-0002",
