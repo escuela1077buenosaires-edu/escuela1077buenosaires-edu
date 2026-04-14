@@ -14,20 +14,20 @@
         body {
             margin: 0;
             font-family: Arial, Helvetica, sans-serif;
-            background: #f3f6fb;
-            color: #1f2937;
+            background: #f6f3ef;
+            color: #6b1f2a;
         }
 
         .contenedor {
-            max-width: 1250px;
+            max-width: 1280px;
             margin: 0 auto;
             padding: 20px;
         }
 
         .cabecera {
-            background: linear-gradient(135deg, #1d4ed8, #2563eb, #60a5fa);
+            background: linear-gradient(135deg, #7a2230, #9a3143, #b44b5b);
             color: white;
-            padding: 28px 24px;
+            padding: 26px 24px;
             border-radius: 20px;
             box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
             margin-bottom: 22px;
@@ -35,7 +35,7 @@
 
         .cabecera h1 {
             margin: 0 0 10px 0;
-            font-size: 31px;
+            font-size: 30px;
         }
 
         .cabecera p {
@@ -44,7 +44,7 @@
             font-size: 16px;
         }
 
-        .cabecera .sub {
+        .subcabecera {
             margin-top: 14px;
             background: rgba(255, 255, 255, 0.14);
             border: 1px solid rgba(255, 255, 255, 0.24);
@@ -54,7 +54,7 @@
         }
 
         .panel {
-            background: white;
+            background: #ffffff;
             border-radius: 18px;
             padding: 18px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
@@ -64,7 +64,7 @@
         .panel h2 {
             margin: 0 0 14px 0;
             font-size: 22px;
-            color: #111827;
+            color: #7a2230;
         }
 
         .filtros {
@@ -82,16 +82,18 @@
             font-weight: bold;
             margin-bottom: 6px;
             font-size: 14px;
+            color: #7a2230;
         }
 
         input[type="text"],
         select {
             width: 100%;
             padding: 10px 12px;
-            border: 1px solid #cbd5e1;
+            border: 1px solid #d8cfc3;
             border-radius: 10px;
             font-size: 15px;
             background: white;
+            color: #6b1f2a;
         }
 
         .estadisticas {
@@ -101,8 +103,8 @@
         }
 
         .stat {
-            background: #f8fafc;
-            border: 1px solid #e5e7eb;
+            background: #fffdf9;
+            border: 1px solid #eadfce;
             border-radius: 14px;
             padding: 14px;
             text-align: center;
@@ -111,181 +113,141 @@
         .stat .numero {
             font-size: 28px;
             font-weight: bold;
-            color: #1d4ed8;
+            color: #7a2230;
         }
 
         .stat .texto {
             font-size: 13px;
-            color: #4b5563;
+            color: #7a2230;
             margin-top: 4px;
         }
 
-        .seccion-recientes {
-            margin-bottom: 26px;
-        }
-
-        .grilla-recientes,
-        .grilla {
-            display: grid;
-            gap: 16px;
-        }
-
-        .grilla-recientes {
-            grid-template-columns: repeat(3, 1fr);
-        }
-
-        .grilla {
-            grid-template-columns: repeat(3, 1fr);
-        }
-
-        .grado-bloque {
-            margin-bottom: 28px;
-        }
-
-        .grado-titulo {
-            margin: 0 0 14px 0;
-            font-size: 24px;
-            color: #111827;
-            padding-left: 10px;
-            border-left: 6px solid #2563eb;
-        }
-
-        .tarjeta {
-            background: white;
+        .tabla-contenedor {
+            overflow-x: auto;
             border-radius: 16px;
-            padding: 18px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e5e7eb;
-            display: flex;
-            flex-direction: column;
-            min-height: 285px;
+            border: 1px solid #e5d8c7;
         }
 
-        .tarjeta.reciente {
-            border: 2px solid #93c5fd;
-            background: #f8fbff;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 980px;
         }
 
-        .tarjeta h3 {
-            margin: 0 0 8px 0;
-            font-size: 19px;
-            color: #111827;
-        }
-
-        .meta {
-            font-size: 13px;
-            color: #475569;
-            margin-bottom: 10px;
-            line-height: 1.55;
-        }
-
-        .descripcion {
+        thead th {
+            background: #7a2230;
+            color: white;
+            text-align: left;
+            padding: 12px 10px;
             font-size: 14px;
-            color: #374151;
-            line-height: 1.55;
-            margin-bottom: 14px;
-            flex-grow: 1;
+            position: sticky;
+            top: 0;
+            z-index: 2;
         }
 
-        .etiquetas {
-            margin-bottom: 14px;
+        tbody td {
+            padding: 12px 10px;
+            font-size: 14px;
+            color: #6b1f2a;
+            border-bottom: 1px solid #e8dccb;
+            vertical-align: middle;
+        }
+
+        tbody tr:nth-child(odd) {
+            background: #eef9ee;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fff9db;
+        }
+
+        tbody tr:hover {
+            background: #f8eef0;
         }
 
         .badge {
             display: inline-block;
-            padding: 6px 10px;
+            padding: 5px 9px;
             border-radius: 999px;
             font-size: 12px;
             font-weight: bold;
-            margin: 0 6px 6px 0;
+            white-space: nowrap;
         }
 
-        .badge.area-lengua {
-            background: #ede9fe;
+        .badge-lengua {
+            background: #f3e8ff;
             color: #6d28d9;
         }
 
-        .badge.area-matematica {
+        .badge-matematica {
             background: #dbeafe;
             color: #1d4ed8;
         }
 
-        .badge.area-otra {
+        .badge-otra {
             background: #fee2e2;
             color: #b91c1c;
         }
 
-        .badge.grado {
+        .badge-grado {
             background: #dcfce7;
             color: #166534;
         }
 
-        .badge.estado {
-            background: #fef3c7;
+        .badge-estado {
+            background: #fde68a;
             color: #92400e;
-        }
-
-        .badge.reciente {
-            background: #e0f2fe;
-            color: #0c4a6e;
-        }
-
-        .acciones {
-            margin-top: auto;
         }
 
         .boton {
             display: inline-block;
             text-decoration: none;
-            background: #2563eb;
+            background: #8f2f41;
             color: white;
-            padding: 10px 14px;
+            padding: 8px 12px;
             border-radius: 10px;
+            font-size: 13px;
             font-weight: bold;
-            font-size: 14px;
+            text-align: center;
+            white-space: nowrap;
         }
 
         .boton:hover {
-            background: #1d4ed8;
+            background: #7a2230;
         }
 
         .sin-resultados {
-            background: white;
+            background: #ffffff;
             border-radius: 16px;
             padding: 24px;
             text-align: center;
-            color: #6b7280;
+            color: #7a2230;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
         }
 
         .pie {
             margin-top: 24px;
-            background: white;
+            background: #ffffff;
             border-radius: 16px;
             padding: 18px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             font-size: 14px;
-            color: #374151;
+            color: #6b1f2a;
             line-height: 1.7;
         }
 
         .pie strong {
-            color: #111827;
+            color: #7a2230;
         }
 
         code {
-            background: #f1f5f9;
+            background: #f7efe8;
             padding: 2px 6px;
             border-radius: 6px;
+            color: #7a2230;
         }
 
-        @media (max-width: 1050px) {
-
-            .grilla-recientes,
-            .grilla {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
+        @media (max-width: 980px) {
             .estadisticas {
                 grid-template-columns: repeat(3, 1fr);
             }
@@ -296,21 +258,12 @@
                 grid-template-columns: 1fr;
             }
 
-            .grilla-recientes,
-            .grilla {
-                grid-template-columns: 1fr;
-            }
-
             .estadisticas {
                 grid-template-columns: repeat(2, 1fr);
             }
 
             .cabecera h1 {
                 font-size: 24px;
-            }
-
-            .grado-titulo {
-                font-size: 21px;
             }
         }
     </style>
@@ -322,12 +275,12 @@
             <h1>Índice de actividades realizadas para DRT</h1>
             <p>
                 Espacio de acceso a actividades digitales elaboradas para apoyar intervenciones pedagógicas,
-                fortalecer trayectorias escolares y facilitar el trabajo de la DRT con sus alumnos.
+                fortalecer trayectorias escolares y facilitar la implementación de propuestas con alumnos.
             </p>
-            <div class="sub">
+            <div class="subcabecera">
                 Escuela: <strong>1-077</strong> |
-                Uso previsto: <strong>implementación de actividades con alumnos</strong> |
-                Prioridad: <strong>Lengua y Matemática</strong>, con posibilidad de incorporar otras áreas.
+                Uso previsto: <strong>DRT con alumnos</strong> |
+                Áreas prioritarias: <strong>Lengua y Matemática</strong>, con posibilidad de incorporar otras áreas.
             </div>
         </div>
 
@@ -385,26 +338,33 @@
                     <div class="texto">Otras áreas</div>
                 </div>
                 <div class="stat">
-                    <div class="numero" id="statRecientes">0</div>
-                    <div class="texto">Recientes destacadas</div>
+                    <div class="numero" id="statVisibles">0</div>
+                    <div class="texto">Mostradas en pantalla</div>
                 </div>
             </div>
         </div>
 
-        <div class="panel seccion-recientes" id="panelRecientes">
-            <h2>Actividades más recientes</h2>
-            <div id="contenedorRecientes" class="grilla-recientes"></div>
+        <div class="panel">
+            <h2>Listado de actividades</h2>
+            <div id="contenedorTabla"></div>
         </div>
 
-        <div id="contenedorPorGrado"></div>
-
         <div class="pie">
-            <strong>Desarrollado por: A.I.E. Escuela 1-077 "Provincia de Buenos Aires"</strong><br>
+            <strong>Cómo actualizar este índice:</strong><br>
+            Solo tenés que agregar un nuevo objeto dentro del arreglo <code>ACTIVIDADES</code>.<br><br>
+
+            <strong>Ejemplo básico:</strong><br>
+            <code>
+      { id: "ACT-MAT-0004", titulo: "Restas simples", area: "Matemática", grado: "3", division: "B", tema: "Resta", descripcion: "Actividad para reforzar restas simples.", estado: "Disponible", fecha: "15/04/2026", enlace: "actividad-matematica-restas-simples.html" }
+      </code><br><br>
+
+            <strong>Si todas las actividades están en la raíz del sitio</strong>, alcanza con poner el nombre del
+            archivo en <code>enlace</code>.
+            Si más adelante usás carpetas, ahí sí ponés la ruta relativa.
         </div>
     </div>
 
     <script>
-
         var ACTIVIDADES = [
             {
                 id: "ACT-MAT-0001",
@@ -413,7 +373,7 @@
                 grado: "2",
                 division: "U",
                 tema: "Conteo",
-                descripcion: "Actividad digital para reforzar el conteo y la numeración hasta 100, con ejercicios variados orientados a mejorar comprensión y cálculo.",
+                descripcion: "Actividad digital para reforzar el conteo y la numeración hasta 100.",
                 estado: "Disponible",
                 fecha: "12/04/2026",
                 enlace: "actividad-matematica-contar-1-100.html"
@@ -425,7 +385,7 @@
                 grado: "1",
                 division: "U",
                 tema: "Lectura inicial",
-                descripcion: "Propuesta para trabajar reconocimiento y lectura de palabras simples, con apoyo visual y consignas breves.",
+                descripcion: "Propuesta para trabajar reconocimiento y lectura de palabras simples.",
                 estado: "Disponible",
                 fecha: "13/04/2026",
                 enlace: "actividad-lengua-lectura-palabras.html"
@@ -437,7 +397,7 @@
                 grado: "2",
                 division: "A",
                 tema: "Sumas",
-                descripcion: "Actividad para ejercitar sumas simples y comprensión de consignas en problemas básicos.",
+                descripcion: "Actividad para ejercitar sumas simples y comprensión de consignas.",
                 estado: "Disponible",
                 fecha: "14/04/2026",
                 enlace: "actividad-matematica-sumas-simples.html"
@@ -453,49 +413,13 @@
                 .replace(/"/g, "&quot;");
         }
 
-        function obtenerClaseArea(area) {
-            if (area === "Lengua") return "badge area-lengua";
-            if (area === "Matemática") return "badge area-matematica";
-            return "badge area-otra";
+        function claseArea(area) {
+            if (area === "Lengua") return "badge badge-lengua";
+            if (area === "Matemática") return "badge badge-matematica";
+            return "badge badge-otra";
         }
 
-        function crearTarjeta(act, esReciente) {
-            var div = document.createElement("div");
-            div.className = esReciente ? "tarjeta reciente" : "tarjeta";
-
-            var badgeReciente = esReciente
-                ? '<span class="badge reciente">Reciente</span>'
-                : '';
-
-            div.innerHTML =
-                '<h3>' + escapar(act.titulo) + '</h3>' +
-                '<div class="meta">' +
-                '<strong>ID:</strong> ' + escapar(act.id) + '<br>' +
-                '<strong>Fecha:</strong> ' + escapar(act.fecha) + '<br>' +
-                '<strong>Tema:</strong> ' + escapar(act.tema) + '<br>' +
-                '<strong>División:</strong> ' + escapar(act.division) +
-                '</div>' +
-                '<div class="etiquetas">' +
-                '<span class="' + obtenerClaseArea(act.area) + '">' + escapar(act.area) + '</span>' +
-                '<span class="badge grado">' + escapar(act.grado) + '° grado</span>' +
-                '<span class="badge estado">' + escapar(act.estado) + '</span>' +
-                badgeReciente +
-                '</div>' +
-                '<div class="descripcion">' + escapar(act.descripcion) + '</div>' +
-                '<div class="acciones">' +
-                '<a class="boton" href="' + escapar(act.enlace) + '" target="_blank">Abrir actividad</a>' +
-                '</div>';
-
-            return div;
-        }
-
-        function parsearFecha(fecha) {
-            var partes = fecha.split("/");
-            if (partes.length !== 3) return new Date(0);
-            return new Date(partes[2], partes[1] - 1, partes[0]);
-        }
-
-        function obtenerActividadesFiltradas() {
+        function filtrarActividades() {
             var busqueda = document.getElementById("busqueda").value.toLowerCase();
             var area = document.getElementById("filtroArea").value;
             var grado = document.getElementById("filtroGrado").value;
@@ -513,77 +437,62 @@
             });
         }
 
-        function renderizarRecientes(lista) {
-            var panel = document.getElementById("panelRecientes");
-            var contenedor = document.getElementById("contenedorRecientes");
+        function renderizarTabla(lista) {
+            var contenedor = document.getElementById("contenedorTabla");
             contenedor.innerHTML = "";
-
-            var copia = lista.slice();
-            copia.sort(function (a, b) {
-                return parsearFecha(b.fecha) - parsearFecha(a.fecha);
-            });
-
-            var recientes = copia.slice(0, 3);
-
-            if (recientes.length === 0) {
-                panel.style.display = "none";
-                return;
-            }
-
-            panel.style.display = "block";
-
-            for (var i = 0; i < recientes.length; i++) {
-                contenedor.appendChild(crearTarjeta(recientes[i], true));
-            }
-        }
-
-        function renderizarPorGrado(lista) {
-            var contenedorPrincipal = document.getElementById("contenedorPorGrado");
-            contenedorPrincipal.innerHTML = "";
 
             if (lista.length === 0) {
                 var vacio = document.createElement("div");
                 vacio.className = "sin-resultados";
                 vacio.innerHTML = "No se encontraron actividades con esos filtros.";
-                contenedorPrincipal.appendChild(vacio);
+                contenedor.appendChild(vacio);
                 return;
             }
 
-            var grados = ["1", "2", "3", "4", "5", "6", "7"];
+            var wrapper = document.createElement("div");
+            wrapper.className = "tabla-contenedor";
 
-            for (var g = 0; g < grados.length; g++) {
-                var grado = grados[g];
+            var html = '';
+            html += '<table>';
+            html += '<thead>';
+            html += '<tr>';
+            html += '<th>ID</th>';
+            html += '<th>Área</th>';
+            html += '<th>Grado</th>';
+            html += '<th>División</th>';
+            html += '<th>Tema</th>';
+            html += '<th>Título</th>';
+            html += '<th>Descripción</th>';
+            html += '<th>Fecha</th>';
+            html += '<th>Estado</th>';
+            html += '<th>Abrir</th>';
+            html += '</tr>';
+            html += '</thead>';
+            html += '<tbody>';
 
-                var actividadesDelGrado = lista.filter(function (act) {
-                    return act.grado === grado;
-                });
-
-                if (actividadesDelGrado.length === 0) {
-                    continue;
-                }
-
-                actividadesDelGrado.sort(function (a, b) {
-                    return parsearFecha(b.fecha) - parsearFecha(a.fecha);
-                });
-
-                var bloque = document.createElement("div");
-                bloque.className = "grado-bloque";
-
-                var titulo = document.createElement("h2");
-                titulo.className = "grado-titulo";
-                titulo.textContent = grado + "° grado";
-                bloque.appendChild(titulo);
-
-                var grilla = document.createElement("div");
-                grilla.className = "grilla";
-
-                for (var i = 0; i < actividadesDelGrado.length; i++) {
-                    grilla.appendChild(crearTarjeta(actividadesDelGrado[i], false));
-                }
-
-                bloque.appendChild(grilla);
-                contenedorPrincipal.appendChild(bloque);
+            for (var i = 0; i < lista.length; i++) {
+                var act = lista[i];
+                html += '<tr>';
+                html += '<td><strong>' + escapar(act.id) + '</strong></td>';
+                html += '<td><span class="' + claseArea(act.area) + '">' + escapar(act.area) + '</span></td>';
+                html += '<td><span class="badge badge-grado">' + escapar(act.grado) + '°</span></td>';
+                html += '<td>' + escapar(act.division) + '</td>';
+                html += '<td>' + escapar(act.tema) + '</td>';
+                html += '<td><strong>' + escapar(act.titulo) + '</strong></td>';
+                html += '<td>' + escapar(act.descripcion) + '</td>';
+                html += '<td>' + escapar(act.fecha) + '</td>';
+                html += '<td><span class="badge badge-estado">' + escapar(act.estado) + '</span></td>';
+                html += '<td><a class="boton" href="' + escapar(act.enlace) + '" target="_blank">Abrir</a></td>';
+                html += '</tr>';
             }
+
+            html += '</tbody>';
+            html += '</table>';
+
+            wrapper.innerHTML = html;
+            contenedor.appendChild(wrapper);
+
+            document.getElementById("statVisibles").textContent = lista.length;
         }
 
         function actualizarEstadisticas() {
@@ -606,13 +515,11 @@
             document.getElementById("statLengua").textContent = lengua;
             document.getElementById("statMatematica").textContent = matematica;
             document.getElementById("statOtras").textContent = otras;
-            document.getElementById("statRecientes").textContent = Math.min(3, total);
         }
 
         function refrescarVista() {
-            var lista = obtenerActividadesFiltradas();
-            renderizarRecientes(lista);
-            renderizarPorGrado(lista);
+            var lista = filtrarActividades();
+            renderizarTabla(lista);
         }
 
         document.getElementById("busqueda").addEventListener("input", refrescarVista);
