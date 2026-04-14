@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contamos del 1 al 100</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background: #f3f7ff; color: #1f2a44; }
+  body { min-height: 100vh; }
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: linear-gradient(180deg, #ffffff 0%, #eef5ff 100%);
+    border-bottom: 1px solid #cddbf8;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 8px 12px 10px;
+  }
+  .title-row {
+    display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  }
+  .title {
+    font-size: 26px; font-weight: bold; color: #1a3f8b;
+  }
+  .stats {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    font-size: 14px;
+  }
+  .pill {
+    background: #fff; border: 1px solid #d7e2f7; border-radius: 999px; padding: 6px 10px;
+    font-weight: bold;
+  }
+  .pill.correct { color: #0a7f34; }
+  .pill.incorrect { color: #b31d1d; }
+  .pill.timer { color: #6a2ca0; }
+  .progress-wrap {
+    margin-top: 8px; width: 100%; height: 8px; background: #dce6fb; border-radius: 999px; overflow: hidden;
+  }
+  .progress-bar {
+    width: 0%; height: 100%; background: linear-gradient(90deg, #4aa3ff 0%, #6d7dff 100%);
+    transition: width 0.3s ease;
+  }
+  .trophies {
+    margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px;
+  }
+  .trophy {
+    width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%;
+    background: #cdd3de; opacity: 0.7; font-size: 13px;
+  }
+  .trophy.on { background: #ffd84d; opacity: 1; }
+  .app {
+    max-width: 980px; margin: 0 auto; padding: 140px 14px 24px;
+  }
+  .screen {
+    display: none; background: #fff; border: 1px solid #d7e2f7; border-radius: 18px;
+    padding: 18px; box-shadow: 0 8px 22px rgba(39,76,160,0.10);
+  }
+  .screen.active { display: block; }
+  h2 {
+    margin: 0 0 12px; color: #1c489a; font-size: 24px;
+  }
+  h3 {
+    margin: 0 0 10px; color: #2457b3; font-size: 20px;
+  }
+  p, li { font-size: 19px; line-height: 1.55; }
+  .info-box {
+    background: #f7fbff; border: 1px solid #d6e6ff; border-radius: 14px; padding: 14px; margin-top: 12px;
+  }
+  .student-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  }
+  .field label {
+    display: block; font-weight: bold; margin-bottom: 6px; font-size: 18px;
+  }
+  .field input {
+    width: 100%; padding: 12px 14px; border: 2px solid #b8cff7; border-radius: 12px; font-size: 18px;
+    text-transform: uppercase; background: #fff;
+  }
+  .question-card {
+    background: #f8fbff; border: 1px solid #dce8ff; border-radius: 16px; padding: 16px;
+  }
+  .question-text {
+    font-size: 24px; font-weight: bold; margin-bottom: 16px; color: #163d84;
+  }
+  .options, .checks, .tf-options {
+    display: grid; gap: 10px;
+  }
+  .option-btn, .tf-btn {
+    display: block; width: 100%; text-align: left; padding: 14px;
+    border: 2px solid #cddcf7; border-radius: 14px; background: #fff;
+    cursor: pointer; font-size: 20px;
+  }
+  .option-btn.selected, .tf-btn.selected {
+    border-color: #4d82e5; background: #eaf2ff;
+  }
+  .check-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border: 1px solid #d5e3fa; border-radius: 12px; background: #fff;
+    font-size: 20px;
+  }
+  .check-item input { width: 22px; height: 22px; }
+  .answer-input {
+    width: 220px; max-width: 100%; padding: 14px; font-size: 22px;
+    border: 2px solid #bfd1f7; border-radius: 12px; text-align: center;
+  }
+  .feedback {
+    margin-top: 14px; min-height: 28px; font-size: 22px; font-weight: bold;
+  }
+  .feedback.ok { color: #0a7f34; }
+  .feedback.bad { color: #b31d1d; }
+  .nav-row {
+    display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; flex-wrap: wrap;
+  }
+  .btn {
+    border: none; border-radius: 14px; padding: 12px 18px; font-size: 18px; font-weight: bold;
+    cursor: pointer;
+  }
+  .btn-primary { background: #2e67d0; color: #fff; }
+  .btn-secondary { background: #e8eefc; color: #24458c; }
+  .btn-success { background: #1b9b4d; color: #fff; }
+  .btn-warning { background: #ffb62e; color: #2f2500; }
+  .btn:disabled { opacity: 0.55; cursor: default; }
+  .sequence-bank, .sequence-answer {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;
+  }
+  .chip {
+    padding: 12px 16px; border: 2px solid #bcd0f7; border-radius: 12px; background: #fff;
+    font-size: 20px; cursor: pointer;
+  }
+  .chip.used { opacity: 0.35; cursor: default; }
+  .drop-zone-wrap {
+    display: grid; gap: 10px;
+  }
+  .drop-pair {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: center;
+  }
+  .drag-item, .drop-zone {
+    padding: 14px; border-radius: 12px; background: #fff;
+    border: 2px dashed #bdd1f8; text-align: center; font-size: 20px;
+  }
+  .drag-item {
+    cursor: move; border-style: solid;
+  }
+  .drop-zone.filled {
+    border-style: solid; background: #eef6ff;
+  }
+  .match-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center; margin-bottom: 10px;
+  }
+  .match-left {
+    padding: 12px; background: #f7fbff; border: 1px solid #d7e6ff; border-radius: 12px; font-size: 20px;
+  }
+  .match-row select {
+    width: 100%; padding: 12px; font-size: 18px; border-radius: 12px; border: 2px solid #bfd2f7;
+  }
+  .grid100 {
+    display: grid; grid-template-columns: repeat(10, minmax(38px, 1fr)); gap: 4px; margin-top: 10px;
+  }
+  .cell100 {
+    border: 1px solid #cfdcf6; background: #fff; border-radius: 8px; padding: 8px 0;
+    text-align: center; font-size: 16px; cursor: pointer; user-select: none;
+  }
+  .cell100.selected { background: #d9e9ff; border-color: #3b78df; font-weight: bold; }
+  .summary-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 12px;
+  }
+  .summary-box {
+    background: #f7fbff; border: 1px solid #d6e6ff; border-radius: 16px; padding: 18px; text-align: center;
+  }
+  .summary-number {
+    font-size: 36px; font-weight: bold; margin-top: 6px;
+  }
+  .skills-list li { margin-bottom: 8px; }
+  .small-note { font-size: 15px; color: #495f8e; }
+  .endpoint-status {
+    margin-top: 14px; padding: 12px; border-radius: 12px; background: #f7fbff; border: 1px solid #d7e6ff;
+    font-size: 17px;
+  }
+  .hidden { display: none !important; }
+  @media (max-width: 740px) {
+    .student-grid, .summary-grid, .drop-pair, .match-row { grid-template-columns: 1fr; }
+    .title { font-size: 22px; }
+    .question-text { font-size: 22px; }
+    p, li { font-size: 18px; }
+    .app { padding-top: 165px; }
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="title-row">
+    <div class="title" id="topTitle"></div>
+    <div class="stats">
+      <div class="pill correct"><strong>Correctos:</strong> <span id="correctCount">0</span></div>
+      <div class="pill incorrect"><strong>Incorrectos:</strong> <span id="incorrectCount">0</span></div>
+      <div class="pill timer"><strong>Tiempo:</strong> <span id="timer">00:00</span></div>
+    </div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="trophies" id="trophies"></div>
+</div>
+
+<div class="app" id="app"></div>
+
+<script>
+var ACTIVITY = {"schema_version": "2.0", "tipo_salida": "actividad_educativa_json", "salida_requerida": {"generar_archivo_json": true, "generar_html_en_esta_etapa": false, "el_html_lo_generara_otra_ia": true}, "metadata": {"nombre_archivo_json": "matematica-contar-del-1-al-100-2.json", "titulo_actividad": "Contamos del 1 al 100", "id_actividad": "ACT-MAT-0002", "grado_nivel": "2° grado de Primaria", "area_final": "Matemática", "tema_especifico": "Contar del 1 al 100", "duracion_estimada": "45 minutos", "modo_presentacion": "Multipantalla", "cantidad_ejercicios": 20}, "datos_pedido_drt": {"escuela": "1-077", "drt": "DRT-1077", "grado": "2", "turno": "T", "division": "U", "area_tipo_origen": "Matemática", "area_final": "Matemática", "tipo_pedido": "Actividad completa", "cantidad_ejercicios_solicitada_por_drt": 20, "proposito_pedagogico": "Conteo", "tema_especifico": "Contar del 1 al 100", "dificultades_observables": ["Dificultad para comprender consignas", "Dificultad para ordenar secuencias", "Dificultad para resolver problemas", "Dificultad en operatoria básica", "Dificultad en numeración"], "descripcion_breve_dificultad": "El alumno no sabe contar hasta 100", "resultados_esperados": ["Reforzar contenido", "Mejorar comprensión", "Mejorar cálculo"], "descripcion_breve_resultado": "Se espera que el alumno logre contar hasta 100", "tipos_actividad_preferidos_docente": ["Opción múltiple", "Casillas de verificación", "Ingreso de resultados / completar", "Ordenar secuencias", "Arrastrar y soltar", "Relacionar / unir", "Verdadero o falso", "Respuesta breve", "Selección sobre imagen"], "texto_base_drt": {"aportado_por_drt": false, "contenido": "", "criterio_de_uso": "La DRT no cargó texto base. Se genera un texto base pedagógico propio, adecuado a 2° grado y al tema de conteo del 1 al 100."}}, "origen_contenido": {"modalidad_generacion": "Generado pedagógicamente a partir de conocimientos escolares básicos de numeración y conteo, adaptados al grado declarado.", "descripcion_fuentes": "Contenido pedagógico original elaborado para 2° grado sobre conteo, secuencias, familias de números, filas y columnas en la tabla del 100, con enfoque escolar básico y lenguaje simple.", "usar_texto_base_drt_como_prioritario": false, "si_no_hay_texto_y_se_necesita_generarlo_desde_fuentes_serias": true}, "consideraciones_pedagogicas": {"nivel_educativo": "Primaria", "criterios_aplicados": ["Consignas cortas y directas", "Secuenciación de menor a mayor dificultad", "Predominio de reconocimiento de número anterior, posterior e intermedio", "Uso de ejemplos concretos y repetición con variación", "Actividades visuales y manipulativas para sostener la atención", "Variedad de formatos para evitar monotonía", "Apoyo en la tabla del 100 como organizador visual"], "consistencia_con_dcp_mendoza": true, "justificacion_pedagogica_general": "La actividad prioriza la construcción de la serie numérica oral y escrita hasta 100, el reconocimiento de regularidades, la identificación de anterior, posterior e intermedio, y la lectura de filas, columnas y familias numéricas. Se opta por formato multipantalla para mejorar legibilidad, disminuir sobrecarga visual y facilitar la comprensión de consignas en un grupo con dificultades en numeración, secuencias y comprensión."}, "estructura_visual_y_navegacion": {"modo_presentacion": "Multipantalla", "descripcion_general": "La actividad se organiza en pantallas breves: identificación del alumno, texto teórico, texto base, una pantalla por ejercicio, resumen final, habilidades trabajadas y finalización. La franja superior permanece visible para sostener seguimiento y motivación.", "pantalla_unica": {"aplica": false, "bloques_en_una_sola_vista": ["titulo_actividad", "barra_superior", "trofeos", "identificacion_alumno", "texto_teorico", "texto_base", "preguntas", "resumen_final", "habilidades_trabajadas", "finalizacion"]}, "multipantalla": {"aplica": true, "franja_superior_fija": {"siempre_visible": true, "elementos_obligatorios": ["titulo_actividad", "barra_progreso_fina", "cronometro_digital_pequeno", "contador_correctos", "contador_incorrectos", "trofeos"]}, "pantallas_de_contenido": {"estructura_obligatoria": ["una_pantalla_para_identificacion_alumno", "una_pantalla_para_texto_teorico", "una_pantalla_para_texto_base", "una_pantalla_independiente_por_cada_pregunta", "una_pantalla_para_resumen_final", "una_pantalla_para_habilidades_trabajadas", "una_pantalla_o_bloque_final_para_finalizacion"], "total_pantallas_de_contenido_calculado": "26", "navegacion": {"usar_flechas_para_avanzar_y_retroceder": true, "permitir_retroceso_para_releer_textos": true}}}}, "bloques_obligatorios": {"titulo_actividad": {"texto": "Contamos del 1 al 100"}, "barra_superior": {"barra_progreso": {"tipo": "fina", "ubicacion": "parte_superior", "siempre_visible_si_es_posible": true}, "cronometro": {"visible": true, "tipo": "digital_pequeno", "ubicacion": "esquina_superior_derecha"}, "contadores": {"mostrar_correctos": true, "mostrar_incorrectos": true, "etiqueta_correctos": "Correctos", "etiqueta_incorrectos": "Incorrectos", "valor_inicial_correctos": 0, "valor_inicial_incorrectos": 0, "actualizar_al_responder": true}}, "trofeos": {"visible": true, "estado_inicial": "gris_opaco", "estado_al_responder_correctamente": "amarillo_o_color_vivo_original", "cantidad_total": 20}, "identificacion_alumno": {"campos": [{"nombre_campo": "apellido", "etiqueta": "Apellido", "obligatorio": true, "transformacion": "MAYUSCULAS"}, {"nombre_campo": "nombres", "etiqueta": "Nombres", "obligatorio": true, "transformacion": "MAYUSCULAS"}]}, "texto_teorico": {"titulo_bloque": "Texto teórico", "contenido": "Contar del 1 al 100 significa decir, leer y reconocer los números en orden. Cuando contamos de uno en uno, cada número siguiente vale 1 más. Por ejemplo: 14, 15, 16. El número anterior vale 1 menos. Por ejemplo: antes de 20 está 19. También podemos contar de 10 en 10: 10, 20, 30, 40, 50, 60, 70, 80, 90 y 100. En una tabla del 100, cada fila tiene 10 números seguidos. La primera fila va del 1 al 10, la segunda del 11 al 20 y así hasta la última, que va del 91 al 100. En una misma columna los números aumentan de 10 en 10, por ejemplo: 7, 17, 27, 37, 47. Cuando miramos una secuencia, podemos descubrir qué número va antes, cuál va después y cuál falta en el medio. Ejemplos: entre 54 y 56 está 55; después de 39 viene 40; después de 99 viene 100.", "debe_explicar_los_conceptos_previos_necesarios": true, "debe_incluir_ejemplos": true}, "texto_base": {"titulo_bloque": "Texto base", "contenido": "En la clase de Matemática, la seño Ana colocó un gran cuadro del 1 al 100. Primero, los chicos recorrieron la fila 1: 1, 2, 3, 4, 5, 6, 7, 8, 9 y 10. Después vieron la fila 2: del 11 al 20. Descubrieron que cada nueva fila empieza con un número terminado en 1 y termina con un número terminado en 0. Luego jugaron con algunas familias: la familia del 30 tiene los números 30, 31, 32, 33, 34, 35, 36, 37, 38 y 39; la familia del 40 tiene del 40 al 49; la del 60 tiene del 60 al 69. Más tarde miraron columnas. En la columna del 5 quedaron 5, 15, 25, 35, 45, 55, 65, 75, 85 y 95. En la columna del 8 quedaron 8, 18, 28, 38, 48, 58, 68, 78, 88 y 98. Para terminar, resolvieron pequeños desafíos: después de 29 viene 30, después de 69 viene 70, entre 67 y 69 está 68, antes de 90 está 89 y después de 99 viene 100.", "origen": "Texto base generado pedagógicamente para esta actividad", "palabras_clave_tenumente_resaltadas": ["cuadro del 1 al 100", "fila", "columna", "familia del 30", "familia del 40", "familia del 60", "después", "antes", "entre", "100"], "listado_de_palabras_clave_para_ia_html": ["cuadro del 1 al 100", "fila", "columna", "familia del 30", "familia del 40", "familia del 60", "después", "antes", "entre", "100"]}, "preguntas": [{"id": 1, "tipo": "Opción múltiple", "pantalla_individual_en_multipantalla": true, "enunciado": "¿Qué número va después de 14?", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 5, "opciones": ["13", "14", "15", "16", "17"], "respuesta_correcta": {"indice": 2, "valor": "15"}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Afianza la relación de número posterior en una secuencia simple.", "comentario_para_html": "Mostrar las 5 opciones en botones grandes o tarjetas seleccionables."}, {"id": 2, "tipo": "Opción múltiple", "pantalla_individual_en_multipantalla": true, "enunciado": "Completa la secuencia: 28, 29, __, 31, 32.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 5, "opciones": ["26", "27", "28", "30", "33"], "respuesta_correcta": {"indice": 3, "valor": "30"}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Trabaja completamiento de secuencias ascendentes con apoyo visual.", "comentario_para_html": "Ubicar la secuencia en tamaño grande y debajo las opciones."}, {"id": 3, "tipo": "Ingreso de resultados / completar", "pantalla_individual_en_multipantalla": true, "enunciado": "Completa: 54, 55, __, 57.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 0, "opciones": [], "respuesta_correcta": {"valor": "56", "aceptar_variantes": ["56"]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Favorece el reconocimiento del número intermedio entre dos consecutivos.", "comentario_para_html": "Usar una casilla grande para escribir un número de dos cifras."}, {"id": 4, "tipo": "Ordenar secuencias", "pantalla_individual_en_multipantalla": true, "enunciado": "Ordena estos números de menor a mayor.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 5, "opciones": ["41", "43", "45", "42", "44"], "respuesta_correcta": {"orden_correcto": ["41", "42", "43", "44", "45"]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Entrena el orden estable de la serie numérica.", "comentario_para_html": "Permitir ordenar arrastrando tarjetas o con botones de mover."}, {"id": 5, "tipo": "Arrastrar y soltar", "pantalla_individual_en_multipantalla": true, "enunciado": "Arrastra cada número al cartel que muestra el número que viene después.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 5, "opciones": [{"elemento": "19", "debe_ir_con": "20"}, {"elemento": "39", "debe_ir_con": "40"}, {"elemento": "59", "debe_ir_con": "60"}, {"elemento": "79", "debe_ir_con": "80"}, {"elemento": "99", "debe_ir_con": "100"}], "respuesta_correcta": {"emparejamientos": [{"elemento": "19", "destino": "20"}, {"elemento": "39", "destino": "40"}, {"elemento": "59", "destino": "60"}, {"elemento": "79", "destino": "80"}, {"elemento": "99", "destino": "100"}]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Refuerza el paso de una decena a la siguiente y el conteo uno más.", "comentario_para_html": "Mostrar tarjetas a la izquierda y metas a la derecha con soltar simple compatible con mouse."}, {"id": 6, "tipo": "Casillas de verificación", "pantalla_individual_en_multipantalla": true, "enunciado": "Marca todos los números de la familia del 30.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 6, "opciones": ["28", "30", "31", "35", "40", "39"], "respuesta_correcta": {"indices": [1, 2, 3, 5], "valores": ["30", "31", "35", "39"]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Consolida el reconocimiento de familias numéricas.", "comentario_para_html": "Separar bien las casillas, con texto grande y espacio suficiente entre opciones."}, {"id": 7, "tipo": "Verdadero o falso", "pantalla_individual_en_multipantalla": true, "enunciado": "Después del 89 viene el 90.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 2, "opciones": ["Verdadero", "Falso"], "respuesta_correcta": {"indice": 0, "valor": "Verdadero"}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Permite validar un hecho numérico directo con baja carga de escritura.", "comentario_para_html": "Presentar dos botones grandes: Verdadero y Falso."}, {"id": 8, "tipo": "Respuesta breve", "pantalla_individual_en_multipantalla": true, "enunciado": "Escribe el número que está entre 67 y 69.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 0, "opciones": [], "respuesta_correcta": {"valor": "68", "aceptar_variantes": ["68"]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Trabaja número intermedio y secuencia corta.", "comentario_para_html": "Usar una sola casilla de respuesta con teclado numérico permitido."}, {"id": 9, "tipo": "Selección sobre imagen", "pantalla_individual_en_multipantalla": true, "enunciado": "Mira el cuadro del 1 al 100 y haz clic en el número 45.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 100, "opciones": [{"tipo_imagen": "tabla_numerica_generada_por_html", "descripcion": "Cuadro del 1 al 100 en una grilla de 10 por 10"}], "respuesta_correcta": {"celdas_correctas": ["45"]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Integra lectura de tabla y ubicación visual de números.", "comentario_para_html": "Generar con CSS y JS una tabla del 1 al 100 clickeable; guardar la celda elegida."}, {"id": 10, "tipo": "Relacionar / unir", "pantalla_individual_en_multipantalla": true, "enunciado": "Une cada fila con los números que le corresponden.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 5, "opciones": [{"izquierda": "Fila 1", "derecha": "1 a 10"}, {"izquierda": "Fila 2", "derecha": "11 a 20"}, {"izquierda": "Fila 4", "derecha": "31 a 40"}, {"izquierda": "Fila 7", "derecha": "61 a 70"}, {"izquierda": "Última fila", "derecha": "91 a 100"}], "respuesta_correcta": {"emparejamientos": [{"izquierda": "Fila 1", "derecha": "1 a 10"}, {"izquierda": "Fila 2", "derecha": "11 a 20"}, {"izquierda": "Fila 4", "derecha": "31 a 40"}, {"izquierda": "Fila 7", "derecha": "61 a 70"}, {"izquierda": "Última fila", "derecha": "91 a 100"}]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Favorece la lectura estructurada de filas dentro de la tabla del 100.", "comentario_para_html": "Puede resolverse con líneas visuales o con selección en listas desplegables."}, {"id": 11, "tipo": "Opción múltiple", "pantalla_individual_en_multipantalla": true, "enunciado": "¿Cuál es el último número cuando contamos del 1 al 100?", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 5, "opciones": ["90", "99", "100", "101", "89"], "respuesta_correcta": {"indice": 2, "valor": "100"}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Consolida la meta final de la serie numérica trabajada.", "comentario_para_html": "Mantener opciones bien separadas y de lectura sencilla."}, {"id": 12, "tipo": "Ingreso de resultados / completar", "pantalla_individual_en_multipantalla": true, "enunciado": "Completa de 10 en 10: 10, 20, 30, __, 50.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 0, "opciones": [], "respuesta_correcta": {"valor": "40", "aceptar_variantes": ["40"]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Refuerza conteo salteado de 10 en 10.", "comentario_para_html": "Colocar la secuencia arriba y el cuadro de ingreso debajo."}, {"id": 13, "tipo": "Ordenar secuencias", "pantalla_individual_en_multipantalla": true, "enunciado": "Ordena estos números de menor a mayor.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 5, "opciones": ["96", "99", "97", "100", "98"], "respuesta_correcta": {"orden_correcto": ["96", "97", "98", "99", "100"]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Acompaña el cierre de la serie numérica hasta 100.", "comentario_para_html": "Usar tarjetas grandes con números cercanos al 100."}, {"id": 14, "tipo": "Casillas de verificación", "pantalla_individual_en_multipantalla": true, "enunciado": "Marca todos los números mayores que 74 y menores que 79.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 6, "opciones": ["73", "75", "76", "77", "78", "79"], "respuesta_correcta": {"indices": [1, 2, 3, 4], "valores": ["75", "76", "77", "78"]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Trabaja comparación simple y reconocimiento de intervalo.", "comentario_para_html": "Casillas amplias, en dos columnas si mejora legibilidad."}, {"id": 15, "tipo": "Arrastrar y soltar", "pantalla_individual_en_multipantalla": true, "enunciado": "Arrastra cada número al número que está 10 lugares más abajo en la misma columna.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 5, "opciones": [{"elemento": "12", "debe_ir_con": "22"}, {"elemento": "45", "debe_ir_con": "55"}, {"elemento": "70", "debe_ir_con": "80"}, {"elemento": "89", "debe_ir_con": "99"}, {"elemento": "5", "debe_ir_con": "15"}], "respuesta_correcta": {"emparejamientos": [{"elemento": "12", "destino": "22"}, {"elemento": "45", "destino": "55"}, {"elemento": "70", "destino": "80"}, {"elemento": "89", "destino": "99"}, {"elemento": "5", "destino": "15"}]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Permite comprender la regularidad de sumar 10 en una columna.", "comentario_para_html": "Representar metas con etiquetas claras; evitar drag complejo para compatibilidad."}, {"id": 16, "tipo": "Verdadero o falso", "pantalla_individual_en_multipantalla": true, "enunciado": "En una columna del cuadro del 100, los números cambian de 10 en 10.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 2, "opciones": ["Verdadero", "Falso"], "respuesta_correcta": {"indice": 0, "valor": "Verdadero"}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Reafirma una regularidad importante de la tabla del 100.", "comentario_para_html": "Mostrar una breve ilustración de columna opcional, sin revelar respuesta."}, {"id": 17, "tipo": "Respuesta breve", "pantalla_individual_en_multipantalla": true, "enunciado": "Escribe el número que viene antes de 90.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 0, "opciones": [], "respuesta_correcta": {"valor": "89", "aceptar_variantes": ["89"]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Desarrolla el concepto de número anterior en una decena alta.", "comentario_para_html": "Respuesta en una casilla única con validación simple."}, {"id": 18, "tipo": "Relacionar / unir", "pantalla_individual_en_multipantalla": true, "enunciado": "Une cada número con su familia.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 5, "opciones": [{"izquierda": "22", "derecha": "Familia del 20"}, {"izquierda": "47", "derecha": "Familia del 40"}, {"izquierda": "63", "derecha": "Familia del 60"}, {"izquierda": "80", "derecha": "Familia del 80"}, {"izquierda": "95", "derecha": "Familia del 90"}], "respuesta_correcta": {"emparejamientos": [{"izquierda": "22", "derecha": "Familia del 20"}, {"izquierda": "47", "derecha": "Familia del 40"}, {"izquierda": "63", "derecha": "Familia del 60"}, {"izquierda": "80", "derecha": "Familia del 80"}, {"izquierda": "95", "derecha": "Familia del 90"}]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Fortalece agrupación por decenas y lectura de familias numéricas.", "comentario_para_html": "Resolver con líneas o con arrastre corto; texto muy claro."}, {"id": 19, "tipo": "Selección sobre imagen", "pantalla_individual_en_multipantalla": true, "enunciado": "Mira el cuadro del 1 al 100 y marca todos los números de la columna del 5 que aparecen en este desafío: 5, 15, 25, 35 y 45.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 100, "opciones": [{"tipo_imagen": "tabla_numerica_generada_por_html", "descripcion": "Cuadro del 1 al 100 en una grilla de 10 por 10 con selección múltiple"}], "respuesta_correcta": {"celdas_correctas": ["5", "15", "25", "35", "45"]}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Integra reconocimiento de columna y selección visual múltiple.", "comentario_para_html": "Permitir múltiples clics en la grilla y resaltar selección del alumno."}, {"id": 20, "tipo": "Opción múltiple", "pantalla_individual_en_multipantalla": true, "enunciado": "¿Qué número falta? 91, 92, 93, __, 95, 96.", "basada_exclusivamente_en": ["texto_teorico", "texto_base"], "requiere_conocimiento_externo": false, "cantidad_minima_opciones_cuando_corresponda": 5, "opciones": ["90", "93", "94", "95", "97"], "respuesta_correcta": {"indice": 2, "valor": "94"}, "feedback_correcto": "¡Correcto!", "feedback_incorrecto": "Incorrecto, lee el texto", "mostrar_respuesta_correcta_si_error": false, "boton_verificar": {"visible": true, "texto": "Verificar", "cada_ejercicio_tiene_uno": true, "una_vez_presionado_no_se_puede_presionar_nuevamente": true}, "justificacion_pedagogica": "Cierra la actividad con una secuencia alta próxima a 100.", "comentario_para_html": "Presentar como desafío final, con letras y números grandes."}], "resumen_final": {"mostrar_al_final_de_la_actividad": true, "mostrar_cantidad_correctas": true, "mostrar_cantidad_incorrectas": true, "mostrar_porcentaje_aciertos": true, "mostrar_porcentaje_errores": true}, "habilidades_trabajadas": {"items": ["Conteo oral y escrito del 1 al 100", "Reconocimiento de número anterior, posterior e intermedio", "Ordenamiento de secuencias numéricas", "Identificación de familias de números", "Lectura de filas y columnas en la tabla del 100", "Conteo de 10 en 10", "Atención y comprensión de consignas breves"]}, "finalizacion": {"accion_finalizar_obligatoria": true, "texto_boton_finalizar": "Finalizar", "requiere_registro_resultado_global": true, "requiere_envio_a_endpoint": true}}, "tipos_de_actividad_permitidos": ["Opción múltiple", "Casillas de verificación", "Ingreso de resultados / completar", "Ordenar secuencias", "Arrastrar y soltar", "Relacionar / unir", "Verdadero o falso", "Respuesta breve", "Selección sobre imagen"], "restricciones_criticas": {"si_respuesta_incorrecta_mostrar_solo": "Incorrecto, lee el texto", "no_mostrar_respuesta_correcta_si_error": true, "boton_verificar_se_bloquea_despues_de_usarse": true}, "restricciones_tecnicas_para_html": {"estilo_moderno_y_atractivo": true, "colores_acordes_a_materia_y_grado": true, "diseno_responsivo": true, "optimizado_para_netbooks_plan_conectar_igualdad_10_a_12_pulgadas": true, "aprovechar_espacio_de_pantalla": true, "evitar_espacios_en_blanco_innecesarios": true, "todo_en_un_solo_archivo_html": true, "incluir_html_css_y_javascript_en_unico_archivo": true, "compatible_con_windows_7": true, "compatible_con_navegadores_antiguos_y_nuevos": true, "sin_frameworks_modernos": true, "sin_librerias_externas": true, "sin_fuentes_web_externas": true, "sin_iconos_online": true, "sin_dependencias_cdn": true, "debe_funcionar_sin_internet": true, "sin_imagenes_remotas": true, "sin_archivos_separados": true, "iconos_permitidos": ["emoji", "css_simple", "svg_embebido"], "sin_localstorage": true, "sin_sessionstorage": true, "sin_base_de_datos": true, "usar_solo_variables_javascript_en_memoria": true}, "requisitos_funcionales_obligatorios": {"id_actividad_vinculada": "ACT-MAT-0002", "campos_identificacion_alumno": ["apellido", "nombres"], "transformacion_a_mayusculas": true, "accion_finalizar_obligatoria": true, "registro_resultado_global_final": true, "datos_minimos_a_registrar": ["id_actividad", "apellido", "nombres", "puntaje_global_final", "fecha_hora_ejecucion", "estado_nuevo"]}, "integracion_trazabilidad": {"codigos_estado": {"1": "Pedido", "2": "Realizado", "3": "Ejecutado"}, "estado_actual_esperado_al_generar_json": 1, "estado_nuevo_al_finalizar_actividad": 3, "tabla_solicitudes": {"nombre": "solicitudes_drt", "campo_id_actividad": "id_actividad", "campo_estado": "estado", "campo_fecha_ejecutada": "fecha_ejecutada"}, "tabla_resultados": {"nombre": "resultados_actividades", "campos_minimos": ["id_resultado", "id_actividad", "fecha_resultado", "hora_resultado", "apellido", "nombres", "puntaje"]}}, "endpoint_registro_resultados": {"requiere_endpoint": true, "metodo_http": "POST", "url_endpoint": "https://script.google.com/macros/s/AKfycbyATy1FhQa7ZV_sYFrETpuvzqqMSgqpYqjdLunJogsFymUkb2owqXlbkesGlqWXJoQO/exec", "payload_obligatorio": ["id_actividad", "apellido", "nombres", "puntaje_global_final", "fecha_hora_ejecucion", "estado_nuevo"], "efectos_esperados": ["insertar_registro_en_resultados_actividades", "actualizar_estado_a_3_en_solicitudes_drt", "completar_fecha_ejecutada_si_corresponde"]}, "validaciones_finales": {"verificar_que_todos_los_bloques_obligatorios_existan": true, "verificar_que_la_cantidad_de_preguntas_coincida_con_cantidad_ejercicios": true, "verificar_que_cantidad_ejercicios_solicitada_por_drt_coincida_con_metadata_cantidad_ejercicios": true, "verificar_que_todas_las_preguntas_se_basen_en_los_textos": true, "verificar_que_los_tipos_de_actividad_usados_pertenezcan_a_la_lista_permitida": true, "verificar_que_no_haya_contradicciones_con_las_restricciones_criticas": true, "verificar_que_el_id_actividad_del_json_coincida_con_el_del_correo": true, "verificar_que_quede_reflejada_la_integracion_con_endpoint_y_trazabilidad": true}};
+var state = {
+  currentScreen: 0,
+  correct: 0,
+  incorrect: 0,
+  elapsed: 0,
+  timerHandle: null,
+  verified: {},
+  answers: {},
+  questionResults: {},
+  finishedSent: false
+};
+
+function byId(id) {
+  return document.getElementById(id);
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function updateTopBar() {
+  byId('topTitle').innerHTML = escapeHtml(ACTIVITY.metadata.titulo_actividad);
+  byId('correctCount').innerHTML = state.correct;
+  byId('incorrectCount').innerHTML = state.incorrect;
+  var totalScreens = getAllScreens().length;
+  var pct = totalScreens > 1 ? Math.round((state.currentScreen / (totalScreens - 1)) * 100) : 0;
+  byId('progressBar').style.width = pct + '%';
+  renderTrophies();
+}
+
+function renderTrophies() {
+  var wrap = byId('trophies');
+  var total = ACTIVITY.bloques_obligatorios.trofeos.cantidad_total || ACTIVITY.metadata.cantidad_ejercicios;
+  var html = '';
+  for (var i = 0; i < total; i++) {
+    html += '<div class="trophy ' + (i < state.correct ? 'on' : '') + '">🏆</div>';
+  }
+  wrap.innerHTML = html;
+}
+
+function formatTime(sec) {
+  var m = Math.floor(sec / 60);
+  var s = sec % 60;
+  return (m < 10 ? '0' + m : '' + m) + ':' + (s < 10 ? '0' + s : '' + s);
+}
+
+function startTimer() {
+  if (state.timerHandle) return;
+  state.timerHandle = setInterval(function() {
+    state.elapsed += 1;
+    byId('timer').innerHTML = formatTime(state.elapsed);
+  }, 1000);
+}
+
+function stopTimer() {
+  if (state.timerHandle) {
+    clearInterval(state.timerHandle);
+    state.timerHandle = null;
+  }
+}
+
+function getQuestionById(qid) {
+  var arr = ACTIVITY.bloques_obligatorios.preguntas;
+  for (var i = 0; i < arr.length; i++) {
+    if (String(arr[i].id) === String(qid)) return arr[i];
+  }
+  return null;
+}
+
+function getAllScreens() {
+  return document.querySelectorAll('.screen');
+}
+
+function showScreen(index) {
+  var screens = getAllScreens();
+  if (index < 0 || index >= screens.length) return;
+  for (var i = 0; i < screens.length; i++) {
+    screens[i].className = 'screen' + (i === index ? ' active' : '');
+  }
+  state.currentScreen = index;
+  updateTopBar();
+  if (screens[index].getAttribute('data-kind') === 'summary') {
+    refreshSummary();
+  }
+}
+
+function nextScreen() {
+  if (state.currentScreen === 0) {
+    var ap = byId('apellido').value.replace(/^\s+|\s+$/g, '');
+    var no = byId('nombres').value.replace(/^\s+|\s+$/g, '');
+    if (!ap || !no) {
+      alert('Completa Apellido y Nombres.');
+      return;
+    }
+  }
+  showScreen(state.currentScreen + 1);
+}
+
+function prevScreen() {
+  showScreen(state.currentScreen - 1);
+}
+
+function upperInputs() {
+  var ids = ['apellido', 'nombres'];
+  for (var i = 0; i < ids.length; i++) {
+    (function(id) {
+      var el = byId(id);
+      el.oninput = function() {
+        this.value = this.value.toUpperCase();
+      };
+    })(ids[i]);
+  }
+}
+
+function buildIntroScreen() {
+  return '' +
+  '<section class="screen active" data-kind="identificacion">' +
+    '<h2>Identificación del alumno</h2>' +
+    '<div class="info-box"><p>Escribe tus datos antes de comenzar.</p></div>' +
+    '<div class="student-grid">' +
+      '<div class="field"><label for="apellido">Apellido</label><input id="apellido" type="text" maxlength="60"></div>' +
+      '<div class="field"><label for="nombres">Nombres</label><input id="nombres" type="text" maxlength="60"></div>' +
+    '</div>' +
+    '<div class="nav-row">' +
+      '<button class="btn btn-secondary" disabled>Anterior</button>' +
+      '<button class="btn btn-primary" onclick="nextScreen()">Siguiente</button>' +
+    '</div>' +
+  '</section>';
+}
+
+function buildTextScreen(title, content, kind) {
+  return '' +
+  '<section class="screen" data-kind="' + kind + '">' +
+    '<h2>' + escapeHtml(title) + '</h2>' +
+    '<div class="info-box"><p>' + content + '</p></div>' +
+    '<div class="nav-row">' +
+      '<button class="btn btn-secondary" onclick="prevScreen()">Anterior</button>' +
+      '<button class="btn btn-primary" onclick="nextScreen()">Siguiente</button>' +
+    '</div>' +
+  '</section>';
+}
+
+function makeOptionButtons(q) {
+  var html = '<div class="options">';
+  for (var i = 0; i < q.opciones.length; i++) {
+    html += '<button type="button" class="option-btn" data-qid="' + q.id + '" data-index="' + i + '" onclick="selectSingleOption(' + q.id + ',' + i + ', this)">' + escapeHtml(q.opciones[i]) + '</button>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function selectSingleOption(qid, index, el) {
+  if (state.verified[qid]) return;
+  state.answers[qid] = index;
+  var wrap = el.parentNode;
+  var buttons = wrap.getElementsByTagName('button');
+  for (var i = 0; i < buttons.length; i++) buttons[i].className = 'option-btn';
+  el.className = 'option-btn selected';
+}
+
+function makeChecks(q) {
+  var html = '<div class="checks">';
+  for (var i = 0; i < q.opciones.length; i++) {
+    html += '<label class="check-item"><input type="checkbox" data-qid="' + q.id + '" data-index="' + i + '" onchange="toggleCheck(' + q.id + ',' + i + ', this)"> <span>' + escapeHtml(q.opciones[i]) + '</span></label>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function toggleCheck(qid, index, el) {
+  if (state.verified[qid]) {
+    el.checked = !el.checked;
+    return;
+  }
+  if (!state.answers[qid]) state.answers[qid] = [];
+  var arr = state.answers[qid];
+  var pos = -1;
+  for (var i = 0; i < arr.length; i++) if (arr[i] === index) pos = i;
+  if (el.checked) {
+    if (pos === -1) arr.push(index);
+  } else {
+    if (pos !== -1) arr.splice(pos, 1);
+  }
+}
+
+function makeTextInput(q) {
+  var current = state.answers[q.id] || '';
+  return '<input class="answer-input" id="answer_' + q.id + '" value="' + escapeHtml(current) + '" oninput="captureTextAnswer(' + q.id + ', this)" type="text" maxlength="10">';
+}
+
+function captureTextAnswer(qid, el) {
+  if (state.verified[qid]) return;
+  state.answers[qid] = String(el.value).replace(/^\s+|\s+$/g, '');
+}
+
+function makeTrueFalse(q) {
+  var html = '<div class="tf-options">';
+  for (var i = 0; i < q.opciones.length; i++) {
+    html += '<button type="button" class="tf-btn" onclick="selectTf(' + q.id + ',' + i + ', this)">' + escapeHtml(q.opciones[i]) + '</button>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function selectTf(qid, index, el) {
+  if (state.verified[qid]) return;
+  state.answers[qid] = index;
+  var buttons = el.parentNode.getElementsByTagName('button');
+  for (var i = 0; i < buttons.length; i++) buttons[i].className = 'tf-btn';
+  el.className = 'tf-btn selected';
+}
+
+function makeSequenceBuilder(q) {
+  var html = '<div class="info-box"><p>Toca los números en el orden correcto.</p></div>';
+  html += '<div class="sequence-bank" id="seq_bank_' + q.id + '">';
+  for (var i = 0; i < q.opciones.length; i++) {
+    html += '<button type="button" class="chip" id="seq_chip_' + q.id + '_' + i + '" onclick="pickSequenceItem(' + q.id + ',' + i + ')">' + escapeHtml(q.opciones[i]) + '</button>';
+  }
+  html += '</div>';
+  html += '<div class="info-box"><p><strong>Tu respuesta:</strong></p><div class="sequence-answer" id="seq_answer_' + q.id + '"></div></div>';
+  html += '<button type="button" class="btn btn-warning" onclick="resetSequence(' + q.id + ')">Reiniciar orden</button>';
+  return html;
+}
+
+function pickSequenceItem(qid, index) {
+  if (state.verified[qid]) return;
+  if (!state.answers[qid]) state.answers[qid] = [];
+  var arr = state.answers[qid];
+  for (var i = 0; i < arr.length; i++) if (arr[i] === index) return;
+  arr.push(index);
+  renderSequenceAnswer(qid);
+}
+
+function renderSequenceAnswer(qid) {
+  var q = getQuestionById(qid);
+  var answerWrap = byId('seq_answer_' + qid);
+  var arr = state.answers[qid] || [];
+  var html = '';
+  for (var i = 0; i < arr.length; i++) {
+    html += '<div class="chip">' + escapeHtml(q.opciones[arr[i]]) + '</div>';
+  }
+  answerWrap.innerHTML = html;
+  for (var j = 0; j < q.opciones.length; j++) {
+    var chip = byId('seq_chip_' + qid + '_' + j);
+    var used = false;
+    for (var k = 0; k < arr.length; k++) if (arr[k] === j) used = true;
+    chip.className = 'chip' + (used ? ' used' : '');
+  }
+}
+
+function resetSequence(qid) {
+  if (state.verified[qid]) return;
+  state.answers[qid] = [];
+  renderSequenceAnswer(qid);
+}
+
+var dragStore = { qid: null, item: null, label: null };
+
+function makeDragDrop(q) {
+  var html = '<div class="drop-zone-wrap">';
+  html += '<div class="info-box"><p>Arrastra o toca una tarjeta y luego toca su lugar.</p></div>';
+  html += '<div class="sequence-bank">';
+  for (var i = 0; i < q.opciones.length; i++) {
+    html += '<div class="drag-item" draggable="true" id="drag_' + q.id + '_' + i + '" data-qid="' + q.id + '" data-item="' + escapeHtml(q.opciones[i].elemento) + '" ondragstart="dragStart(event)" onclick="selectDragItem(' + q.id + ',\'' + q.opciones[i].elemento + '\', this)">' + escapeHtml(q.opciones[i].elemento) + '</div>';
+  }
+  html += '</div>';
+  for (var j = 0; j < q.opciones.length; j++) {
+    html += '<div class="drop-pair">';
+    html += '<div class="drop-zone" data-qid="' + q.id + '" data-target="' + escapeHtml(q.opciones[j].debe_ir_con) + '" ondragover="allowDrop(event)" ondrop="dropItem(event)" onclick="clickDropZone(this)">Suelta aquí el que va antes de <strong>' + escapeHtml(q.opciones[j].debe_ir_con) + '</strong></div>';
+    html += '<div class="small-note">Meta: ' + escapeHtml(q.opciones[j].debe_ir_con) + '</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function selectDragItem(qid, item, el) {
+  if (state.verified[qid]) return;
+  dragStore.qid = qid;
+  dragStore.item = item;
+  var items = document.querySelectorAll('#screen_q_' + qid + ' .drag-item');
+  for (var i = 0; i < items.length; i++) items[i].style.background = '#fff';
+  el.style.background = '#e8f1ff';
+}
+
+function clickDropZone(el) {
+  if (!dragStore.item || state.verified[dragStore.qid]) return;
+  placeInDrop(el, dragStore.item, dragStore.qid);
+}
+
+function dragStart(ev) {
+  var el = ev.target;
+  dragStore.qid = parseInt(el.getAttribute('data-qid'), 10);
+  dragStore.item = el.getAttribute('data-item');
+  ev.dataTransfer.setData('text/plain', dragStore.item);
+}
+
+function allowDrop(ev) {
+  ev.preventDefault();
+}
+
+function dropItem(ev) {
+  ev.preventDefault();
+  var item = ev.dataTransfer.getData('text/plain') || dragStore.item;
+  var qid = parseInt(ev.target.getAttribute('data-qid'), 10);
+  if (state.verified[qid]) return;
+  placeInDrop(ev.target, item, qid);
+}
+
+function placeInDrop(zone, item, qid) {
+  if (!state.answers[qid]) state.answers[qid] = {};
+  var target = zone.getAttribute('data-target');
+  state.answers[qid][target] = item;
+  zone.className = 'drop-zone filled';
+  zone.innerHTML = '<strong>' + escapeHtml(item) + '</strong> → ' + escapeHtml(target);
+}
+
+function makeMatch(q) {
+  var html = '<div class="info-box"><p>Elige la opción correcta para cada fila.</p></div>';
+  for (var i = 0; i < q.opciones.length; i++) {
+    html += '<div class="match-row">';
+    html += '<div class="match-left">' + escapeHtml(q.opciones[i].izquierda) + '</div>';
+    html += '<select id="match_' + q.id + '_' + i + '" onchange="captureMatch(' + q.id + ',' + i + ', this)">';
+    html += '<option value="">Elegir...</option>';
+    var rights = [];
+    for (var j = 0; j < q.opciones.length; j++) rights.push(q.opciones[j].derecha);
+    for (var k = 0; k < rights.length; k++) {
+      html += '<option value="' + escapeHtml(rights[k]) + '">' + escapeHtml(rights[k]) + '</option>';
+    }
+    html += '</select></div>';
+  }
+  return html;
+}
+
+function captureMatch(qid, index, el) {
+  if (state.verified[qid]) return;
+  if (!state.answers[qid]) state.answers[qid] = {};
+  state.answers[qid][index] = el.value;
+}
+
+function makeGrid100(q, multi) {
+  var html = '<div class="info-box"><p>Haz clic en la grilla.</p></div><div class="grid100" id="grid_' + q.id + '">';
+  for (var i = 1; i <= 100; i++) {
+    html += '<div class="cell100" onclick="toggleGridCell(' + q.id + ',' + i + ',' + (multi ? 'true' : 'false') + ', this)">' + i + '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function toggleGridCell(qid, value, multi, el) {
+  if (state.verified[qid]) return;
+  if (!multi) {
+    state.answers[qid] = [String(value)];
+    var cells = el.parentNode.getElementsByClassName('cell100');
+    for (var i = 0; i < cells.length; i++) cells[i].className = 'cell100';
+    el.className = 'cell100 selected';
+  } else {
+    if (!state.answers[qid]) state.answers[qid] = [];
+    var arr = state.answers[qid];
+    var str = String(value);
+    var found = -1;
+    for (var i2 = 0; i2 < arr.length; i2++) if (arr[i2] === str) found = i2;
+    if (found === -1) {
+      arr.push(str);
+      el.className = 'cell100 selected';
+    } else {
+      arr.splice(found, 1);
+      el.className = 'cell100';
+    }
+  }
+}
+
+function buildQuestionScreen(q) {
+  var inner = '';
+  if (q.tipo === 'Opción múltiple') inner = makeOptionButtons(q);
+  else if (q.tipo === 'Casillas de verificación') inner = makeChecks(q);
+  else if (q.tipo === 'Ingreso de resultados / completar' || q.tipo === 'Respuesta breve') inner = makeTextInput(q);
+  else if (q.tipo === 'Verdadero o falso') inner = makeTrueFalse(q);
+  else if (q.tipo === 'Ordenar secuencias') inner = makeSequenceBuilder(q);
+  else if (q.tipo === 'Arrastrar y soltar') inner = makeDragDrop(q);
+  else if (q.tipo === 'Relacionar / unir') inner = makeMatch(q);
+  else if (q.tipo === 'Selección sobre imagen') {
+    var multi = q.id === 19;
+    inner = makeGrid100(q, multi);
+  } else inner = '<p>Tipo no implementado.</p>';
+
+  return '' +
+  '<section class="screen" id="screen_q_' + q.id + '" data-kind="question" data-qid="' + q.id + '">' +
+    '<h3>Ejercicio ' + q.id + ' de ' + ACTIVITY.bloques_obligatorios.preguntas.length + '</h3>' +
+    '<div class="question-card">' +
+      '<div class="question-text">' + escapeHtml(q.enunciado) + '</div>' +
+      inner +
+      '<div class="feedback" id="feedback_' + q.id + '"></div>' +
+      '<div class="nav-row">' +
+        '<button class="btn btn-secondary" onclick="prevScreen()">Anterior</button>' +
+        '<div>' +
+          '<button class="btn btn-success" id="verify_' + q.id + '" onclick="verifyQuestion(' + q.id + ')">Verificar</button> ' +
+          '<button class="btn btn-primary" onclick="nextScreen()">Siguiente</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+  '</section>';
+}
+
+function arraysEqual(a, b) {
+  if (!a || !b || a.length !== b.length) return false;
+  var a2 = a.slice(0).sort();
+  var b2 = b.slice(0).sort();
+  for (var i = 0; i < a2.length; i++) if (String(a2[i]) !== String(b2[i])) return false;
+  return true;
+}
+
+function verifyQuestion(qid) {
+  var q = getQuestionById(qid);
+  var ok = false;
+  var ans = state.answers[qid];
+  if (q.tipo === 'Opción múltiple' || q.tipo === 'Verdadero o falso') {
+    ok = ans === q.respuesta_correcta.indice;
+  } else if (q.tipo === 'Ingreso de resultados / completar' || q.tipo === 'Respuesta breve') {
+    var txt = String(ans || '').replace(/^\s+|\s+$/g, '');
+    var valid = q.respuesta_correcta.aceptar_variantes || [q.respuesta_correcta.valor];
+    for (var i = 0; i < valid.length; i++) {
+      if (txt === String(valid[i])) ok = true;
+    }
+  } else if (q.tipo === 'Casillas de verificación') {
+    ok = arraysEqual(ans || [], q.respuesta_correcta.indices || []);
+  } else if (q.tipo === 'Ordenar secuencias') {
+    var built = [];
+    var indexes = ans || [];
+    for (var j = 0; j < indexes.length; j++) built.push(q.opciones[indexes[j]]);
+    ok = arraysEqual(built, q.respuesta_correcta.orden_correcto) && built.length === q.respuesta_correcta.orden_correcto.length;
+  } else if (q.tipo === 'Arrastrar y soltar') {
+    ok = true;
+    var map = ans || {};
+    var pairs = q.respuesta_correcta.emparejamientos || [];
+    for (var k = 0; k < pairs.length; k++) {
+      if (map[pairs[k].destino] !== pairs[k].elemento) ok = false;
+    }
+  } else if (q.tipo === 'Relacionar / unir') {
+    ok = true;
+    var sel = ans || {};
+    var pairs2 = q.respuesta_correcta.emparejamientos || [];
+    for (var m = 0; m < pairs2.length; m++) {
+      if (sel[m] !== pairs2[m].derecha) ok = false;
+    }
+  } else if (q.tipo === 'Selección sobre imagen') {
+    ok = arraysEqual(ans || [], q.respuesta_correcta.celdas_correctas || []);
+  }
+
+  state.verified[qid] = true;
+  state.questionResults[qid] = ok;
+  disableQuestion(qid);
+
+  var fb = byId('feedback_' + qid);
+  if (ok) {
+    state.correct += 1;
+    fb.className = 'feedback ok';
+    fb.innerHTML = q.feedback_correcto;
+  } else {
+    state.incorrect += 1;
+    fb.className = 'feedback bad';
+    fb.innerHTML = q.feedback_incorrecto;
+  }
+  updateTopBar();
+}
+
+function disableQuestion(qid) {
+  byId('verify_' + qid).disabled = true;
+  var screen = byId('screen_q_' + qid);
+  var inputs = screen.getElementsByTagName('input');
+  for (var i = 0; i < inputs.length; i++) inputs[i].disabled = true;
+  var buttons = screen.getElementsByTagName('button');
+  for (var j = 0; j < buttons.length; j++) {
+    if (buttons[j].id !== 'verify_' + qid && buttons[j].className.indexOf('btn-secondary') === -1 && buttons[j].className.indexOf('btn-primary') === -1) {
+      buttons[j].disabled = true;
+    }
+  }
+  var selects = screen.getElementsByTagName('select');
+  for (var k = 0; k < selects.length; k++) selects[k].disabled = true;
+}
+
+function buildSummaryScreen() {
+  return '' +
+  '<section class="screen" data-kind="summary">' +
+    '<h2>Resumen final</h2>' +
+    '<div class="summary-grid">' +
+      '<div class="summary-box"><div>Correctas</div><div class="summary-number" id="sumCorrect">0</div></div>' +
+      '<div class="summary-box"><div>Incorrectas</div><div class="summary-number" id="sumIncorrect">0</div></div>' +
+      '<div class="summary-box"><div>% aciertos</div><div class="summary-number" id="sumPctOk">0%</div></div>' +
+      '<div class="summary-box"><div>% errores</div><div class="summary-number" id="sumPctBad">0%</div></div>' +
+    '</div>' +
+    '<div class="nav-row">' +
+      '<button class="btn btn-secondary" onclick="prevScreen()">Anterior</button>' +
+      '<button class="btn btn-primary" onclick="nextScreen()">Siguiente</button>' +
+    '</div>' +
+  '</section>';
+}
+
+function refreshSummary() {
+  var total = ACTIVITY.bloques_obligatorios.preguntas.length;
+  var ok = state.correct;
+  var bad = state.incorrect;
+  byId('sumCorrect').innerHTML = ok;
+  byId('sumIncorrect').innerHTML = bad;
+  byId('sumPctOk').innerHTML = Math.round((ok / total) * 100) + '%';
+  byId('sumPctBad').innerHTML = Math.round((bad / total) * 100) + '%';
+}
+
+function buildSkillsScreen() {
+  var items = ACTIVITY.bloques_obligatorios.habilidades_trabajadas.items;
+  var lis = '';
+  for (var i = 0; i < items.length; i++) lis += '<li>' + escapeHtml(items[i]) + '</li>';
+  return '' +
+  '<section class="screen" data-kind="skills">' +
+    '<h2>Habilidades trabajadas</h2>' +
+    '<div class="info-box"><ul class="skills-list">' + lis + '</ul></div>' +
+    '<div class="nav-row">' +
+      '<button class="btn btn-secondary" onclick="prevScreen()">Anterior</button>' +
+      '<button class="btn btn-primary" onclick="nextScreen()">Siguiente</button>' +
+    '</div>' +
+  '</section>';
+}
+
+function buildFinalScreen() {
+  return '' +
+  '<section class="screen" data-kind="final">' +
+    '<h2>Finalización</h2>' +
+    '<div class="info-box">' +
+      '<p><strong>ID de actividad:</strong> ' + escapeHtml(ACTIVITY.metadata.id_actividad) + '</p>' +
+      '<p><strong>Estado nuevo al finalizar:</strong> 3</p>' +
+      '<p class="small-note">Al presionar Finalizar, la actividad intentará enviar el resultado global final al endpoint configurado.</p>' +
+    '</div>' +
+    '<div class="nav-row">' +
+      '<button class="btn btn-secondary" onclick="prevScreen()">Anterior</button>' +
+      '<button class="btn btn-success" id="finalizeBtn" onclick="finalizeActivity()">Finalizar</button>' +
+    '</div>' +
+    '<div id="endpointStatus" class="endpoint-status">Aún no se envió el resultado final.</div>' +
+  '</section>';
+}
+
+function buildApp() {
+  var html = '';
+  html += buildIntroScreen();
+  html += buildTextScreen(ACTIVITY.bloques_obligatorios.texto_teorico.titulo_bloque, ACTIVITY.bloques_obligatorios.texto_teorico.contenido, 'texto-teorico');
+  html += buildTextScreen(ACTIVITY.bloques_obligatorios.texto_base.titulo_bloque, ACTIVITY.bloques_obligatorios.texto_base.contenido, 'texto-base');
+  var qs = ACTIVITY.bloques_obligatorios.preguntas;
+  for (var i = 0; i < qs.length; i++) html += buildQuestionScreen(qs[i]);
+  html += buildSummaryScreen();
+  html += buildSkillsScreen();
+  html += buildFinalScreen();
+  byId('app').innerHTML = html;
+  upperInputs();
+  updateTopBar();
+}
+
+function sendPost(url, payload, onDone, onFail) {
+  var datos = [];
+  for (var clave in payload) {
+    if (payload.hasOwnProperty(clave)) {
+      datos.push(encodeURIComponent(clave) + '=' + encodeURIComponent(payload[clave]));
+    }
+  }
+  var cuerpo = datos.join('&');
+
+  if (window.fetch) {
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: cuerpo
+    })
+    .then(function(resp) {
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      return resp.text();
+    })
+    .then(function(txt) { onDone(txt); })
+    .catch(function(err) { onFail(err); });
+  } else {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4) {
+        if (xhr.status >= 200 && xhr.status < 300) onDone(xhr.responseText);
+        else onFail(new Error('HTTP ' + xhr.status));
+      }
+    };
+    xhr.send(cuerpo);
+  }
+}
+
+function finalizeActivity() {
+  if (state.finishedSent) return;
+  var total = ACTIVITY.bloques_obligatorios.preguntas.length;
+  var apellido = byId('apellido').value.replace(/^\s+|\s+$/g, '').toUpperCase();
+  var nombres = byId('nombres').value.replace(/^\s+|\s+$/g, '').toUpperCase();
+  if (!apellido || !nombres) {
+    alert('Completa Apellido y Nombres.');
+    showScreen(0);
+    return;
+  }
+
+  byId('apellido').value = apellido;
+  byId('nombres').value = nombres;
+
+  var payload = {
+    action: 'finalizar_actividad',
+    id_actividad: ACTIVITY.metadata.id_actividad,
+    apellido: apellido,
+    nombres: nombres,
+    puntaje_global_final: Math.round((state.correct / total) * 100),
+    fecha_hora_ejecucion: new Date().toISOString(),
+    estado_nuevo: 3
+  };
+
+  byId('finalizeBtn').disabled = true;
+  byId('endpointStatus').innerHTML = 'Enviando resultado final...';
+
+  sendPost(
+    ACTIVITY.endpoint_registro_resultados.url_endpoint,
+    payload,
+    function(txt) {
+      state.finishedSent = true;
+      stopTimer();
+      byId('endpointStatus').innerHTML = 'Resultado final enviado correctamente. Respuesta del servidor: ' + escapeHtml(txt);
+    },
+    function(err) {
+      byId('finalizeBtn').disabled = false;
+      byId('endpointStatus').innerHTML = 'No se pudo enviar el resultado final al endpoint. Detalle: ' + escapeHtml(err && err.message ? err.message : err);
+    }
+  );
+}
+
+buildApp();
+startTimer();
+</script>
+</body>
+</html>
