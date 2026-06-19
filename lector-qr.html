@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176f73">
+  <title>Lector QR 1077</title>
+  <link rel="icon" href="lector-qr-icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="lector-qr.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="qr-reader-body">
+  <main class="qr-reader">
+    <section class="qr-reader-hero">
+      <span>Escuela 1077</span>
+      <h1>Lector de resultados QR</h1>
+      <p>La docente selecciona la actividad, escanea el QR del alumno y envia el resultado a Supabase sin exponer claves.</p>
+    </section>
+
+    <section class="qr-reader-panel">
+      <div id="qrReaderStatus" class="student-index-status">Cargando configuracion.</div>
+
+      <div id="qrSessionBox" class="qr-reader-box">Sin sesion.</div>
+      <div class="portal-actions">
+        <button type="button" id="qrLoginGoogle">Iniciar sesion con Google</button>
+        <button type="button" id="qrLogout" class="secondary">Cerrar sesion</button>
+      </div>
+    </section>
+
+    <section class="qr-reader-panel">
+      <h2>1. Seleccionar actividad</h2>
+      <label class="qr-reader-label">
+        Actividad publicada
+        <select id="qrActivitySelect">
+          <option value="">Inicie sesion para cargar actividades</option>
+        </select>
+      </label>
+      <p id="qrActivityHint" class="portal-muted">El QR no incluye el ID interno de actividad; por eso se selecciona aqui.</p>
+    </section>
+
+    <section class="qr-reader-panel">
+      <h2>2. Leer QR</h2>
+      <div id="qrCameraWarning" class="portal-warning hidden"></div>
+      <video id="qrVideo" class="qr-video" playsinline muted></video>
+      <div class="portal-actions">
+        <button type="button" id="qrStartCamera">Iniciar camara</button>
+        <button type="button" id="qrStopCamera" class="secondary">Detener camara</button>
+      </div>
+
+      <details class="qr-manual">
+        <summary>Modo manual si la camara no esta disponible</summary>
+        <label class="qr-reader-label">
+          Contenido del QR
+          <textarea id="qrManualText" rows="5" placeholder='{"id":"ALU-001","pts":8,"err":2,"ej":10,"nota":8,"m":12}'></textarea>
+        </label>
+        <button type="button" id="qrReadManual" class="secondary">Procesar texto</button>
+      </details>
+    </section>
+
+    <section class="qr-reader-panel">
+      <h2>3. Validar y enviar</h2>
+      <div id="qrResultBox" class="qr-reader-box">Todavia no hay QR leido.</div>
+      <div class="portal-actions">
+        <button type="button" id="qrSendResult">Enviar resultado a Supabase</button>
+        <button type="button" id="qrClearResult" class="secondary">Limpiar</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="aie-public-config.js"></script>
+  <script src="aie-runtime.js"></script>
+  <script src="lector-qr.js"></script>
+</body>
+</html>

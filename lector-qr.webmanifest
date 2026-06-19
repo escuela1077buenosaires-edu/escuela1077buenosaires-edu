@@ -1,0 +1,18 @@
+{
+  "name": "Lector QR Escuela 1077",
+  "short_name": "QR 1077",
+  "description": "Lector PWA para registrar resultados de actividades por QR.",
+  "start_url": "lector-qr.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f7",
+  "theme_color": "#176f73",
+  "icons": [
+    {
+      "src": "lector-qr-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Lector QR 1077">
+  <rect width="512" height="512" rx="96" fill="#176f73"/>
+  <rect x="96" y="96" width="112" height="112" rx="16" fill="#ffffff"/>
+  <rect x="128" y="128" width="48" height="48" rx="8" fill="#176f73"/>
+  <rect x="304" y="96" width="112" height="112" rx="16" fill="#ffffff"/>
+  <rect x="336" y="128" width="48" height="48" rx="8" fill="#176f73"/>
+  <rect x="96" y="304" width="112" height="112" rx="16" fill="#ffffff"/>
+  <rect x="128" y="336" width="48" height="48" rx="8" fill="#176f73"/>
+  <rect x="280" y="280" width="40" height="40" rx="6" fill="#ffffff"/>
+  <rect x="344" y="280" width="72" height="40" rx="6" fill="#ffffff"/>
+  <rect x="280" y="344" width="40" height="72" rx="6" fill="#ffffff"/>
+  <rect x="344" y="368" width="40" height="48" rx="6" fill="#ffffff"/>
+  <rect x="408" y="344" width="24" height="24" rx="5" fill="#ffffff"/>
+  <path d="M88 256h336" stroke="#d8f2ef" stroke-width="18" stroke-linecap="round" opacity=".85"/>
+</svg>

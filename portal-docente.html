@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portal docente 1077</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Portal docente 1077</h1>
+      <p>Habilitacion de indice, actividades y alumnos de apoyo</p>
+    </div>
+    <div class="topbar-actions">
+      <a class="topbar-link" href="lector-qr.html">Lector QR</a>
+      <a class="topbar-link" href="alumnos.html">Indice alumnos</a>
+      <button type="button" id="teacherPortalRefresh" class="secondary">Actualizar</button>
+    </div>
+  </header>
+
+  <section class="teacher-portal-view" id="teacherPortalView">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Portal docente 1077</h2>
+          <p class="panel-subtitle">DRT, directora y supervisora deben iniciar sesion con Google y tener perfil activo.</p>
+        </div>
+      </div>
+
+      <div id="teacherPortalStatus" class="admin-status">Cargando portal docente.</div>
+
+      <div class="portal-grid">
+        <section class="portal-card">
+          <h3>Sesion</h3>
+          <div id="portalSessionBox" class="portal-box">Sin sesion.</div>
+          <div class="portal-actions">
+            <button type="button" id="portalLoginGoogle">Iniciar sesion con Google</button>
+            <button type="button" id="portalLogout" class="secondary">Cerrar sesion</button>
+          </div>
+        </section>
+
+        <section class="portal-card">
+          <h3>Indice para alumnos</h3>
+          <div id="portalIndexState" class="portal-box">Sin datos.</div>
+          <label>
+            Mensaje
+            <textarea id="portalIndexMessage" rows="3" placeholder="Mensaje breve para docentes/alumnos."></textarea>
+          </label>
+          <label>
+            Vigente hasta
+            <input id="portalIndexVigenteHasta" type="datetime-local">
+          </label>
+          <div class="portal-actions">
+            <button type="button" id="portalToggleIndex">Habilitar indice</button>
+          </div>
+        </section>
+
+        <section class="portal-card">
+          <h3>Sesion AIE</h3>
+          <div id="portalClassSessionState" class="portal-box">Sin datos.</div>
+          <label>
+            Duracion
+            <select id="portalClassSessionDuration">
+              <option value="60">60 minutos</option>
+              <option value="90" selected>90 minutos</option>
+              <option value="120">120 minutos</option>
+              <option value="180">180 minutos</option>
+            </select>
+          </label>
+          <label>
+            Motivo
+            <input id="portalClassSessionReason" type="text" maxlength="500" placeholder="Clase AIE">
+          </label>
+          <div class="portal-actions">
+            <button type="button" id="portalStartClassSession">Abrir sesion</button>
+            <button type="button" id="portalCloseClassSession" class="secondary">Cerrar sesion</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="portal-grid portal-grid-bottom">
+      <section class="panel portal-panel">
+        <div class="panel-head">
+          <div>
+            <h2>Actividades</h2>
+            <p class="panel-subtitle">Solo se puede cambiar disponibilidad y fechas.</p>
+          </div>
+        </div>
+        <div id="portalActivities" class="portal-list">Sin datos.</div>
+      </section>
+
+      <section class="panel portal-panel">
+        <div class="panel-head">
+          <div>
+            <h2>Accesos recientes</h2>
+            <p class="panel-subtitle">Registro de ingresos y acciones del personal.</p>
+          </div>
+        </div>
+        <div id="portalAccessLog" class="portal-list">Sin datos.</div>
+      </section>
+
+      <section class="panel portal-panel">
+        <div class="panel-head">
+          <div>
+            <h2>Resultados recientes</h2>
+            <p class="panel-subtitle">Lectura protegida por permiso de resultados.</p>
+          </div>
+        </div>
+        <div class="portal-results-controls">
+          <label>
+            ID alumno
+            <input id="portalResultsStudentFilter" type="text" maxlength="40" placeholder="Opcional">
+          </label>
+          <label>
+            Cantidad
+            <select id="portalResultsLimit">
+              <option value="25">25</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+            </select>
+          </label>
+          <button type="button" id="portalResultsApply" class="secondary">Filtrar</button>
+          <button type="button" id="portalResultsExport" class="secondary">Exportar CSV</button>
+        </div>
+        <div id="portalResultsStatus" class="portal-muted">Sin datos.</div>
+        <div id="portalResultsList" class="portal-list">Sin datos.</div>
+      </section>
+
+      <section class="panel portal-panel">
+        <div class="panel-head">
+          <div>
+            <h2>Alumnos apoyo</h2>
+            <p class="panel-subtitle">Gestion disponible para perfiles autorizados.</p>
+          </div>
+        </div>
+        <div id="portalStudentsStatus" class="portal-muted">Sin datos.</div>
+        <form id="portalStudentForm" class="portal-student-form">
+          <input type="hidden" id="portalStudentId">
+          <label>
+            ID alumno
+            <input id="portalStudentCode" type="text" maxlength="40" required>
+          </label>
+          <label>
+            Nombre
+            <input id="portalStudentName" type="text" maxlength="120">
+          </label>
+          <label>
+            Apellido
+            <input id="portalStudentLastName" type="text" maxlength="120">
+          </label>
+          <label>
+            Grado
+            <select id="portalStudentGrade" required>
+              <option value="">Seleccionar</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+            </select>
+          </label>
+          <label>
+            Division
+            <input id="portalStudentDivision" type="text" maxlength="20">
+          </label>
+          <label>
+            Turno
+            <select id="portalStudentShift">
+              <option value="">Sin dato</option>
+              <option value="manana">manana</option>
+              <option value="tarde">tarde</option>
+              <option value="vespertino">vespertino</option>
+            </select>
+          </label>
+          <label class="portal-check-row">
+            <input id="portalStudentActive" type="checkbox" checked>
+            Activo
+          </label>
+          <label class="portal-student-notes">
+            Observaciones
+            <textarea id="portalStudentNotes" rows="2" maxlength="1000"></textarea>
+          </label>
+          <div class="portal-actions portal-student-actions">
+            <button type="submit" id="portalStudentSave">Guardar alumno</button>
+            <button type="button" id="portalStudentCancel" class="secondary">Nuevo</button>
+          </div>
+        </form>
+        <div id="portalStudentsList" class="portal-list">Sin datos.</div>
+      </section>
+    </section>
+  </section>
+
+  <script src="aie-public-config.js"></script>
+  <script src="aie-runtime.js"></script>
+  <script src="portal-docente.js"></script>
+</body>
+</html>
