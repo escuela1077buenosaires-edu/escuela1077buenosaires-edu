@@ -25,7 +25,7 @@
   }
 
   function backendUnavailableMessage() {
-    return 'Falta configurar AIE_PUBLIC_BACKEND_BASE_URL_1077 para usar esta pagina publicada fuera de localhost.';
+    return 'Esta accion requiere un backend HTTPS publico configurado en AIE_PUBLIC_BACKEND_BASE_URL_1077. Portal, indice y lector QR pueden operar con Supabase Auth/RPC directo.';
   }
 
   function supabaseReady() {

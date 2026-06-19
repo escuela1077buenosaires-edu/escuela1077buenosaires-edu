@@ -11,8 +11,8 @@ Este paquete no incluye service role, tokens, contrasenas ni el administrador lo
 Para el modo directo sin PC encendida, este paquete usa Supabase URL y anon key publica.
 La anon key no es service role y no otorga permisos si RLS/RPC estan bien configurados.
 
-Si alguna pantalla sigue usando backend local, configurar AIE_PUBLIC_BACKEND_BASE_URL_1077 antes de generar el paquete.
-Ejemplo de valor: https://tu-backend-publico.example.com
+AIE_PUBLIC_BACKEND_BASE_URL_1077 es opcional para el flujo actual.
+Solo se usa si mas adelante alguna pantalla necesita endpoints propios en un backend HTTPS publico.
 
 Tambien hay que agregar en Supabase Auth las Redirect URLs publicas:
 - https://escuela1077buenosaires-edu.github.io/escuela1077buenosaires-edu/portal-docente.html
