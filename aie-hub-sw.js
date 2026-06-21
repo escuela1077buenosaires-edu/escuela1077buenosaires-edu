@@ -7,6 +7,7 @@ var STATIC_FILES = [
   './portal-docente.html',
   './portal-docente.js',
   './portal-docente-fixes.js',
+  './aie-login-redirect.js',
   './alumnos.html',
   './alumnos.js',
   './lector-qr.html',

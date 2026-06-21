@@ -1,0 +1,69 @@
+(function () {
+  var PARAM_NAME = 'login';
+  var RETRY_MS = 250;
+  var MAX_RETRIES = 40;
+
+  function wantsLogin() {
+    try {
+      return new URLSearchParams(window.location.search || '').get(PARAM_NAME) === '1';
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function hasAuthHash() {
+    return (window.location.hash || '').indexOf('access_token=') >= 0;
+  }
+
+  function pageTarget() {
+    if (document.getElementById('portalLoginGoogle')) {
+      return { buttonId: 'portalLoginGoogle', sessionKey: 'aiePortal1077AccessToken' };
+    }
+    if (document.getElementById('qrLoginGoogle')) {
+      return { buttonId: 'qrLoginGoogle', sessionKey: 'aieQr1077AccessToken' };
+    }
+    return null;
+  }
+
+  function hasStoredToken(sessionKey) {
+    try {
+      return !!(sessionKey && window.sessionStorage && window.sessionStorage.getItem(sessionKey));
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function cleanLoginParam() {
+    if (!window.history || !window.history.replaceState) return;
+    try {
+      var url = new URL(window.location.href);
+      url.searchParams.delete(PARAM_NAME);
+      window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+    } catch (err) {
+      return;
+    }
+  }
+
+  function clickWhenReady(target, tries) {
+    var button = document.getElementById(target.buttonId);
+    if (button && !button.disabled) {
+      button.click();
+      return;
+    }
+    if (tries >= MAX_RETRIES) return;
+    window.setTimeout(function () {
+      clickWhenReady(target, tries + 1);
+    }, RETRY_MS);
+  }
+
+  function start() {
+    if (!wantsLogin() || hasAuthHash()) return;
+    var target = pageTarget();
+    if (!target) return;
+    cleanLoginParam();
+    if (hasStoredToken(target.sessionKey)) return;
+    clickWhenReady(target, 0);
+  }
+
+  start();
+}());
