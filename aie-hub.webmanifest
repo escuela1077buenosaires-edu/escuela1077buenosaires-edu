@@ -1,0 +1,17 @@
+{
+  "name": "AIE Escuela 1077",
+  "short_name": "AIE 1077",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eaf3f3",
+  "theme_color": "#176f73",
+  "icons": [
+    {
+      "src": "lector-qr-icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
