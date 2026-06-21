@@ -51,13 +51,14 @@
           <label>
             Vigente hasta
             <input id="portalIndexVigenteHasta" type="datetime-local">
+            <small class="portal-muted">Si queda vacio, se habilita por 90 minutos o hasta el fin del horario autorizado.</small>
           </label>
           <div class="portal-actions">
             <button type="button" id="portalToggleIndex">Habilitar indice</button>
           </div>
         </section>
 
-        <section class="portal-card">
+        <section class="portal-card" id="portalClassSessionCard">
           <h3>Sesion AIE</h3>
           <div id="portalClassSessionState" class="portal-box">Sin datos.</div>
           <label>
@@ -124,7 +125,7 @@
             </select>
           </label>
           <button type="button" id="portalResultsApply" class="secondary">Filtrar</button>
-          <button type="button" id="portalResultsExport" class="secondary">Exportar CSV</button>
+          <button type="button" id="portalResultsExport" class="secondary">Exportar para Excel</button>
         </div>
         <div id="portalResultsStatus" class="portal-muted">Sin datos.</div>
         <div id="portalResultsList" class="portal-list">Sin datos.</div>
@@ -199,5 +200,6 @@
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
   <script src="portal-docente.js"></script>
+  <script src="portal-docente-fixes.js"></script>
 </body>
 </html>
