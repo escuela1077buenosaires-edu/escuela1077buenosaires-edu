@@ -70,5 +70,10 @@
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
   <script src="lector-qr.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('aie-hub-sw.js', { scope: './' }).catch(function () {});
+    }
+  </script>
 </body>
 </html>
