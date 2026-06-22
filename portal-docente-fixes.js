@@ -1,4 +1,9 @@
 (function () {
+  var creatorCache = null;
+  var creatorLoading = false;
+  var creatorLastLoad = 0;
+  var CREATOR_RELOAD_MS = 10000;
+
   function $(id) {
     return document.getElementById(id);
   }
@@ -97,6 +102,76 @@
     if (button) button.textContent = 'Exportar para Excel';
   }
 
+  function storedPortalToken() {
+    try {
+      return window.sessionStorage ? window.sessionStorage.getItem('aiePortal1077AccessToken') || '' : '';
+    } catch (err) {
+      return '';
+    }
+  }
+
+  function creatorKey(value) {
+    return clean(value).toUpperCase();
+  }
+
+  function loadStudentCreators(callback) {
+    var now = Date.now();
+    if (creatorCache && now - creatorLastLoad < CREATOR_RELOAD_MS) {
+      callback(creatorCache);
+      return;
+    }
+    if (creatorLoading || !window.AIE_RUNTIME || !window.AIE_RUNTIME.supabaseReady()) return;
+    var token = storedPortalToken();
+    if (!token) return;
+    creatorLoading = true;
+    window.AIE_RUNTIME.supabaseRpc('aie_1077_alumnos_apoyo_listar', {}, token, function (err, data) {
+      creatorLoading = false;
+      if (err || !data || !Array.isArray(data.alumnos)) return;
+      var map = {};
+      data.alumnos.forEach(function (student) {
+        if (student && student.idAlumno) map[creatorKey(student.idAlumno)] = student;
+      });
+      creatorCache = map;
+      creatorLastLoad = Date.now();
+      callback(map);
+    });
+  }
+
+  function formatCreator(student) {
+    if (!student) return '';
+    var parts = [];
+    parts.push(student.creadoPorEmail || 'sin dato');
+    if (student.creadoPorRol) parts.push(student.creadoPorRol);
+    if (student.creadoEn) {
+      var date = new Date(student.creadoEn);
+      parts.push(Number.isNaN(date.getTime()) ? student.creadoEn : date.toLocaleString());
+    }
+    return 'Alta: ' + parts.join(' | ');
+  }
+
+  function updateStudentCreators() {
+    var list = $('portalStudentsList');
+    if (!list || !/Puede cargar y editar alumnos/i.test(($('portalStudentsStatus') || {}).textContent || '')) return;
+    loadStudentCreators(function (map) {
+      var items = list.querySelectorAll('.portal-list-item');
+      for (var i = 0; i < items.length; i++) {
+        var title = items[i].querySelector('strong');
+        var idAlumno = title ? clean((title.textContent || '').split('|')[0]) : '';
+        var student = map[creatorKey(idAlumno)];
+        var text = formatCreator(student);
+        if (!text) continue;
+        var line = items[i].querySelector('.portal-created-by');
+        if (!line) {
+          line = document.createElement('span');
+          line.className = 'portal-created-by';
+          var actions = items[i].querySelector('.portal-actions');
+          items[i].insertBefore(line, actions || null);
+        }
+        line.textContent = text;
+      }
+    });
+  }
+
   function setResultsStatus(text, error) {
     var box = $('portalResultsStatus');
     if (!box) return;
@@ -152,6 +227,7 @@
     updateAdminIndexView();
     ensureDivisionSelect();
     updateStudentsFormVisibility();
+    updateStudentCreators();
     updateExportButton();
   }
 
