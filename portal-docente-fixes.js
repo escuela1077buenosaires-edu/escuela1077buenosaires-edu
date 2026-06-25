@@ -33,6 +33,31 @@
     return text.indexOf('no estas autorizado') >= 0 && text.indexOf('profe jose') >= 0;
   }
 
+  function currentSessionIdentity() {
+    var box = $('portalSessionBox');
+    var text = box ? clean(box.textContent || '') : '';
+    var match = text.match(/([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})\s*\|\s*([a-z_]+)/i);
+    return {
+      email: match ? match[1].toLowerCase() : '',
+      role: match ? match[2].toLowerCase() : '',
+      authorized: !!match
+    };
+  }
+
+  function updateAutomationMarkers() {
+    var identity = currentSessionIdentity();
+    var root = document.documentElement;
+    var body = document.body;
+    var targets = [root, body, $('portalSessionBox')].filter(Boolean);
+    targets.forEach(function (target) {
+      target.setAttribute('data-aie-school', '1077');
+      target.setAttribute('data-aie-page', 'portal-docente');
+      target.setAttribute('data-aie-session-authorized', identity.authorized ? 'true' : 'false');
+      target.setAttribute('data-aie-session-email', identity.email);
+      target.setAttribute('data-aie-session-role', identity.role);
+    });
+  }
+
   function updateClassSessionVisibility() {
     var card = $('portalClassSessionCard') || findCard('Sesion AIE');
     if (card) card.style.display = isAdminSession() ? '' : 'none';
@@ -222,6 +247,7 @@
   }
 
   function applyFixes() {
+    updateAutomationMarkers();
     updateClassSessionVisibility();
     updateIndexHint();
     updateAdminIndexView();
