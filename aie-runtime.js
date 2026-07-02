@@ -119,12 +119,23 @@
     return config.backendBaseUrl + (value.charAt(0) === '/' ? value : '/' + value);
   }
 
+  function cleanSearchForAuth() {
+    try {
+      var params = new URLSearchParams(window.location.search || '');
+      params.delete('login');
+      var text = params.toString();
+      return text ? '?' + text : '';
+    } catch (err) {
+      return '';
+    }
+  }
+
   function currentPageUrl(hash) {
-    return window.location.origin + window.location.pathname + window.location.search + (hash || '');
+    return window.location.origin + window.location.pathname + cleanSearchForAuth() + (hash || '');
   }
 
   function currentPagePath(hash) {
-    return window.location.pathname + window.location.search + (hash || '');
+    return window.location.pathname + cleanSearchForAuth() + (hash || '');
   }
 
   window.AIE_RUNTIME = {
