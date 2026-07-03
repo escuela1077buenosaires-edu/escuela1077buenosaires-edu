@@ -1,4 +1,4 @@
-var CACHE_NAME = 'aie-pages-1077-v5';
+var CACHE_NAME = 'aie-pages-1077-v6';
 var STATIC_FILES = [
   './',
   './index.html',
@@ -25,6 +25,7 @@ self.addEventListener('install', function (event) {
       return cache.addAll(STATIC_FILES);
     })
   );
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', function (event) {
@@ -36,6 +37,8 @@ self.addEventListener('activate', function (event) {
         }
         return null;
       }));
+    }).then(function () {
+      return self.clients.claim();
     })
   );
 });
