@@ -1,11 +1,28 @@
 (function () {
   var sessionKey = 'aiePortal1077AccessToken';
+  var DEFAULT_INDEX_MINUTES = 90;
   var portal = {
     config: null,
     state: null,
     accessToken: '',
     alumnosApoyo: [],
-    resultados: []
+    resultados: [],
+    studentAction: '',
+    studentFilters: {
+      idAlumno: '',
+      apellido: '',
+      nombre: '',
+      grado: '',
+      turno: '',
+      division: ''
+    },
+    activityFilters: {
+      titulo: '',
+      area: '',
+      grado: '',
+      tipo: '',
+      disponible: ''
+    }
   };
 
   function $(id) {
@@ -37,6 +54,15 @@
 
   function boolValue(value) {
     return value === true || value === 'true' || value === 1 || value === '1';
+  }
+
+  function isAdminState(state) {
+    return !!(state && state.perfil && state.perfil.rol === 'administrador');
+  }
+
+  function isDefaultUnauthorizedMessage(value) {
+    var text = clean(value).toLowerCase();
+    return text.indexOf('no estas autorizado') >= 0 && text.indexOf('profe jose') >= 0;
   }
 
   function timestampForRpc(value) {
@@ -247,6 +273,95 @@
     return profile[key] === true || permissions[key] === true;
   }
 
+  function permissionAny(state, keys) {
+    return (keys || []).some(function (key) {
+      return permission(state, key);
+    });
+  }
+
+  function portalHasAnyPermission(state, permissionsText) {
+    var keys = clean(permissionsText).split(/\s+/).filter(Boolean);
+    if (!keys.length) return true;
+    if (isAdminState(state)) return true;
+    return state && state.autorizado && permissionAny(state, keys);
+  }
+
+  function setHidden(element, hidden) {
+    if (!element) return;
+    if (hidden) {
+      element.classList.add('hidden');
+    } else {
+      element.classList.remove('hidden');
+    }
+  }
+
+  function actionIcon(name) {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'action-icon');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    var paths = {
+      edit: ['M4 20h4l10.5-10.5a2.8 2.8 0 0 0-4-4L4 16v4z', 'M13.5 6.5l4 4'],
+      deactivate: ['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z', 'M7 7l10 10'],
+      search: ['M10 18a8 8 0 1 1 5.3-14A8 8 0 0 1 10 18z', 'M15 15l5 5'],
+      open: ['M14 3h7v7', 'M21 3l-9 9', 'M5 5h6', 'M5 5v14h14v-6']
+    };
+    (paths[name] || paths.edit).forEach(function (d) {
+      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', d);
+      svg.appendChild(path);
+    });
+    return svg;
+  }
+
+  function iconButton(kind, label, className, onClick) {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = className || 'portal-icon-button secondary';
+    button.setAttribute('aria-label', label);
+    button.title = label;
+    button.appendChild(actionIcon(kind));
+    button.onclick = onClick;
+    return button;
+  }
+
+  function updatePortalFeatureVisibility(state) {
+    var authorized = state && state.autorizado;
+    var blocks = document.querySelectorAll('[data-portal-any]');
+    for (var i = 0; i < blocks.length; i++) {
+      setHidden(blocks[i], !portalHasAnyPermission(state, blocks[i].getAttribute('data-portal-any')));
+    }
+    var adminOnly = document.querySelectorAll('[data-portal-admin-only]');
+    for (var j = 0; j < adminOnly.length; j++) {
+      setHidden(adminOnly[j], !(authorized && isAdminState(state)));
+    }
+    renderPermissionSummary(state);
+  }
+
+  function renderPermissionSummary(state) {
+    var box = $('portalPermissionSummary');
+    if (!box) return;
+    if (!(state && state.autorizado && state.perfil)) {
+      box.textContent = 'Inicie sesion con Google para ver las funcionalidades habilitadas.';
+      box.className = 'portal-permission-summary';
+      return;
+    }
+    var groups = [
+      ['Alumnos', ['puede_agregar_alumnos', 'puede_editar_alumnos', 'puede_desactivar_alumnos', 'puede_eliminar_alumnos', 'puede_gestionar_alumnos']],
+      ['Actividades', ['puede_visualizar_actividades', 'puede_probar_actividades', 'puede_habilitar_actividades', 'puede_bloquear_actividades', 'puede_habilitar_indice']],
+      ['Resultados', ['puede_ver_resultados', 'puede_exportar_resultados', 'puede_ver_analiticas_generales', 'puede_ver_analiticas_alumno']],
+      ['Interfaces', ['puede_usar_lector_qr', 'puede_ver_indice_alumnos', 'puede_ver_portal_funcional']]
+    ];
+    var enabled = groups.filter(function (group) {
+      return isAdminState(state) || permissionAny(state, group[1]);
+    }).map(function (group) {
+      return group[0];
+    });
+    box.textContent = (state.perfil.rol === 'drt' ? 'Panel DRT' : 'Panel por permisos') + ': ' + (enabled.join(' | ') || 'sin funcionalidades habilitadas');
+    box.className = 'portal-permission-summary';
+  }
+
   function stateBadge(enabled) {
     var span = document.createElement('span');
     span.className = enabled ? 'publication-state publication-state-publicada' : 'publication-state publication-state-fallida';
@@ -316,19 +431,33 @@
     var toggle = $('portalToggleIndex');
     if (!box || !message || !until || !toggle) return;
     var control = state && state.control || {};
+    var admin = isAdminState(state);
     var enabled = control.habilitado === true;
+    var adminBlocked = control.bloqueoAdminActivo === true;
     box.innerHTML = '';
     box.appendChild(stateBadge(enabled));
     var detail = document.createElement('div');
     detail.className = 'portal-detail';
-    detail.textContent = enabled
+    detail.textContent = adminBlocked
+      ? 'La Habilitacion del Indice de Actividades esta bloqueada por el AIE.'
+      : enabled
       ? 'Los alumnos pueden ver el indice mientras no venza la fecha configurada.'
-      : 'Los alumnos no deben ver el indice de actividades.';
+      : admin
+        ? 'El indice esta cerrado para alumnos. Su perfil administrador puede habilitarlo sin restriccion horaria.'
+        : 'Los alumnos no deben ver el indice de actividades.';
     box.appendChild(detail);
+    if (adminBlocked && control.bloqueoAdminMotivo) {
+      var blocked = document.createElement('div');
+      blocked.className = 'portal-warning';
+      blocked.textContent = 'Motivo: ' + control.bloqueoAdminMotivo;
+      box.appendChild(blocked);
+    }
     if (control.vencido) {
       var expired = document.createElement('div');
-      expired.className = 'portal-warning';
-      expired.textContent = 'La habilitacion esta vencida.';
+      expired.className = admin ? 'portal-muted' : 'portal-warning';
+      expired.textContent = admin
+        ? 'La habilitacion para alumnos esta vencida; puede habilitarla nuevamente.'
+        : 'La habilitacion esta vencida.';
       box.appendChild(expired);
     }
     if (control.actualizadoEn) {
@@ -337,16 +466,24 @@
       updated.textContent = 'Actualizado: ' + portalDate(control.actualizadoEn);
       box.appendChild(updated);
     }
-    message.value = control.mensaje || '';
-    until.value = '';
+    message.value = admin && isDefaultUnauthorizedMessage(control.mensaje) ? '' : control.mensaje || '';
+    message.placeholder = admin
+      ? 'Mensaje visible para alumnos o perfiles sin acceso.'
+      : 'Mensaje breve para docentes/alumnos.';
+    until.value = enabled ? dateInputValue(control.vigenteHasta) : '';
     toggle.textContent = enabled ? 'Deshabilitar indice' : 'Habilitar indice';
-    toggle.disabled = !(state && state.autorizado && permission(state, 'puede_habilitar_indice') && state.configuracion && state.configuracion.supabase.backendListo);
+    toggle.disabled = adminBlocked || !(state && state.autorizado && (admin || permission(state, 'puede_habilitar_indice')) && state.configuracion && state.configuracion.supabase.backendListo);
   }
 
   function renderClassSession(state) {
+    var card = $('portalClassSessionCard');
     var box = $('portalClassSessionState');
     var start = $('portalStartClassSession');
     var close = $('portalCloseClassSession');
+    var role = state && state.perfil && state.perfil.rol || '';
+    var visible = role === 'administrador';
+    if (card) card.style.display = visible ? '' : 'none';
+    if (!visible) return;
     if (!box || !start || !close) return;
     var classSession = state && state.sesionAie || {};
     var session = classSession.sesion || {};
@@ -419,14 +556,57 @@
     return controls;
   }
 
+  function readActivityFilters() {
+    portal.activityFilters = {
+      titulo: $('portalActivityFilterTitle') ? clean($('portalActivityFilterTitle').value).toLowerCase() : '',
+      area: $('portalActivityFilterArea') ? clean($('portalActivityFilterArea').value).toLowerCase() : '',
+      grado: $('portalActivityFilterGrade') ? clean($('portalActivityFilterGrade').value) : '',
+      tipo: $('portalActivityFilterType') ? clean($('portalActivityFilterType').value) : '',
+      disponible: $('portalActivityFilterAvailable') ? clean($('portalActivityFilterAvailable').value) : ''
+    };
+    return portal.activityFilters;
+  }
+
+  function clearActivityFilters() {
+    portal.activityFilters = { titulo: '', area: '', grado: '', tipo: '', disponible: '' };
+    if ($('portalActivityFilterTitle')) $('portalActivityFilterTitle').value = '';
+    if ($('portalActivityFilterArea')) $('portalActivityFilterArea').value = '';
+    if ($('portalActivityFilterGrade')) $('portalActivityFilterGrade').value = '';
+    if ($('portalActivityFilterType')) $('portalActivityFilterType').value = '';
+    if ($('portalActivityFilterAvailable')) $('portalActivityFilterAvailable').value = '';
+  }
+
+  function filteredActivities(list) {
+    var filters = portal.activityFilters || {};
+    return (list || []).filter(function (activity) {
+      if (filters.titulo && clean(activity.titulo).toLowerCase().indexOf(filters.titulo) < 0) return false;
+      if (filters.area && clean(activity.area).toLowerCase().indexOf(filters.area) < 0) return false;
+      if (filters.grado && String(activity.grado || '') !== filters.grado) return false;
+      if (filters.tipo && String(activity.tipo || '').toUpperCase() !== filters.tipo.toUpperCase()) return false;
+      if (filters.disponible === 'true' && activity.disponible !== true) return false;
+      if (filters.disponible === 'false' && activity.disponible === true) return false;
+      return true;
+    });
+  }
+
+  function activityPublicUrl(activity) {
+    if (!(activity && activity.codigo)) return '';
+    return 'alumnos.html#actividad=' + encodeURIComponent(activity.codigo);
+  }
+
   function renderActivities(state) {
     var box = $('portalActivities');
     if (!box) return;
     box.innerHTML = '';
-    var list = state && state.actividades || [];
+    var allowed = state && state.autorizado && portalHasAnyPermission(state, 'puede_visualizar_actividades puede_probar_actividades puede_habilitar_actividades puede_bloquear_actividades');
+    if (!allowed) {
+      box.textContent = state && state.autorizado ? 'Sin permiso para visualizar actividades.' : 'Inicie sesion para ver actividades.';
+      return;
+    }
+    var list = filteredActivities(state && state.actividades || []);
     if (!list.length) {
       box.textContent = state && state.autorizado
-        ? 'No hay actividades registradas para administrar.'
+        ? 'No hay actividades registradas para los filtros seleccionados.'
         : 'Indice cerrado o sin sesion autorizada. No se listan actividades para alumnos.';
       return;
     }
@@ -445,9 +625,18 @@
       item.appendChild(activityBadge(activity));
       item.appendChild(meta);
       item.appendChild(availability);
-      if (state && state.autorizado && permission(state, 'puede_habilitar_actividades')) {
+      var actions = document.createElement('div');
+      actions.className = 'portal-row-actions';
+      var url = activityPublicUrl(activity);
+      if (url && state && state.autorizado && permission(state, 'puede_probar_actividades')) {
+        actions.appendChild(iconButton('open', 'Probar actividad', 'portal-icon-button secondary', function () {
+          window.open(url, '_blank', 'noopener');
+        }));
+      }
+      if (state && state.autorizado && permissionAny(state, ['puede_habilitar_actividades', 'puede_bloquear_actividades'])) {
         item.appendChild(activityControls(activity));
       }
+      if (actions.childNodes.length) item.appendChild(actions);
       box.appendChild(item);
     });
   }
@@ -474,6 +663,26 @@
     });
   }
 
+  function renderInterfaces(state) {
+    var card = $('portalInterfacesCard');
+    var portalLink = $('portalLinkPortal');
+    var qr = $('portalLinkQr');
+    var index = $('portalLinkIndice');
+    var topQr = $('portalTopQr');
+    var topIndex = $('portalTopIndice');
+    var canQr = isAdminState(state) || permission(state, 'puede_usar_lector_qr');
+    var canIndex = isAdminState(state) || permission(state, 'puede_ver_indice_alumnos');
+    var canPortal = isAdminState(state) || permission(state, 'puede_ver_portal_funcional');
+    setHidden(portalLink, !(state && state.autorizado && canPortal));
+    setHidden(qr, !(state && state.autorizado && canQr));
+    setHidden(index, !(state && state.autorizado && canIndex));
+    setHidden(topQr, !(state && state.autorizado && canQr));
+    setHidden(topIndex, !(state && state.autorizado && canIndex));
+    if (card && state && state.autorizado && !canPortal && !canQr && !canIndex && !isAdminState(state)) {
+      setHidden(card, true);
+    }
+  }
+
   function setResultsStatus(text, error) {
     var box = $('portalResultsStatus');
     if (!box) return;
@@ -495,9 +704,11 @@
   function renderResults(state, results) {
     var box = $('portalResultsList');
     var allowed = state && state.autorizado && permission(state, 'puede_ver_resultados');
+    var exportButton = $('portalResultsExport');
     if (!box) return;
     box.innerHTML = '';
     if (!allowed) {
+      if (exportButton) exportButton.disabled = true;
       setResultsStatus(state && state.autorizado
         ? 'Su perfil no tiene permiso para ver resultados.'
         : 'Inicie sesion para ver resultados.', true);
@@ -505,6 +716,7 @@
       return;
     }
     var list = results || portal.resultados || [];
+    if (exportButton) exportButton.disabled = !permission(state, 'puede_exportar_resultados') || !list.length;
     setResultsStatus('Ultimos ' + list.length + ' resultado(s) registrados.');
     if (!list.length) {
       box.textContent = 'No hay resultados registrados.';
@@ -548,6 +760,10 @@
   }
 
   function exportResultsCsv() {
+    if (!permission(portal.state || {}, 'puede_exportar_resultados')) {
+      setResultsStatus('Su perfil no tiene permiso para exportar resultados.', true);
+      return;
+    }
     var list = portal.resultados || [];
     if (!list.length) {
       setResultsStatus('No hay resultados cargados para exportar.', true);
@@ -586,15 +802,15 @@
         result.horaLocal
       ].map(csvCell).join(';'));
     });
-    var blob = new Blob([lines.join('\r\n') + '\r\n'], { type: 'text/csv;charset=utf-8' });
+    var blob = new Blob(['\ufeff' + lines.join('\r\n') + '\r\n'], { type: 'text/csv;charset=utf-8' });
     var link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'resultados-1077.csv';
+    link.download = 'resultados-1077-excel.csv';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     setTimeout(function () { URL.revokeObjectURL(link.href); }, 0);
-    setResultsStatus('CSV generado con ' + list.length + ' resultado(s).');
+    setResultsStatus('Archivo para Excel generado con ' + list.length + ' resultado(s).');
   }
 
   function loadResults() {
@@ -657,13 +873,50 @@
     if ($('portalStudentNotes')) $('portalStudentNotes').value = '';
   }
 
+  function setStudentMode(mode) {
+    portal.studentAction = mode || '';
+    var form = $('portalStudentForm');
+    var filters = $('portalStudentFilters');
+    var newButton = $('portalStudentActionNew');
+    var searchButton = $('portalStudentActionSearch');
+    setHidden(form, !(mode === 'alta' || mode === 'editar'));
+    setHidden(filters, mode !== 'buscar');
+    if (newButton) newButton.className = mode === 'alta' ? 'active' : '';
+    if (searchButton) searchButton.className = mode === 'buscar' ? 'secondary active' : 'secondary';
+  }
+
+  function readStudentFilters() {
+    portal.studentFilters = {
+      idAlumno: $('portalStudentFilterCode') ? clean($('portalStudentFilterCode').value).toLowerCase() : '',
+      apellido: $('portalStudentFilterLastName') ? clean($('portalStudentFilterLastName').value).toLowerCase() : '',
+      nombre: $('portalStudentFilterName') ? clean($('portalStudentFilterName').value).toLowerCase() : '',
+      grado: $('portalStudentFilterGrade') ? clean($('portalStudentFilterGrade').value) : '',
+      turno: $('portalStudentFilterShift') ? clean($('portalStudentFilterShift').value) : '',
+      division: $('portalStudentFilterDivision') ? clean($('portalStudentFilterDivision').value).toUpperCase() : ''
+    };
+    return portal.studentFilters;
+  }
+
+  function filteredStudents(list) {
+    var filters = portal.studentFilters || {};
+    return (list || []).filter(function (student) {
+      if (filters.idAlumno && clean(student.idAlumno).toLowerCase().indexOf(filters.idAlumno) < 0) return false;
+      if (filters.apellido && clean(student.apellido).toLowerCase().indexOf(filters.apellido) < 0) return false;
+      if (filters.nombre && clean(student.nombre).toLowerCase().indexOf(filters.nombre) < 0) return false;
+      if (filters.grado && String(student.grado || '') !== filters.grado) return false;
+      if (filters.turno && String(student.turno || '') !== filters.turno) return false;
+      if (filters.division && String(student.division || '').toUpperCase() !== filters.division) return false;
+      return true;
+    });
+  }
+
   function studentPayload() {
     return {
       id_alumno: $('portalStudentCode') ? clean($('portalStudentCode').value) : '',
       nombre: $('portalStudentName') ? clean($('portalStudentName').value) : '',
       apellido: $('portalStudentLastName') ? clean($('portalStudentLastName').value) : '',
       grado: $('portalStudentGrade') ? $('portalStudentGrade').value : '',
-      division: $('portalStudentDivision') ? clean($('portalStudentDivision').value) : '',
+      division: $('portalStudentDivision') ? clean($('portalStudentDivision').value).toUpperCase() : '',
       turno: $('portalStudentShift') ? $('portalStudentShift').value : '',
       activo: $('portalStudentActive') ? $('portalStudentActive').checked : true,
       observaciones: $('portalStudentNotes') ? clean($('portalStudentNotes').value) : ''
@@ -688,10 +941,18 @@
 
   function renderStudents(state, students) {
     var listBox = $('portalStudentsList');
+    var form = $('portalStudentForm');
     var allowed = state && state.autorizado && permission(state, 'puede_gestionar_alumnos');
+    var canAdd = state && state.autorizado && permission(state, 'puede_agregar_alumnos');
+    var canEdit = state && state.autorizado && permission(state, 'puede_editar_alumnos');
+    var canDeactivate = state && state.autorizado && permission(state, 'puede_desactivar_alumnos');
+    if ($('portalStudentActionNew')) $('portalStudentActionNew').disabled = !canAdd;
+    if ($('portalStudentActionSearch')) $('portalStudentActionSearch').disabled = !allowed;
+    if ($('portalStudentListar')) $('portalStudentListar').disabled = !allowed;
     if (!listBox) return;
     listBox.innerHTML = '';
-    setStudentFormEnabled(allowed);
+    if (form) setHidden(form, !(portal.studentAction === 'alta' || portal.studentAction === 'editar') || !(canAdd || canEdit));
+    setStudentFormEnabled(canAdd || canEdit);
     if (!allowed) {
       clearStudentForm();
       setStudentsStatus(state && state.autorizado
@@ -700,10 +961,12 @@
       listBox.textContent = state && state.autorizado ? 'Sin permiso de gestion de alumnos.' : 'Sin sesion autorizada.';
       return;
     }
-    var list = students || portal.alumnosApoyo || [];
-    setStudentsStatus('Puede cargar y editar alumnos de apoyo.');
+    var list = filteredStudents(students || portal.alumnosApoyo || []);
+    setStudentsStatus(portal.studentAction === 'buscar'
+      ? 'Listado de alumnos - Cantidad: ' + list.length
+      : 'Seleccione Altas para cargar o Buscar para consultar alumnos.');
     if (!list.length) {
-      listBox.textContent = 'No hay alumnos cargados.';
+      listBox.textContent = portal.studentAction === 'buscar' ? 'No hay alumnos para los filtros seleccionados.' : 'Sin listado cargado.';
       return;
     }
     list.forEach(function (student) {
@@ -715,6 +978,13 @@
       meta.textContent = 'Grado ' + (student.grado || '-') + ' | Division ' + (student.division || '-') + ' | Turno ' + (student.turno || '-') + ' | ' + (student.activo ? 'activo' : 'inactivo');
       item.appendChild(title);
       item.appendChild(meta);
+      var created = document.createElement('span');
+      created.className = 'portal-created-by';
+      created.textContent = 'Alta: ' +
+        (student.creadoPorEmail || 'sin dato') +
+        (student.creadoPorRol ? ' | ' + student.creadoPorRol : '') +
+        (student.creadoEn ? ' | ' + portalDate(student.creadoEn) : '');
+      item.appendChild(created);
       if (student.observaciones) {
         var notes = document.createElement('span');
         notes.textContent = student.observaciones;
@@ -722,22 +992,17 @@
       }
       var actions = document.createElement('div');
       actions.className = 'portal-actions';
-      var edit = document.createElement('button');
-      edit.type = 'button';
-      edit.className = 'secondary compact-button';
-      edit.textContent = 'Editar';
-      edit.onclick = function () {
-        fillStudentForm(student);
-      };
-      actions.appendChild(edit);
-      if (student.activo) {
-        var deactivate = document.createElement('button');
-        deactivate.type = 'button';
-        deactivate.className = 'secondary compact-button';
-        deactivate.textContent = 'Desactivar';
-        deactivate.onclick = function () {
+      if (canEdit) {
+        var edit = iconButton('edit', 'Editar alumno', 'portal-icon-button secondary', function () {
+          setStudentMode('editar');
+          fillStudentForm(student);
+        });
+        actions.appendChild(edit);
+      }
+      if (student.activo && canDeactivate) {
+        var deactivate = iconButton('deactivate', 'Desactivar alumno', 'portal-icon-button danger', function () {
           deactivateStudent(student);
-        };
+        });
         actions.appendChild(deactivate);
       }
       item.appendChild(actions);
@@ -766,6 +1031,7 @@
   function renderState(state) {
     portal.state = state || {};
     var config = state && state.configuracion || portal.config || {};
+    updatePortalFeatureVisibility(state);
     renderSession(state);
     renderIndex(state);
     renderClassSession(state);
@@ -773,14 +1039,13 @@
     renderAccessLog(state);
     renderResults(state, portal.resultados || []);
     renderStudents(state, portal.alumnosApoyo || []);
+    renderInterfaces(state);
     if (!state || state.ok === false) {
       setStatus((state && state.error) || 'Portal docente bloqueado por configuracion pendiente.', true);
       return;
     }
     if (state.autorizado) {
-      setStatus('Sesion autorizada. Puede administrar el indice de la escuela 1077.');
-      loadResults();
-      loadStudents();
+      setStatus('Sesion autorizada. Se muestran solo las funcionalidades habilitadas para su rol.');
     } else if (portal.accessToken) {
       setStatus('Sesion pendiente de autorizacion: verifique que el Gmail exista en Perfiles y roles.', true);
     } else if (config.supabase && config.supabase.loginGoogleListo) {
@@ -840,12 +1105,17 @@
 
   function toggleIndex() {
     var state = portal.state || {};
+    var admin = isAdminState(state);
     if (!state.autorizado) {
       setStatus('Debe iniciar sesion con una cuenta autorizada para cambiar el indice.', true);
       return;
     }
-    if (!permission(state, 'puede_habilitar_indice')) {
+    if (!admin && !permission(state, 'puede_habilitar_indice')) {
       setStatus('Su perfil no tiene permiso para cambiar el indice.', true);
+      return;
+    }
+    if (state.control && state.control.bloqueoAdminActivo === true) {
+      setStatus('La Habilitacion del Indice de Actividades esta bloqueada por el AIE.', true);
       return;
     }
     var enabled = !(state.control && state.control.habilitado === true);
@@ -906,7 +1176,8 @@
 
   function saveActivity(activity, available, visibleDesde, visibleHasta) {
     var state = portal.state || {};
-    if (!state.autorizado || !permission(state, 'puede_habilitar_actividades')) {
+    var requiredPermission = available ? 'puede_habilitar_actividades' : 'puede_bloquear_actividades';
+    if (!state.autorizado || !permission(state, requiredPermission)) {
       setStatus('Su perfil no tiene permiso para modificar actividades.', true);
       return;
     }
@@ -928,11 +1199,12 @@
   function saveStudent(event) {
     event.preventDefault();
     var state = portal.state || {};
-    if (!state.autorizado || !permission(state, 'puede_gestionar_alumnos')) {
+    var id = $('portalStudentId') ? $('portalStudentId').value : '';
+    var requiredPermission = id ? 'puede_editar_alumnos' : 'puede_agregar_alumnos';
+    if (!state.autorizado || !permission(state, requiredPermission)) {
       setStudentsStatus('Su perfil no tiene permiso para guardar alumnos.', true);
       return;
     }
-    var id = $('portalStudentId') ? $('portalStudentId').value : '';
     var method = id ? 'PATCH' : 'POST';
     var path = '/api/portal-docente/alumnos-apoyo' + (id ? '/' + encodeURIComponent(id) : '');
     setStatus('Guardando alumno');
@@ -943,6 +1215,7 @@
       }
       clearStudentForm();
       setStudentsStatus('Alumno guardado correctamente.');
+      setStudentMode('buscar');
       loadStudents();
       setStatus('Activo');
     }, true);
@@ -950,6 +1223,10 @@
 
   function deactivateStudent(student) {
     if (!student || !student.id) return;
+    if (!permission(portal.state || {}, 'puede_desactivar_alumnos')) {
+      setStudentsStatus('Su perfil no tiene permiso para desactivar alumnos.', true);
+      return;
+    }
     if (!window.confirm('Desactivar alumno ' + (student.idAlumno || '') + '?')) return;
     setStatus('Desactivando alumno');
     api('DELETE', '/api/portal-docente/alumnos-apoyo/' + encodeURIComponent(student.id), null, function (err) {
@@ -958,6 +1235,7 @@
         return;
       }
       setStudentsStatus('Alumno desactivado.');
+      setStudentMode('buscar');
       loadStudents();
       setStatus('Activo');
     }, true);
@@ -973,10 +1251,66 @@
     if ($('portalStudentForm')) $('portalStudentForm').onsubmit = saveStudent;
     if ($('portalResultsApply')) $('portalResultsApply').onclick = loadResults;
     if ($('portalResultsExport')) $('portalResultsExport').onclick = exportResultsCsv;
+    if ($('portalActivitiesSearch')) {
+      $('portalActivitiesSearch').onclick = function () {
+        readActivityFilters();
+        renderActivities(portal.state || {});
+      };
+    }
+    if ($('portalActivitiesClear')) {
+      $('portalActivitiesClear').onclick = function () {
+        clearActivityFilters();
+        renderActivities(portal.state || {});
+      };
+    }
+    if ($('portalStudentActionNew')) {
+      $('portalStudentActionNew').onclick = function () {
+        clearStudentForm();
+        setStudentMode('alta');
+        renderStudents(portal.state || {}, portal.alumnosApoyo || []);
+        setStudentsStatus('Alta de alumno.');
+      };
+    }
+    if ($('portalStudentActionSearch')) {
+      $('portalStudentActionSearch').onclick = function () {
+        setStudentMode('buscar');
+        readStudentFilters();
+        loadStudents();
+      };
+    }
+    if ($('portalStudentListar')) {
+      $('portalStudentListar').onclick = function () {
+        setStudentMode('buscar');
+        readStudentFilters();
+        loadStudents();
+      };
+    }
+    var studentFilterInputs = document.querySelectorAll('#portalStudentFilters input, #portalStudentFilters select');
+    for (var studentFilterIndex = 0; studentFilterIndex < studentFilterInputs.length; studentFilterIndex++) {
+      studentFilterInputs[studentFilterIndex].onkeydown = function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          setStudentMode('buscar');
+          readStudentFilters();
+          loadStudents();
+        }
+      };
+    }
+    var activityFilterInputs = document.querySelectorAll('#portalActivityFilters input, #portalActivityFilters select');
+    for (var activityFilterIndex = 0; activityFilterIndex < activityFilterInputs.length; activityFilterIndex++) {
+      activityFilterInputs[activityFilterIndex].onkeydown = function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          readActivityFilters();
+          renderActivities(portal.state || {});
+        }
+      };
+    }
     if ($('portalStudentCancel')) {
       $('portalStudentCancel').onclick = function () {
         clearStudentForm();
-        setStudentsStatus('Nuevo alumno.');
+        setStudentMode('alta');
+        setStudentsStatus('Alta de alumno.');
       };
     }
   }

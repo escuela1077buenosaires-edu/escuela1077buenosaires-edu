@@ -118,6 +118,7 @@
     var form = $('portalStudentForm');
     var status = $('portalStudentsStatus');
     if (!form || !status) return;
+    if (form.getAttribute('data-portal-managed') === 'true') return;
     var blocked = /no tiene permiso|sin sesion|inicie sesion/i.test(status.textContent || '');
     form.style.display = blocked ? 'none' : '';
   }

@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Portal docente 1077</title>
+  <title>Portal funcional del personal docente - Escuela 1077</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=admin-20260716-03">
 </head>
 <body>
   <header class="topbar">
     <div>
-      <h1>Portal docente 1077</h1>
-      <p>Habilitacion de indice, actividades y alumnos de apoyo</p>
+      <h1>Portal funcional del personal docente - Escuela 1077 "Provincia de Buenos Aires"</h1>
+      <p>Funcionalidades visibles segun rol y permisos asignados por el AIE</p>
     </div>
     <div class="topbar-actions">
-      <a class="topbar-link" href="lector-qr.html">Lector QR</a>
-      <a class="topbar-link" href="alumnos.html">Indice alumnos</a>
+      <a class="topbar-link hidden" id="portalTopQr" href="lector-qr.html">Lector QR</a>
+      <a class="topbar-link hidden" id="portalTopIndice" href="alumnos.html">Indice alumnos</a>
       <button type="button" id="teacherPortalRefresh" class="secondary">Actualizar</button>
     </div>
   </header>
@@ -24,25 +24,26 @@
     <section class="panel">
       <div class="panel-head">
         <div>
-          <h2>Portal docente 1077</h2>
+          <h2>Portal funcional del personal docente</h2>
           <p class="panel-subtitle">DRT, directora y supervisora deben iniciar sesion con Google y tener perfil activo.</p>
         </div>
       </div>
 
       <div id="teacherPortalStatus" class="admin-status">Cargando portal docente.</div>
+      <div id="portalPermissionSummary" class="portal-permission-summary hidden"></div>
 
       <div class="portal-grid">
-        <section class="portal-card">
+        <section class="portal-card portal-feature-block portal-session-block">
           <h3>Sesion</h3>
           <div id="portalSessionBox" class="portal-box">Sin sesion.</div>
           <div class="portal-actions">
-            <button type="button" id="portalLoginGoogle">Iniciar sesion con Google</button>
+            <button type="button" id="portalLoginGoogle" disabled>Iniciar sesion con Google</button>
             <button type="button" id="portalLogout" class="secondary">Cerrar sesion</button>
           </div>
         </section>
 
-        <section class="portal-card">
-          <h3>Indice para alumnos</h3>
+        <section class="portal-card portal-feature-block hidden" id="portalIndexCard" data-portal-any="puede_habilitar_indice">
+          <h3>Habilitacion del Indice de Actividades</h3>
           <div id="portalIndexState" class="portal-box">Sin datos.</div>
           <label>
             Mensaje
@@ -58,7 +59,7 @@
           </div>
         </section>
 
-        <section class="portal-card" id="portalClassSessionCard">
+        <section class="portal-card portal-feature-block" id="portalClassSessionCard">
           <h3>Sesion AIE</h3>
           <div id="portalClassSessionState" class="portal-box">Sin datos.</div>
           <label>
@@ -83,17 +84,60 @@
     </section>
 
     <section class="portal-grid portal-grid-bottom">
-      <section class="panel portal-panel">
+      <section class="panel portal-panel portal-feature-block hidden" id="portalActivitiesCard" data-portal-any="puede_visualizar_actividades puede_probar_actividades puede_habilitar_actividades puede_bloquear_actividades">
         <div class="panel-head">
           <div>
             <h2>Actividades</h2>
-            <p class="panel-subtitle">Solo se puede cambiar disponibilidad y fechas.</p>
+            <p class="panel-subtitle">Visualizacion, prueba y disponibilidad segun permisos asignados.</p>
           </div>
+        </div>
+        <div class="portal-feature-toolbar">
+          <button type="button" id="portalActivitiesSearch">Buscar</button>
+          <button type="button" id="portalActivitiesClear" class="secondary">Limpiar filtros</button>
+        </div>
+        <div id="portalActivityFilters" class="portal-filter-row" aria-label="Filtros de actividades">
+          <label>
+            Titulo
+            <input id="portalActivityFilterTitle" type="text" maxlength="120">
+          </label>
+          <label>
+            Area
+            <input id="portalActivityFilterArea" type="text" maxlength="80">
+          </label>
+          <label class="portal-filter-small">
+            Grado
+            <select id="portalActivityFilterGrade">
+              <option value="">Todos</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+            </select>
+          </label>
+          <label class="portal-filter-small">
+            Tipo
+            <select id="portalActivityFilterType">
+              <option value="">Todos</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+            </select>
+          </label>
+          <label class="portal-filter-small">
+            Disponible
+            <select id="portalActivityFilterAvailable">
+              <option value="">Todos</option>
+              <option value="true">SI</option>
+              <option value="false">NO</option>
+            </select>
+          </label>
         </div>
         <div id="portalActivities" class="portal-list">Sin datos.</div>
       </section>
 
-      <section class="panel portal-panel">
+      <section class="panel portal-panel portal-feature-block hidden" id="portalAccessCard" data-portal-admin-only="true">
         <div class="panel-head">
           <div>
             <h2>Accesos recientes</h2>
@@ -103,11 +147,11 @@
         <div id="portalAccessLog" class="portal-list">Sin datos.</div>
       </section>
 
-      <section class="panel portal-panel">
+      <section class="panel portal-panel portal-feature-block hidden" id="portalResultsCard" data-portal-any="puede_ver_resultados puede_exportar_resultados puede_ver_analiticas_generales puede_ver_analiticas_alumno">
         <div class="panel-head">
           <div>
-            <h2>Resultados recientes</h2>
-            <p class="panel-subtitle">Lectura protegida por permiso de resultados.</p>
+            <h2>Resultados y seguimiento</h2>
+            <p class="panel-subtitle">Consulta y exportacion segun permisos asignados.</p>
           </div>
         </div>
         <div class="portal-results-controls">
@@ -131,15 +175,68 @@
         <div id="portalResultsList" class="portal-list">Sin datos.</div>
       </section>
 
-      <section class="panel portal-panel">
+      <section class="panel portal-panel portal-feature-block hidden" id="portalStudentsCard" data-portal-any="puede_agregar_alumnos puede_editar_alumnos puede_desactivar_alumnos puede_eliminar_alumnos puede_gestionar_alumnos">
         <div class="panel-head">
           <div>
-            <h2>Alumnos apoyo</h2>
-            <p class="panel-subtitle">Gestion disponible para perfiles autorizados.</p>
+            <h2>Alumnos con trayectorias escolares debiles o en riesgo</h2>
+            <p class="panel-subtitle">Altas, busqueda y modificaciones segun permisos asignados.</p>
           </div>
         </div>
+        <div class="portal-feature-toolbar">
+          <button type="button" id="portalStudentActionNew">Altas</button>
+          <button type="button" id="portalStudentActionSearch" class="secondary">Buscar</button>
+        </div>
+        <div id="portalStudentFilters" class="portal-filter-row hidden" aria-label="Filtros de alumnos">
+          <label class="portal-filter-id">
+            ID alumno
+            <input id="portalStudentFilterCode" type="text" maxlength="40">
+          </label>
+          <label>
+            Apellido
+            <input id="portalStudentFilterLastName" type="text" maxlength="120">
+          </label>
+          <label>
+            Nombre
+            <input id="portalStudentFilterName" type="text" maxlength="120">
+          </label>
+          <label class="portal-filter-small">
+            Grado
+            <select id="portalStudentFilterGrade">
+              <option value="">Todos</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+            </select>
+          </label>
+          <label class="portal-filter-small">
+            Turno
+            <select id="portalStudentFilterShift">
+              <option value="">Todos</option>
+              <option value="manana">manana</option>
+              <option value="tarde">tarde</option>
+              <option value="vespertino">vespertino</option>
+            </select>
+          </label>
+          <label class="portal-filter-small">
+            Division
+            <select id="portalStudentFilterDivision">
+              <option value="">Todas</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+              <option value="E">E</option>
+              <option value="F">F</option>
+            </select>
+          </label>
+          <button type="button" id="portalStudentListar" class="secondary">Listar</button>
+        </div>
         <div id="portalStudentsStatus" class="portal-muted">Sin datos.</div>
-        <form id="portalStudentForm" class="portal-student-form">
+        <form id="portalStudentForm" class="portal-student-form hidden" data-portal-managed="true">
           <input type="hidden" id="portalStudentId">
           <label>
             ID alumno
@@ -202,13 +299,27 @@
         </form>
         <div id="portalStudentsList" class="portal-list">Sin datos.</div>
       </section>
+
+      <section class="panel portal-panel portal-feature-block hidden" id="portalInterfacesCard" data-portal-any="puede_usar_lector_qr puede_ver_indice_alumnos puede_ver_portal_funcional">
+        <div class="panel-head">
+          <div>
+            <h2>Interfaces disponibles</h2>
+            <p class="panel-subtitle">Accesos directos visibles segun permisos asignados.</p>
+          </div>
+        </div>
+        <div id="portalInterfacesList" class="portal-interface-grid">
+          <a id="portalLinkPortal" class="portal-interface-card" href="portal-docente.html">Portal Funcional</a>
+          <a id="portalLinkQr" class="portal-interface-card" href="lector-qr.html">Lector QR</a>
+          <a id="portalLinkIndice" class="portal-interface-card" href="alumnos.html">Indice alumnos</a>
+        </div>
+      </section>
     </section>
   </section>
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="portal-docente.js"></script>
-  <script src="portal-docente-fixes.js"></script>
+  <script src="portal-docente.js?v=admin-20260716-03"></script>
+  <script src="portal-docente-fixes.js?v=admin-20260716-03"></script>
   <script src="aie-login-redirect.js"></script>
 </body>
 </html>

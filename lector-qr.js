@@ -510,7 +510,7 @@
 
   function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('lector-qr-sw.js', { scope: './' }).catch(function () {});
+      navigator.serviceWorker.register('aie-hub-sw.js', { scope: './' }).catch(function () {});
     }
   }
 

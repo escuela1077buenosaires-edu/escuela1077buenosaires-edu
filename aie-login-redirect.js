@@ -47,6 +47,7 @@
   function clickWhenReady(target, tries) {
     var button = document.getElementById(target.buttonId);
     if (button && !button.disabled) {
+      cleanLoginParam();
       button.click();
       return;
     }
@@ -60,8 +61,10 @@
     if (!wantsLogin() || hasAuthHash()) return;
     var target = pageTarget();
     if (!target) return;
-    cleanLoginParam();
-    if (hasStoredToken(target.sessionKey)) return;
+    if (hasStoredToken(target.sessionKey)) {
+      cleanLoginParam();
+      return;
+    }
     clickWhenReady(target, 0);
   }
 

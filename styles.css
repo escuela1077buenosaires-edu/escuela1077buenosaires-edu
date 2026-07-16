@@ -384,6 +384,10 @@ body {
   background: #fbfcfd;
 }
 
+.setup-diagnostics.diagnostics-collapsed .diagnostic-item {
+  display: none;
+}
+
 .setup-diagnostics-error {
   border-color: #e0b9b9;
   background: #f7e5e5;
@@ -450,6 +454,46 @@ body {
   padding: 0 14px 14px;
 }
 
+.admin-domain-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 10px;
+  padding: 14px;
+}
+
+.admin-domain-card {
+  display: grid;
+  gap: 5px;
+  min-height: 96px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f8fafc;
+  color: var(--ink);
+  text-align: left;
+  box-shadow: 0 1px 2px rgba(20, 25, 30, 0.06);
+}
+
+.admin-domain-card:hover {
+  border-color: #9fcbd0;
+  background: #eef8f8;
+}
+
+.admin-domain-card.active {
+  border-color: #6aaeb5;
+  background: #e8f6f7;
+}
+
+.admin-domain-card strong {
+  font-size: 16px;
+}
+
+.admin-domain-card span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
 .admin-table-tab {
   min-height: 34px;
   padding: 7px 10px;
@@ -470,6 +514,981 @@ body {
   grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
   gap: 16px;
   margin-top: 16px;
+}
+
+.admin-grid.admin-student-mode {
+  grid-template-columns: 1fr;
+}
+
+.admin-grid.admin-profile-mode {
+  grid-template-columns: 1fr;
+}
+
+.admin-grid.admin-activity-mode {
+  grid-template-columns: 1fr;
+}
+
+.admin-grid.admin-access-mode {
+  grid-template-columns: 1fr;
+}
+
+.admin-grid.admin-system-mode {
+  grid-template-columns: 1fr;
+}
+
+.admin-grid.admin-student-mode #adminSupabaseNew {
+  display: none;
+}
+
+.admin-grid.admin-activity-mode #adminSupabaseNew,
+.admin-grid.admin-activity-mode #adminSupabasePrev,
+.admin-grid.admin-activity-mode #adminSupabaseNext,
+.admin-grid.admin-activity-mode #adminSupabaseExport,
+.admin-grid.admin-activity-mode .admin-search-control,
+.admin-grid.admin-activity-mode .admin-limit-control,
+.admin-grid.admin-activity-mode .admin-page-info {
+  display: none;
+}
+
+.admin-grid.admin-student-mode #adminSupabasePrev,
+.admin-grid.admin-student-mode #adminSupabaseNext,
+.admin-grid.admin-student-mode #adminSupabaseExport,
+.admin-grid.admin-student-mode .admin-page-info,
+.admin-grid.admin-student-mode .admin-limit-control {
+  display: none;
+}
+
+.admin-grid.admin-profile-mode #adminSupabasePrev,
+.admin-grid.admin-profile-mode #adminSupabaseNext,
+.admin-grid.admin-profile-mode .admin-page-info,
+.admin-grid.admin-profile-mode .admin-limit-control,
+.admin-grid.admin-profile-mode .admin-search-control {
+  display: none;
+}
+
+.admin-grid.admin-student-mode .admin-search-control {
+  display: none;
+}
+
+.admin-grid.admin-access-mode #adminSupabaseNew,
+.admin-grid.admin-access-mode #adminSupabasePrev,
+.admin-grid.admin-access-mode #adminSupabaseNext,
+.admin-grid.admin-access-mode .admin-search-control,
+.admin-grid.admin-access-mode .admin-limit-control,
+.admin-grid.admin-access-mode .admin-page-info {
+  display: none;
+}
+
+.admin-grid.admin-system-mode #adminSupabaseNew,
+.admin-grid.admin-system-mode #adminSupabasePrev,
+.admin-grid.admin-system-mode #adminSupabaseNext,
+.admin-grid.admin-system-mode .admin-search-control,
+.admin-grid.admin-system-mode .admin-limit-control,
+.admin-grid.admin-system-mode .admin-page-info {
+  display: none;
+}
+
+.admin-grid.admin-student-mode .admin-rows-panel .panel-head {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.admin-grid.admin-student-mode .admin-toolbar {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.admin-grid.admin-activity-mode .admin-rows-panel,
+.admin-grid.admin-activity-mode .admin-editor-panel {
+  grid-column: 1 / -1;
+}
+
+.admin-grid.admin-profile-mode .admin-rows-panel,
+.admin-grid.admin-profile-mode .admin-editor-panel {
+  grid-column: 1 / -1;
+}
+
+.admin-grid.admin-access-mode .admin-rows-panel,
+.admin-grid.admin-access-mode .admin-editor-panel {
+  grid-column: 1 / -1;
+}
+
+.admin-grid.admin-system-mode .admin-rows-panel,
+.admin-grid.admin-system-mode .admin-editor-panel {
+  grid-column: 1 / -1;
+}
+
+.admin-grid.admin-activity-mode .admin-rows-panel .panel-head {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.admin-grid.admin-profile-mode .admin-rows-panel .panel-head {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.admin-grid.admin-access-mode .admin-rows-panel .panel-head {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.admin-grid.admin-system-mode .admin-rows-panel .panel-head {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.admin-grid.admin-activity-mode .admin-toolbar {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.admin-grid.admin-profile-mode .admin-toolbar {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.admin-grid.admin-access-mode .admin-toolbar {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.admin-grid.admin-system-mode .admin-toolbar {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.admin-student-menu {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.admin-student-menu h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.admin-student-menu p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.admin-student-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.admin-student-actions button.active {
+  border-color: #6aaeb5;
+  background: #147a80;
+  color: #fff;
+}
+
+.admin-activity-menu {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.admin-activity-menu h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.admin-activity-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.admin-activity-actions button.active {
+  border-color: #6aaeb5;
+  background: #147a80;
+  color: #fff;
+}
+
+.admin-activity-execution-zone {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 3px solid #15803d;
+  border-radius: 10px;
+  background: #f0fdf4;
+}
+
+.admin-access-menu {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.admin-access-menu h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.admin-access-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.admin-access-actions button.active {
+  border-color: #6aaeb5;
+  background: #147a80;
+  color: #fff;
+}
+
+.admin-system-menu {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.admin-system-menu h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.admin-system-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.admin-system-actions button.active {
+  border-color: #6aaeb5;
+  background: #147a80;
+  color: #fff;
+}
+
+.admin-activity-control-panel {
+  grid-column: 1 / -1;
+  border: 3px solid #111827;
+}
+
+.admin-activity-control-panel .panel-head {
+  padding: 10px 14px;
+}
+
+.admin-activity-control-panel #adminIndexLockState {
+  min-height: 0;
+  padding: 8px 10px;
+}
+
+.admin-index-lock-badge {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.admin-index-lock-reason {
+  display: block;
+  margin-top: 8px;
+}
+
+.admin-index-lock-reason textarea {
+  margin-top: 4px;
+  min-height: 38px;
+  width: 100%;
+  resize: vertical;
+}
+
+.admin-student-filters {
+  flex: 0 0 100%;
+  display: grid;
+  width: 100%;
+  box-sizing: border-box;
+  grid-template-columns: 118px minmax(182px, 306px) minmax(262px, 448px) 90px 145px 125px 100px;
+  column-gap: 14px;
+  row-gap: 8px;
+  align-items: end;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.admin-toolbar .admin-student-filters label,
+.admin-toolbar .admin-student-filters label:first-child {
+  min-width: 0;
+}
+
+.admin-access-filters {
+  flex: 0 0 100%;
+  display: grid;
+  width: 100%;
+  box-sizing: border-box;
+  grid-template-columns: minmax(230px, 1.4fr) 150px minmax(190px, 1fr) 145px 145px 100px;
+  column-gap: 14px;
+  row-gap: 8px;
+  align-items: end;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.admin-toolbar .admin-access-filters label,
+.admin-toolbar .admin-access-filters label:first-child {
+  min-width: 0;
+}
+
+.admin-profile-filters {
+  flex: 0 0 100%;
+  display: grid;
+  width: 100%;
+  box-sizing: border-box;
+  grid-template-columns: minmax(240px, 1.5fr) minmax(230px, 1.4fr) 150px 110px 100px;
+  column-gap: 14px;
+  row-gap: 8px;
+  align-items: end;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.admin-toolbar .admin-profile-filters label,
+.admin-toolbar .admin-profile-filters label:first-child {
+  min-width: 0;
+}
+
+.admin-student-filters input,
+.admin-student-filters select,
+.admin-profile-filters input,
+.admin-profile-filters select {
+  box-sizing: border-box;
+  min-height: 34px;
+}
+
+.admin-student-filters button,
+.admin-profile-filters button {
+  min-height: 34px;
+  margin-left: 2px;
+}
+
+.admin-activity-filters {
+  flex: 0 0 100%;
+  display: grid;
+  width: 100%;
+  box-sizing: border-box;
+  grid-template-columns: minmax(180px, 2fr) minmax(150px, 1.3fr) 76px 76px 120px 120px minmax(180px, 1.7fr) 100px;
+  column-gap: 12px;
+  row-gap: 8px;
+  align-items: end;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.admin-toolbar .admin-activity-filters label,
+.admin-toolbar .admin-activity-filters label:first-child {
+  min-width: 0;
+}
+
+.admin-activity-filters input,
+.admin-activity-filters select {
+  box-sizing: border-box;
+  min-height: 34px;
+}
+
+.admin-activity-filters button {
+  min-height: 34px;
+}
+
+.admin-activity-filter-small {
+  min-width: 0;
+}
+
+.admin-activity-filter-small select {
+  min-width: 0;
+}
+
+.admin-activity-detail-filters {
+  display: grid;
+  grid-template-columns: 160px 160px 90px 100px;
+  gap: 12px;
+  align-items: end;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: #f8fafc;
+}
+
+.admin-activity-detail-filters label {
+  min-width: 0;
+}
+
+.admin-activity-detail-filters input,
+.admin-activity-detail-filters select,
+.admin-activity-detail-filters button {
+  box-sizing: border-box;
+  min-height: 34px;
+}
+
+.admin-activity-detail-filter-small {
+  min-width: 0;
+}
+
+.admin-activity-detail-panel .admin-cell-field-email {
+  max-width: 190px;
+}
+
+.admin-activity-detail-panel .admin-cell-field-rol,
+.admin-activity-detail-panel .admin-cell-field-evento,
+.admin-activity-detail-panel .admin-cell-field-grado,
+.admin-activity-detail-panel .admin-cell-field-actividad_grado,
+.admin-activity-detail-panel .admin-cell-field-actividad_tipo,
+.admin-activity-detail-panel .admin-cell-field-cantidad_ejercicios,
+.admin-activity-detail-panel .admin-cell-field-correctos,
+.admin-activity-detail-panel .admin-cell-field-incorrectos,
+.admin-activity-detail-panel .admin-cell-field-nota,
+.admin-activity-detail-panel .admin-cell-field-tiempo_minutos {
+  max-width: 90px;
+  white-space: nowrap;
+}
+
+.admin-activity-detail-panel .admin-cell-field-actividad_grado,
+.admin-activity-detail-panel .admin-cell-field-actividad_tipo,
+.admin-activity-detail-panel .admin-cell-field-cantidad_ejercicios,
+.admin-activity-detail-panel .admin-cell-field-correctos,
+.admin-activity-detail-panel .admin-cell-field-incorrectos,
+.admin-activity-detail-panel .admin-cell-field-nota,
+.admin-activity-detail-panel .admin-cell-field-tiempo_minutos {
+  min-width: 34px;
+  max-width: 62px;
+  text-align: center;
+}
+
+.admin-activity-detail-panel .admin-cell-field-correctos {
+  color: #087f5b;
+  font-weight: 800;
+}
+
+.admin-activity-detail-panel .admin-cell-field-incorrectos {
+  color: #b42318;
+  font-weight: 800;
+}
+
+.admin-activity-detail-panel .admin-cell-field-fecha_hora,
+.admin-activity-detail-panel .admin-cell-field-finalizado_en {
+  min-width: 138px;
+  max-width: 150px;
+  white-space: nowrap;
+}
+
+.admin-activity-detail-panel .admin-cell-field-detalle,
+.admin-activity-detail-panel .admin-cell-field-actividad_titulo,
+.admin-activity-detail-panel .admin-cell-field-actividad_archivo,
+.admin-activity-detail-panel .admin-cell-field-actividad_detalle {
+  max-width: none;
+  min-width: 260px;
+}
+
+.admin-activity-detail-panel .admin-cell-field-alumno_nombre {
+  min-width: 145px;
+  max-width: 220px;
+}
+
+.admin-student-filter-small {
+  min-width: 0;
+}
+
+.admin-student-filter-small select {
+  min-width: 0;
+}
+
+.admin-student-form {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-student-form .admin-field {
+  margin: 0;
+}
+
+.admin-student-form .admin-field-id_alumno {
+  grid-column: span 2;
+}
+
+.admin-student-form .admin-field-nombre,
+.admin-student-form .admin-field-apellido {
+  grid-column: span 3;
+}
+
+.admin-student-form .admin-field-grado,
+.admin-student-form .admin-field-division {
+  grid-column: span 1;
+}
+
+.admin-student-form .admin-field-turno {
+  grid-column: span 2;
+}
+
+.admin-student-form .admin-field-activo {
+  grid-column: span 1;
+  align-content: end;
+}
+
+.admin-student-form .admin-field-observaciones {
+  grid-column: 1 / -1;
+}
+
+.admin-student-form textarea {
+  min-height: 96px;
+}
+
+.admin-activity-form {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-activity-form .admin-field {
+  margin: 0;
+}
+
+.admin-activity-form .admin-field-titulo {
+  grid-column: span 5;
+}
+
+.admin-activity-form .admin-field-area {
+  grid-column: span 3;
+}
+
+.admin-activity-form .admin-field-grado,
+.admin-activity-form .admin-field-tipo_actividad,
+.admin-activity-form .admin-field-estado,
+.admin-activity-form .admin-field-disponible {
+  grid-column: span 1;
+}
+
+.admin-activity-form .admin-field-cantidad_ejercicios {
+  grid-column: span 2;
+}
+
+.admin-activity-form .admin-field-visible_desde,
+.admin-activity-form .admin-field-visible_hasta {
+  grid-column: span 3;
+}
+
+.admin-activity-form .admin-field-descripcion {
+  grid-column: 1 / -1;
+}
+
+.admin-activity-form textarea {
+  min-height: 90px;
+}
+
+.admin-profile-form {
+  display: grid;
+  gap: 14px;
+}
+
+.profile-base-block,
+.profile-permissions-wrap {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 2px solid #c8dedf;
+  border-radius: 10px;
+  background: #fbfdfd;
+}
+
+.profile-base-block h3,
+.profile-permissions-wrap h3,
+.profile-permission-block h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.profile-base-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.profile-base-grid .admin-field {
+  margin: 0;
+}
+
+.profile-base-grid .admin-field-nombre {
+  grid-column: span 4;
+}
+
+.profile-base-grid .admin-field-email {
+  grid-column: span 4;
+}
+
+.profile-base-grid .admin-field-rol {
+  grid-column: span 2;
+}
+
+.profile-base-grid .admin-field-activo {
+  grid-column: span 2;
+  align-content: end;
+}
+
+.profile-base-grid .admin-field-horarios_habilitados {
+  grid-column: 1 / -1;
+}
+
+.profile-base-grid textarea {
+  min-height: 78px;
+}
+
+.profile-schedule-block {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.profile-schedule-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.profile-schedule-head h3 {
+  margin: 0;
+}
+
+.profile-schedule-head span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.profile-schedule-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.profile-schedule-editor {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) 130px 130px auto auto;
+  gap: 10px;
+  align-items: end;
+  padding: 10px;
+  border: 1px solid #c8dedf;
+  border-radius: 8px;
+  background: #f0f8f8;
+}
+
+.profile-schedule-editor.hidden {
+  display: none;
+}
+
+.profile-schedule-table-wrap {
+  max-height: 190px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.profile-schedule-table th,
+.profile-schedule-table td {
+  padding: 7px 9px;
+}
+
+.profile-schedule-table tbody tr {
+  cursor: pointer;
+}
+
+.profile-schedule-selected {
+  background: #e8f6f7;
+}
+
+.profile-permission-hint,
+.profile-permission-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.profile-permission-block {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.profile-permission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.profile-permission-item {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-height: 76px;
+  padding: 8px 10px;
+  border: 1px solid #d5dee4;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: var(--ink);
+}
+
+.profile-permission-item select {
+  width: 100%;
+  min-height: 34px;
+}
+
+.profile-permission-item small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.profile-permission-disabled {
+  background: #f3f5f6;
+  color: var(--muted);
+}
+
+.admin-grid.admin-profile-mode .admin-cell-field-nombre {
+  min-width: 160px;
+  max-width: 210px;
+}
+
+.admin-grid.admin-profile-mode .admin-cell-field-email {
+  min-width: 190px;
+  max-width: 240px;
+}
+
+.admin-grid.admin-profile-mode .admin-cell-field-rol {
+  min-width: 95px;
+}
+
+.admin-grid.admin-profile-mode .admin-cell-field-activo {
+  min-width: 70px;
+  white-space: nowrap;
+}
+
+.admin-grid.admin-profile-mode .admin-cell-field-horario_dia {
+  min-width: 95px;
+  white-space: nowrap;
+}
+
+.admin-grid.admin-profile-mode .admin-cell-field-horario_desde,
+.admin-grid.admin-profile-mode .admin-cell-field-horario_hasta {
+  min-width: 82px;
+  white-space: nowrap;
+}
+
+.admin-student-detail-panel {
+  grid-column: 1 / -1;
+}
+
+.admin-activity-detail-panel {
+  grid-column: 1 / -1;
+}
+
+.admin-student-detail-panel .table-wrap {
+  max-height: 320px;
+}
+
+.admin-performance-date {
+  min-width: 135px;
+  max-width: 145px;
+  white-space: nowrap;
+}
+
+.admin-performance-student {
+  min-width: 150px;
+  max-width: 220px;
+}
+
+.admin-performance-activity {
+  min-width: 280px;
+  max-width: none;
+}
+
+.admin-performance-month {
+  min-width: 48px;
+  max-width: 64px;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 800;
+}
+
+.admin-performance-month.empty {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.admin-performance-month.good {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.admin-performance-month.mid {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.admin-performance-month.low {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.admin-performance-summary {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-performance-summary h3 {
+  margin: 0 16px;
+  font-size: 18px;
+}
+
+.admin-performance-summary > .panel-subtitle {
+  margin-left: 16px;
+  margin-right: 16px;
+}
+
+.admin-performance-summary .table-wrap {
+  max-height: 260px;
+}
+
+.admin-performance-summary-activity {
+  min-width: 220px;
+  max-width: 320px;
+}
+
+.admin-performance-summary-small {
+  min-width: 72px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.admin-performance-summary-students {
+  min-width: 118px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.admin-performance-summary-total {
+  background: #eef7f7;
+  font-weight: 800;
+}
+
+.admin-activity-detail-panel .table-wrap {
+  max-height: 360px;
+}
+
+@media (max-width: 1100px) {
+  .admin-student-filters,
+  .admin-activity-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-student-form .admin-field-id_alumno,
+  .admin-student-form .admin-field-nombre,
+  .admin-student-form .admin-field-apellido,
+  .admin-student-form .admin-field-grado,
+  .admin-student-form .admin-field-division,
+  .admin-student-form .admin-field-turno,
+  .admin-student-form .admin-field-activo {
+    grid-column: span 6;
+  }
+
+  .admin-activity-form .admin-field-titulo,
+  .admin-activity-form .admin-field-area,
+  .admin-activity-form .admin-field-grado,
+  .admin-activity-form .admin-field-tipo_actividad,
+  .admin-activity-form .admin-field-estado,
+  .admin-activity-form .admin-field-disponible,
+  .admin-activity-form .admin-field-cantidad_ejercicios,
+  .admin-activity-form .admin-field-visible_desde,
+  .admin-activity-form .admin-field-visible_hasta {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-student-menu,
+  .admin-activity-menu {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-student-actions,
+  .admin-activity-actions {
+    justify-content: flex-start;
+  }
+
+  .admin-student-filters,
+  .admin-activity-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-student-form .admin-field-id_alumno,
+  .admin-student-form .admin-field-nombre,
+  .admin-student-form .admin-field-apellido,
+  .admin-student-form .admin-field-grado,
+  .admin-student-form .admin-field-division,
+  .admin-student-form .admin-field-turno,
+  .admin-student-form .admin-field-activo {
+    grid-column: 1 / -1;
+  }
+
+  .admin-activity-form .admin-field-titulo,
+  .admin-activity-form .admin-field-area,
+  .admin-activity-form .admin-field-grado,
+  .admin-activity-form .admin-field-tipo_actividad,
+  .admin-activity-form .admin-field-estado,
+  .admin-activity-form .admin-field-disponible,
+  .admin-activity-form .admin-field-cantidad_ejercicios,
+  .admin-activity-form .admin-field-visible_desde,
+  .admin-activity-form .admin-field-visible_hasta {
+    grid-column: 1 / -1;
+  }
 }
 
 .admin-rows-panel,
@@ -514,6 +1533,19 @@ body {
   table-layout: auto;
 }
 
+.admin-grid.admin-access-mode .admin-cell-field-email {
+  min-width: 260px;
+}
+
+.admin-grid.admin-access-mode .admin-cell-field-fecha_resumen {
+  width: 190px;
+  white-space: nowrap;
+}
+
+.admin-grid.admin-access-mode .admin-cell-field-detalle {
+  min-width: 360px;
+}
+
 .portal-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -524,6 +1556,20 @@ body {
 .portal-grid-bottom {
   padding: 0;
   margin-top: 16px;
+}
+
+.portal-feature-block {
+  grid-column: 1 / -1;
+}
+
+.portal-permission-summary {
+  margin: 12px 14px 0;
+  padding: 10px 12px;
+  border: 2px solid #0f766e;
+  border-radius: 10px;
+  background: #ecfeff;
+  color: #0f4f55;
+  font-weight: 800;
 }
 
 .portal-card,
@@ -562,6 +1608,62 @@ body {
   flex-wrap: wrap;
 }
 
+.portal-feature-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 12px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: #f8fafc;
+}
+
+.portal-feature-toolbar button.active,
+.portal-feature-toolbar button.secondary.active {
+  border-color: #6aaeb5;
+  background: #147a80;
+  color: #fff;
+}
+
+.portal-filter-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.4fr) minmax(160px, 1.2fr) 90px 90px 120px auto;
+  gap: 10px;
+  align-items: end;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  background: #fbfcfd;
+}
+
+.portal-filter-row label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.portal-filter-row input,
+.portal-filter-row select {
+  width: 100%;
+  min-height: 34px;
+  box-sizing: border-box;
+}
+
+.portal-filter-row button {
+  min-height: 34px;
+}
+
+.portal-filter-small {
+  min-width: 0;
+}
+
+.portal-filter-id {
+  max-width: 150px;
+}
+
 .portal-list {
   display: grid;
   gap: 8px;
@@ -583,6 +1685,29 @@ body {
 .portal-session-profile span {
   color: var(--muted);
   font-size: 13px;
+}
+
+.portal-row-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.portal-icon-button {
+  width: 38px;
+  min-width: 38px;
+  height: 34px;
+  padding: 6px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.portal-icon-button.danger {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
 }
 
 .portal-activity-controls {
@@ -648,6 +1773,24 @@ body {
   gap: 8px;
   padding: 12px;
   border-bottom: 1px solid var(--line);
+}
+
+.portal-interface-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  padding: 14px;
+}
+
+.portal-interface-card {
+  display: block;
+  padding: 16px;
+  border: 2px solid #bae6fd;
+  border-radius: 12px;
+  background: #f0f9ff;
+  color: #075985;
+  font-weight: 900;
+  text-decoration: none;
 }
 
 .portal-check-row {
@@ -902,6 +2045,11 @@ body {
   overflow-wrap: anywhere;
 }
 
+.publication-state.admin-index-lock-badge {
+  font-size: 17px;
+  font-weight: 800;
+}
+
 .publication-state-publicada {
   background: #e5f3e9;
   color: var(--ok);
@@ -929,6 +2077,66 @@ body {
   min-height: 32px;
   padding: 6px 8px;
   font-size: 12px;
+}
+
+.admin-row-actions {
+  width: 92px;
+  white-space: nowrap;
+}
+
+.admin-row-action {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  min-height: 34px;
+  margin-right: 6px;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #eef4f5;
+  color: #0f6970;
+}
+
+.admin-row-action:hover {
+  background: #dfeff1;
+  color: #084d52;
+}
+
+.admin-row-action-remove {
+  background: #f7e9e9;
+  color: #8b2f2f;
+}
+
+.admin-row-action-remove:hover,
+.admin-row-action-hard-delete:hover {
+  background: #efd4d4;
+  color: #6f1f1f;
+}
+
+.admin-row-action-hard-delete {
+  border-color: #8f1d14;
+  background: #b42318;
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(180, 35, 24, 0.18);
+}
+
+.admin-row-action-disabled,
+.admin-row-action-disabled:hover {
+  border-color: #d2dadd;
+  background: #eef2f4;
+  color: #8a96a3;
+  box-shadow: none;
+  opacity: 0.65;
+}
+
+.admin-row-action-icon {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .publisher-history-list {
