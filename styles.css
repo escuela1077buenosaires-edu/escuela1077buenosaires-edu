@@ -1664,10 +1664,19 @@ body {
   max-width: 150px;
 }
 
+#portalActivityFilters {
+  grid-template-columns: minmax(220px, 1.6fr) minmax(180px, 1fr) 80px 80px 110px;
+}
+
+#portalStudentFilters {
+  grid-template-columns: 120px minmax(150px, 1fr) minmax(150px, 1fr) 78px 120px 105px auto;
+}
+
 .portal-list {
   display: grid;
   gap: 8px;
   padding: 14px;
+  overflow-x: auto;
 }
 
 .portal-list-item {
@@ -1744,6 +1753,99 @@ body {
   grid-column: 1 / -1;
 }
 
+.portal-table {
+  display: grid;
+  width: 100%;
+  min-width: 980px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.portal-table-row {
+  display: contents;
+}
+
+.portal-table-header,
+.portal-table-row > div {
+  min-width: 0;
+  padding: 8px 9px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+
+.portal-table-header {
+  background: #f1f5f7;
+  color: #54626d;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.portal-table-row > div {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  font-size: 13px;
+}
+
+.portal-table-row:nth-child(even) > div {
+  background: #fbfcfd;
+}
+
+.portal-table select,
+.portal-table input[type="datetime-local"] {
+  width: 100%;
+  min-height: 32px;
+  font-size: 13px;
+}
+
+.portal-activity-table {
+  grid-template-columns: minmax(230px, 2fr) 155px 58px 105px 95px 155px 155px minmax(180px, 1.2fr) 100px;
+  min-width: 1240px;
+}
+
+.portal-result-table {
+  grid-template-columns: 145px 110px minmax(230px, 2fr) 140px 42px 42px 60px 48px 48px 60px 55px;
+  min-width: 1080px;
+}
+
+.portal-student-table {
+  grid-template-columns: 115px 150px 150px 42px 55px 95px 65px minmax(240px, 1.4fr) 88px;
+  min-width: 1000px;
+}
+
+.portal-cell-title,
+.portal-cell-file,
+.portal-cell-created {
+  align-items: flex-start !important;
+}
+
+.portal-cell-compact,
+.portal-cell-ok,
+.portal-cell-bad {
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.portal-cell-ok {
+  color: #15803d;
+  font-weight: 800;
+}
+
+.portal-cell-bad {
+  color: #b91c1c;
+  font-weight: 800;
+}
+
+.portal-cell-date,
+.portal-cell-student {
+  white-space: nowrap;
+}
+
 .portal-student-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1768,11 +1870,25 @@ body {
 
 .portal-results-controls {
   display: grid;
-  grid-template-columns: minmax(160px, 1fr) 110px auto auto;
+  grid-template-columns: minmax(120px, 1fr) minmax(160px, 1.4fr) 155px 80px 80px 130px 130px 80px auto auto;
   align-items: end;
   gap: 8px;
   padding: 12px;
   border-bottom: 1px solid var(--line);
+}
+
+.portal-results-controls label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.portal-results-controls input,
+.portal-results-controls select {
+  width: 100%;
+  min-height: 34px;
 }
 
 .portal-interface-grid {

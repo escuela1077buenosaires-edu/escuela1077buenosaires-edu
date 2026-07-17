@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Portal funcional del personal docente - Escuela 1077</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css?v=admin-20260716-04">
+  <link rel="stylesheet" href="styles.css?v=admin-20260717-01">
 </head>
 <body>
   <header class="topbar">
@@ -102,7 +102,16 @@
           </label>
           <label>
             Area
-            <input id="portalActivityFilterArea" type="text" maxlength="80">
+            <select id="portalActivityFilterArea">
+              <option value="">Todas</option>
+              <option value="Lengua">Lengua</option>
+              <option value="Matematica">Matematica</option>
+              <option value="Ciencias Naturales">Ciencias Naturales</option>
+              <option value="Ciencias Sociales">Ciencias Sociales</option>
+              <option value="Formacion Etica y Ciudadana">Formacion Etica y Ciudadana</option>
+              <option value="Tecnologia">Tecnologia</option>
+              <option value="Otra">Otra</option>
+            </select>
           </label>
           <label class="portal-filter-small">
             Grado
@@ -157,10 +166,56 @@
         <div class="portal-results-controls">
           <label>
             ID alumno
-            <input id="portalResultsStudentFilter" type="text" maxlength="40" placeholder="Opcional">
+            <input id="portalResultsStudentFilter" type="text" maxlength="40">
           </label>
           <label>
-            Cantidad
+            Actividad
+            <input id="portalResultsActivityFilter" type="text" maxlength="120">
+          </label>
+          <label class="portal-filter-small">
+            Area
+            <select id="portalResultsAreaFilter">
+              <option value="">Todas</option>
+              <option value="Lengua">Lengua</option>
+              <option value="Matematica">Matematica</option>
+              <option value="Ciencias Naturales">Ciencias Naturales</option>
+              <option value="Ciencias Sociales">Ciencias Sociales</option>
+              <option value="Formacion Etica y Ciudadana">Formacion Etica y Ciudadana</option>
+              <option value="Tecnologia">Tecnologia</option>
+              <option value="Otra">Otra</option>
+            </select>
+          </label>
+          <label class="portal-filter-small">
+            Grado
+            <select id="portalResultsGradeFilter">
+              <option value="">Todos</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+            </select>
+          </label>
+          <label class="portal-filter-small">
+            Tipo
+            <select id="portalResultsTypeFilter">
+              <option value="">Todos</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+            </select>
+          </label>
+          <label class="portal-filter-date">
+            Desde
+            <input id="portalResultsFromFilter" type="date">
+          </label>
+          <label class="portal-filter-date">
+            Hasta
+            <input id="portalResultsToFilter" type="date">
+          </label>
+          <label class="portal-filter-small">
+            Cant.
             <select id="portalResultsLimit">
               <option value="25">25</option>
               <option value="50" selected>50</option>
@@ -178,7 +233,7 @@
       <section class="panel portal-panel portal-feature-block hidden" id="portalStudentsCard" data-portal-any="puede_agregar_alumnos puede_editar_alumnos puede_desactivar_alumnos puede_eliminar_alumnos puede_gestionar_alumnos">
         <div class="panel-head">
           <div>
-            <h2>Alumnos con trayectorias escolares debiles o en riesgo</h2>
+            <h2>Listado de Alumnos con Trayectorias Escolares debiles o en Riesgo</h2>
             <p class="panel-subtitle">Altas, busqueda y modificaciones segun permisos asignados.</p>
           </div>
         </div>
@@ -196,7 +251,7 @@
             <input id="portalStudentFilterLastName" type="text" maxlength="120">
           </label>
           <label>
-            Nombre
+            Nombres
             <input id="portalStudentFilterName" type="text" maxlength="120">
           </label>
           <label class="portal-filter-small">
@@ -318,8 +373,8 @@
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="portal-docente.js?v=admin-20260716-04"></script>
-  <script src="portal-docente-fixes.js?v=admin-20260716-04"></script>
+  <script src="portal-docente.js?v=admin-20260717-01"></script>
+  <script src="portal-docente-fixes.js?v=admin-20260717-01"></script>
   <script src="aie-login-redirect.js"></script>
 </body>
 </html>

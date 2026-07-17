@@ -258,14 +258,6 @@
     updateExportButton();
   }
 
-  document.addEventListener('click', function (event) {
-    if (event.target && event.target.id === 'portalResultsExport') {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      exportResultsFromDom();
-    }
-  }, true);
-
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', applyFixes);
   } else {

@@ -7,6 +7,16 @@
     accessToken: '',
     alumnosApoyo: [],
     resultados: [],
+    resultFilters: {
+      alumno: '',
+      actividad: '',
+      area: '',
+      grado: '',
+      tipo: '',
+      desde: '',
+      hasta: '',
+      limit: '50'
+    },
     studentAction: '',
     studentFilters: {
       idAlumno: '',
@@ -249,7 +259,11 @@
     if (!value) return '';
     var date = new Date(value);
     if (Number.isNaN(date.getTime())) return String(value);
-    return date.toLocaleString();
+    return padDatePart(date.getDate()) + '/' +
+      padDatePart(date.getMonth() + 1) + '/' +
+      date.getFullYear() + ' - ' +
+      padDatePart(date.getHours()) + ':' +
+      padDatePart(date.getMinutes());
   }
 
   function padDatePart(value) {
@@ -265,6 +279,47 @@
       padDatePart(date.getDate()) + 'T' +
       padDatePart(date.getHours()) + ':' +
       padDatePart(date.getMinutes());
+  }
+
+  function valueOrDash(value) {
+    var text = clean(value);
+    return text || '-';
+  }
+
+  function fileNameFromPath(value) {
+    var text = clean(value).replace(/\\/g, '/');
+    if (!text) return '';
+    var parts = text.split('/').filter(Boolean);
+    return parts.length ? parts[parts.length - 1] : text;
+  }
+
+  function activityFileName(activity) {
+    return clean(activity && (activity.archivo || activity.archivoNombre || activity.archivo_nombre)) ||
+      fileNameFromPath(activity && activity.storagePath) ||
+      fileNameFromPath(activity && activity.storage_path);
+  }
+
+  function resultDateText(result) {
+    var dateText = clean(result && result.fechaLocal);
+    var timeText = clean(result && result.horaLocal).slice(0, 5);
+    if (dateText) {
+      var parts = dateText.split('-');
+      if (parts.length === 3) dateText = parts[2] + '/' + parts[1] + '/' + parts[0];
+    } else if (result && result.registradoEn) {
+      return portalDate(result.registradoEn);
+    }
+    return [dateText, timeText].filter(Boolean).join(' - ');
+  }
+
+  function cell(className, text) {
+    var div = document.createElement('div');
+    div.className = className || '';
+    div.textContent = text == null ? '' : String(text);
+    return div;
+  }
+
+  function headerCell(text) {
+    return cell('portal-table-header', text);
   }
 
   function permission(state, key) {
@@ -347,18 +402,7 @@
       box.className = 'portal-permission-summary';
       return;
     }
-    var groups = [
-      ['Alumnos', ['puede_agregar_alumnos', 'puede_editar_alumnos', 'puede_desactivar_alumnos', 'puede_eliminar_alumnos', 'puede_gestionar_alumnos']],
-      ['Actividades', ['puede_visualizar_actividades', 'puede_probar_actividades', 'puede_habilitar_actividades', 'puede_bloquear_actividades', 'puede_habilitar_indice']],
-      ['Resultados', ['puede_ver_resultados', 'puede_exportar_resultados', 'puede_ver_analiticas_generales', 'puede_ver_analiticas_alumno']],
-      ['Interfaces', ['puede_usar_lector_qr', 'puede_ver_indice_alumnos', 'puede_ver_portal_funcional']]
-    ];
-    var enabled = groups.filter(function (group) {
-      return isAdminState(state) || permissionAny(state, group[1]);
-    }).map(function (group) {
-      return group[0];
-    });
-    box.textContent = (state.perfil.rol === 'drt' ? 'Panel DRT' : 'Panel por permisos') + ': ' + (enabled.join(' | ') || 'sin funcionalidades habilitadas');
+    box.textContent = 'Los permisos para acceder a las diversas funcionalidades del sistema y ejecutarlas han sido establecidos acorde al rol. En caso de necesitar ampliacion o restriccion de permisos, comunicarse con el AIE: Profe. Bruno.';
     box.className = 'portal-permission-summary';
   }
 
@@ -411,9 +455,8 @@
       profile.appendChild(detail);
       box.appendChild(profile);
       var permissions = document.createElement('span');
-      permissions.textContent = 'Permisos: ' + Object.keys(state.perfil.permisos || {}).filter(function (key) {
-        return state.perfil.permisos[key] === true;
-      }).join(', ');
+      permissions.className = 'portal-permission-note';
+      permissions.textContent = 'Los permisos para acceder a las diversas funcionalidades del sistema y ejecutarlas han sido establecidos acorde al rol. En caso de necesitar ampliacion o restriccion de permisos, comunicarse con el AIE: Profe. Bruno.';
       box.appendChild(permissions);
       return;
     }
@@ -518,42 +561,61 @@
     close.disabled = !allowed || !active;
   }
 
-  function activityControls(activity) {
-    var controls = document.createElement('div');
-    controls.className = 'portal-activity-controls';
-    var availableLabel = document.createElement('label');
-    var available = document.createElement('input');
-    available.type = 'checkbox';
-    available.checked = activity.disponible === true;
-    availableLabel.appendChild(available);
-    availableLabel.appendChild(document.createTextNode(' Disponible para alumnos'));
-    controls.appendChild(availableLabel);
+  function activityTableRow(state, activity) {
+    var row = document.createElement('div');
+    row.className = 'portal-table-row portal-activity-row';
+    var canModify = state && state.autorizado && permissionAny(state, ['puede_habilitar_actividades', 'puede_bloquear_actividades']);
 
-    var fromLabel = document.createElement('label');
-    fromLabel.textContent = 'Visible desde';
+    var available = document.createElement('select');
+    available.value = activity.disponible === true ? 'true' : 'false';
+    available.disabled = !canModify;
+    var yes = document.createElement('option');
+    yes.value = 'true';
+    yes.textContent = 'SI';
+    var no = document.createElement('option');
+    no.value = 'false';
+    no.textContent = 'NO';
+    available.appendChild(yes);
+    available.appendChild(no);
+
     var from = document.createElement('input');
     from.type = 'datetime-local';
     from.value = dateInputValue(activity.visibleDesde);
-    fromLabel.appendChild(from);
-    controls.appendChild(fromLabel);
+    from.disabled = !canModify;
 
-    var untilLabel = document.createElement('label');
-    untilLabel.textContent = 'Visible hasta';
     var until = document.createElement('input');
     until.type = 'datetime-local';
     until.value = dateInputValue(activity.visibleHasta);
-    untilLabel.appendChild(until);
-    controls.appendChild(untilLabel);
+    until.disabled = !canModify;
 
     var save = document.createElement('button');
     save.type = 'button';
     save.className = 'secondary compact-button';
-    save.textContent = 'Guardar disponibilidad';
+    save.textContent = 'Guardar';
+    save.disabled = !canModify;
     save.onclick = function () {
-      saveActivity(activity, available.checked, from.value, until.value);
+      saveActivity(activity, available.value === 'true', from.value, until.value);
     };
-    controls.appendChild(save);
-    return controls;
+
+    row.appendChild(cell('portal-cell-title', valueOrDash(activity.titulo || activity.codigo || activity.id)));
+    row.appendChild(cell('', valueOrDash(activity.area)));
+    row.appendChild(cell('portal-cell-compact', valueOrDash(activity.tipo)));
+    row.appendChild(cell('', valueOrDash(activity.estado)));
+    var availableCell = document.createElement('div');
+    availableCell.appendChild(available);
+    row.appendChild(availableCell);
+    var fromCell = document.createElement('div');
+    fromCell.appendChild(from);
+    row.appendChild(fromCell);
+    var untilCell = document.createElement('div');
+    untilCell.appendChild(until);
+    row.appendChild(untilCell);
+    row.appendChild(cell('portal-cell-file', valueOrDash(activityFileName(activity))));
+    var actions = document.createElement('div');
+    actions.className = 'portal-row-actions';
+    actions.appendChild(save);
+    row.appendChild(actions);
+    return row;
   }
 
   function readActivityFilters() {
@@ -580,7 +642,7 @@
     var filters = portal.activityFilters || {};
     return (list || []).filter(function (activity) {
       if (filters.titulo && clean(activity.titulo).toLowerCase().indexOf(filters.titulo) < 0) return false;
-      if (filters.area && clean(activity.area).toLowerCase().indexOf(filters.area) < 0) return false;
+      if (filters.area && clean(activity.area).toLowerCase() !== filters.area) return false;
       if (filters.grado && String(activity.grado || '') !== filters.grado) return false;
       if (filters.tipo && String(activity.tipo || '').toUpperCase() !== filters.tipo.toUpperCase()) return false;
       if (filters.disponible === 'true' && activity.disponible !== true) return false;
@@ -610,35 +672,15 @@
         : 'Indice cerrado o sin sesion autorizada. No se listan actividades para alumnos.';
       return;
     }
-    list.forEach(function (activity) {
-      var item = document.createElement('div');
-      item.className = 'portal-list-item';
-      var title = document.createElement('strong');
-      title.textContent = activity.titulo || activity.codigo || activity.id;
-      var meta = document.createElement('span');
-      meta.textContent = 'Grado ' + activity.grado + ' | ' + activity.area + ' | Tipo ' + activity.tipo + ' | Estado ' + activity.estado;
-      var availability = document.createElement('span');
-      availability.textContent = 'Disponible: ' + (activity.disponible ? 'si' : 'no') +
-        ' | Desde: ' + (portalDate(activity.visibleDesde) || 'sin fecha') +
-        ' | Hasta: ' + (portalDate(activity.visibleHasta) || 'sin fecha');
-      item.appendChild(title);
-      item.appendChild(activityBadge(activity));
-      item.appendChild(meta);
-      item.appendChild(availability);
-      var actions = document.createElement('div');
-      actions.className = 'portal-row-actions';
-      var url = activityPublicUrl(activity);
-      if (url && state && state.autorizado && permission(state, 'puede_probar_actividades')) {
-        actions.appendChild(iconButton('open', 'Probar actividad', 'portal-icon-button secondary', function () {
-          window.open(url, '_blank', 'noopener');
-        }));
-      }
-      if (state && state.autorizado && permissionAny(state, ['puede_habilitar_actividades', 'puede_bloquear_actividades'])) {
-        item.appendChild(activityControls(activity));
-      }
-      if (actions.childNodes.length) item.appendChild(actions);
-      box.appendChild(item);
+    var table = document.createElement('div');
+    table.className = 'portal-table portal-activity-table';
+    ['Titulo', 'Area', 'Tipo', 'Estado', 'Disponible', 'Visible desde', 'Visible hasta', 'Archivo', 'Acciones'].forEach(function (title) {
+      table.appendChild(headerCell(title));
     });
+    list.forEach(function (activity) {
+      table.appendChild(activityTableRow(state, activity));
+    });
+    box.appendChild(table);
   }
 
   function renderAccessLog(state) {
@@ -701,6 +743,57 @@
     return parts.join(' | ');
   }
 
+  function readResultFilters() {
+    portal.resultFilters = {
+      alumno: $('portalResultsStudentFilter') ? clean($('portalResultsStudentFilter').value) : '',
+      actividad: $('portalResultsActivityFilter') ? clean($('portalResultsActivityFilter').value).toLowerCase() : '',
+      area: $('portalResultsAreaFilter') ? clean($('portalResultsAreaFilter').value).toLowerCase() : '',
+      grado: $('portalResultsGradeFilter') ? clean($('portalResultsGradeFilter').value) : '',
+      tipo: $('portalResultsTypeFilter') ? clean($('portalResultsTypeFilter').value).toUpperCase() : '',
+      desde: $('portalResultsFromFilter') ? clean($('portalResultsFromFilter').value) : '',
+      hasta: $('portalResultsToFilter') ? clean($('portalResultsToFilter').value) : '',
+      limit: $('portalResultsLimit') ? $('portalResultsLimit').value : '50'
+    };
+    return portal.resultFilters;
+  }
+
+  function resultActivityText(result) {
+    return clean(result && (result.actividadTitulo || result.actividadCodigo || result.actividadId)) || '-';
+  }
+
+  function filteredResults(list) {
+    var filters = portal.resultFilters || {};
+    return (list || []).filter(function (result) {
+      var activity = resultActivityText(result).toLowerCase();
+      var date = clean(result.fechaLocal);
+      if (filters.alumno && clean(result.alumnoId).toLowerCase().indexOf(filters.alumno.toLowerCase()) < 0) return false;
+      if (filters.actividad && activity.indexOf(filters.actividad) < 0) return false;
+      if (filters.area && clean(result.area).toLowerCase() !== filters.area) return false;
+      if (filters.grado && String(result.grado || '') !== filters.grado) return false;
+      if (filters.tipo && String(result.tipoActividad || '').toUpperCase() !== filters.tipo) return false;
+      if (filters.desde && date && date < filters.desde) return false;
+      if (filters.hasta && date && date > filters.hasta) return false;
+      return true;
+    });
+  }
+
+  function resultTableRow(result) {
+    var row = document.createElement('div');
+    row.className = 'portal-table-row portal-result-row';
+    row.appendChild(cell('portal-cell-date', valueOrDash(resultDateText(result))));
+    row.appendChild(cell('portal-cell-student', valueOrDash(result.alumnoId)));
+    row.appendChild(cell('portal-cell-title', resultActivityText(result)));
+    row.appendChild(cell('', valueOrDash(result.area)));
+    row.appendChild(cell('portal-cell-compact', valueOrDash(result.grado)));
+    row.appendChild(cell('portal-cell-compact', valueOrDash(result.tipoActividad)));
+    row.appendChild(cell('portal-cell-compact', valueOrDash(result.cantidadEjercicios)));
+    row.appendChild(cell('portal-cell-ok', valueOrDash(result.correctos)));
+    row.appendChild(cell('portal-cell-bad', valueOrDash(result.incorrectos)));
+    row.appendChild(cell('portal-cell-compact', valueOrDash(result.nota)));
+    row.appendChild(cell('portal-cell-compact', result.tiempoMinutos == null ? '-' : result.tiempoMinutos));
+    return row;
+  }
+
   function renderResults(state, results) {
     var box = $('portalResultsList');
     var allowed = state && state.autorizado && permission(state, 'puede_ver_resultados');
@@ -715,40 +808,22 @@
       box.textContent = state && state.autorizado ? 'Sin permiso de resultados.' : 'Sin sesion autorizada.';
       return;
     }
-    var list = results || portal.resultados || [];
+    var list = filteredResults(results || portal.resultados || []);
     if (exportButton) exportButton.disabled = !permission(state, 'puede_exportar_resultados') || !list.length;
-    setResultsStatus('Ultimos ' + list.length + ' resultado(s) registrados.');
+    setResultsStatus('Resultados listados - Cantidad: ' + list.length);
     if (!list.length) {
       box.textContent = 'No hay resultados registrados.';
       return;
     }
-    list.forEach(function (result) {
-      var item = document.createElement('div');
-      item.className = 'portal-list-item';
-      var title = document.createElement('strong');
-      title.textContent = 'Alumno ' + (result.alumnoId || '-') + ' | Nota ' + (result.nota == null ? '-' : result.nota);
-      var activity = document.createElement('span');
-      activity.textContent = 'Actividad: ' + (result.actividadTitulo || result.actividadCodigo || result.actividadId || '-');
-      var score = document.createElement('span');
-      score.textContent = 'Ejercicios: ' + (result.cantidadEjercicios || '-') +
-        ' | Correctos: ' + result.correctos +
-        ' | Incorrectos: ' + result.incorrectos +
-        ' | Tiempo: ' + (result.tiempoMinutos == null ? '-' : result.tiempoMinutos + ' min');
-      var meta = document.createElement('span');
-      meta.textContent = resultMeta(result);
-      item.appendChild(title);
-      item.appendChild(activity);
-      item.appendChild(score);
-      item.appendChild(meta);
-      box.appendChild(item);
+    var table = document.createElement('div');
+    table.className = 'portal-table portal-result-table';
+    ['Fecha', 'Alumno', 'Actividad', 'Area', 'G', 'T', 'Cant.', 'OK', 'Err.', 'Nota', 'T/m'].forEach(function (title) {
+      table.appendChild(headerCell(title));
     });
-  }
-
-  function resultFilters() {
-    return {
-      alumno: $('portalResultsStudentFilter') ? clean($('portalResultsStudentFilter').value) : '',
-      limit: $('portalResultsLimit') ? $('portalResultsLimit').value : '50'
-    };
+    list.forEach(function (result) {
+      table.appendChild(resultTableRow(result));
+    });
+    box.appendChild(table);
   }
 
   function csvCell(value) {
@@ -764,7 +839,7 @@
       setResultsStatus('Su perfil no tiene permiso para exportar resultados.', true);
       return;
     }
-    var list = portal.resultados || [];
+    var list = filteredResults(portal.resultados || []);
     if (!list.length) {
       setResultsStatus('No hay resultados cargados para exportar.', true);
       return;
@@ -819,7 +894,8 @@
       renderResults(state, []);
       return;
     }
-    var qs = query(resultFilters());
+    var filters = readResultFilters();
+    var qs = query({ alumno: filters.alumno, limit: filters.limit });
     api('GET', '/api/portal-docente/resultados' + (qs ? '?' + qs : ''), null, function (err, data) {
       if (err) {
         portal.resultados = [];
@@ -939,6 +1015,38 @@
     if ($('portalStudentNotes')) $('portalStudentNotes').value = student.observaciones || '';
   }
 
+  function studentTableRow(student, canEdit, canDeactivate) {
+    var row = document.createElement('div');
+    row.className = 'portal-table-row portal-student-row';
+    row.appendChild(cell('portal-cell-student', valueOrDash(student.idAlumno)));
+    row.appendChild(cell('', valueOrDash(student.apellido)));
+    row.appendChild(cell('', valueOrDash(student.nombre)));
+    row.appendChild(cell('portal-cell-compact', valueOrDash(student.grado)));
+    row.appendChild(cell('portal-cell-compact', valueOrDash(student.division)));
+    row.appendChild(cell('', valueOrDash(student.turno)));
+    row.appendChild(cell('portal-cell-compact', student.activo ? 'SI' : 'NO'));
+    row.appendChild(cell('portal-cell-created', valueOrDash(
+      (student.creadoPorEmail || 'sin dato') +
+      (student.creadoPorRol ? ' | ' + student.creadoPorRol : '') +
+      (student.creadoEn ? ' | ' + portalDate(student.creadoEn) : '')
+    )));
+    var actions = document.createElement('div');
+    actions.className = 'portal-row-actions';
+    if (canEdit) {
+      actions.appendChild(iconButton('edit', 'Editar alumno', 'portal-icon-button secondary', function () {
+        setStudentMode('editar');
+        fillStudentForm(student);
+      }));
+    }
+    if (student.activo && canDeactivate) {
+      actions.appendChild(iconButton('deactivate', 'Desactivar alumno', 'portal-icon-button danger', function () {
+        deactivateStudent(student);
+      }));
+    }
+    row.appendChild(actions);
+    return row;
+  }
+
   function renderStudents(state, students) {
     var listBox = $('portalStudentsList');
     var form = $('portalStudentForm');
@@ -969,45 +1077,15 @@
       listBox.textContent = portal.studentAction === 'buscar' ? 'No hay alumnos para los filtros seleccionados.' : 'Sin listado cargado.';
       return;
     }
-    list.forEach(function (student) {
-      var item = document.createElement('div');
-      item.className = 'portal-list-item';
-      var title = document.createElement('strong');
-      title.textContent = (student.idAlumno || '') + ' | ' + [student.apellido, student.nombre].filter(Boolean).join(', ');
-      var meta = document.createElement('span');
-      meta.textContent = 'Grado ' + (student.grado || '-') + ' | Division ' + (student.division || '-') + ' | Turno ' + (student.turno || '-') + ' | ' + (student.activo ? 'activo' : 'inactivo');
-      item.appendChild(title);
-      item.appendChild(meta);
-      var created = document.createElement('span');
-      created.className = 'portal-created-by';
-      created.textContent = 'Alta: ' +
-        (student.creadoPorEmail || 'sin dato') +
-        (student.creadoPorRol ? ' | ' + student.creadoPorRol : '') +
-        (student.creadoEn ? ' | ' + portalDate(student.creadoEn) : '');
-      item.appendChild(created);
-      if (student.observaciones) {
-        var notes = document.createElement('span');
-        notes.textContent = student.observaciones;
-        item.appendChild(notes);
-      }
-      var actions = document.createElement('div');
-      actions.className = 'portal-actions';
-      if (canEdit) {
-        var edit = iconButton('edit', 'Editar alumno', 'portal-icon-button secondary', function () {
-          setStudentMode('editar');
-          fillStudentForm(student);
-        });
-        actions.appendChild(edit);
-      }
-      if (student.activo && canDeactivate) {
-        var deactivate = iconButton('deactivate', 'Desactivar alumno', 'portal-icon-button danger', function () {
-          deactivateStudent(student);
-        });
-        actions.appendChild(deactivate);
-      }
-      item.appendChild(actions);
-      listBox.appendChild(item);
+    var table = document.createElement('div');
+    table.className = 'portal-table portal-student-table';
+    ['ID alumno', 'Apellido', 'Nombres', 'G', 'Div.', 'Turno', 'Activo', 'Alta', 'Acciones'].forEach(function (title) {
+      table.appendChild(headerCell(title));
     });
+    list.forEach(function (student) {
+      table.appendChild(studentTableRow(student, canEdit, canDeactivate));
+    });
+    listBox.appendChild(table);
   }
 
   function loadStudents() {
@@ -1303,6 +1381,15 @@
           event.preventDefault();
           readActivityFilters();
           renderActivities(portal.state || {});
+        }
+      };
+    }
+    var resultFilterInputs = document.querySelectorAll('.portal-results-controls input, .portal-results-controls select');
+    for (var resultFilterIndex = 0; resultFilterIndex < resultFilterInputs.length; resultFilterIndex++) {
+      resultFilterInputs[resultFilterIndex].onkeydown = function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          loadResults();
         }
       };
     }

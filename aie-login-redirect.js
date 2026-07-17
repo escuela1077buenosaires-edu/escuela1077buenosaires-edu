@@ -38,6 +38,8 @@
     try {
       var url = new URL(window.location.href);
       url.searchParams.delete(PARAM_NAME);
+      url.searchParams.delete('rol');
+      url.searchParams.delete('v');
       window.history.replaceState(null, '', url.pathname + url.search + url.hash);
     } catch (err) {
       return;
