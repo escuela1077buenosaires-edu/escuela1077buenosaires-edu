@@ -360,7 +360,8 @@
       edit: ['M4 20h4l10.5-10.5a2.8 2.8 0 0 0-4-4L4 16v4z', 'M13.5 6.5l4 4'],
       deactivate: ['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z', 'M7 7l10 10'],
       search: ['M10 18a8 8 0 1 1 5.3-14A8 8 0 0 1 10 18z', 'M15 15l5 5'],
-      open: ['M14 3h7v7', 'M21 3l-9 9', 'M5 5h6', 'M5 5v14h14v-6']
+      open: ['M14 3h7v7', 'M21 3l-9 9', 'M5 5h6', 'M5 5v14h14v-6'],
+      save: ['M5 12l4 4 10-10']
     };
     (paths[name] || paths.edit).forEach(function (d) {
       var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -398,18 +399,18 @@
     var box = $('portalPermissionSummary');
     if (!box) return;
     if (!(state && state.autorizado && state.perfil)) {
-      box.textContent = 'Inicie sesion con Google para ver las funcionalidades habilitadas.';
+      box.textContent = 'Inicie sesión con Google para ver las funcionalidades habilitadas.';
       box.className = 'portal-permission-summary';
       return;
     }
-    box.textContent = 'Los permisos para acceder a las diversas funcionalidades del sistema y ejecutarlas han sido establecidos acorde al rol. En caso de necesitar ampliacion o restriccion de permisos, comunicarse con el AIE: Profe. Bruno.';
+    box.textContent = 'Los permisos para acceder a las diversas funcionalidades del sistema y ejecutarlas han sido establecidos acorde al rol. En caso de necesitar ampliación o restricción de permisos, comunicarse con el AIE: Profe. Bruno.';
     box.className = 'portal-permission-summary';
   }
 
   function stateBadge(enabled) {
     var span = document.createElement('span');
     span.className = enabled ? 'publication-state publication-state-publicada' : 'publication-state publication-state-fallida';
-    span.textContent = enabled ? 'Indice habilitado' : 'Indice cerrado';
+    span.textContent = enabled ? 'Índice habilitado' : 'Índice cerrado';
     return span;
   }
 
@@ -421,8 +422,8 @@
     span.textContent = classSession.requerido === false
       ? 'Control preparado'
       : classSession.soportado === false
-      ? 'Migracion pendiente'
-      : active ? 'Sesion AIE activa' : 'Sin sesion AIE';
+      ? 'Migración pendiente'
+      : active ? 'Sesión AIE activa' : 'Sin sesión AIE';
     return span;
   }
 
@@ -441,7 +442,7 @@
     if (!box || !login || !logout) return;
     var config = state && state.configuracion || portal.config || {};
     var supabase = config.supabase || {};
-    login.disabled = !loginUrl();
+    login.disabled = !loginUrl() || !!portal.accessToken;
     logout.disabled = !portal.accessToken;
     box.innerHTML = '';
     if (state && state.perfil) {
@@ -454,14 +455,10 @@
       profile.appendChild(name);
       profile.appendChild(detail);
       box.appendChild(profile);
-      var permissions = document.createElement('span');
-      permissions.className = 'portal-permission-note';
-      permissions.textContent = 'Los permisos para acceder a las diversas funcionalidades del sistema y ejecutarlas han sido establecidos acorde al rol. En caso de necesitar ampliacion o restriccion de permisos, comunicarse con el AIE: Profe. Bruno.';
-      box.appendChild(permissions);
       return;
     }
     var lines = [];
-    lines.push(portal.accessToken ? 'Sesion local detectada, pendiente de autorizacion.' : 'Sin sesion docente.');
+    lines.push(portal.accessToken ? 'Sesión local detectada, pendiente de autorización.' : 'Sin sesión docente.');
     lines.push(supabase.loginGoogleListo ? 'Login Google preparado.' : 'Falta anon/publishable key para habilitar Google.');
     lines.push('Roles permitidos: ' + ((config.rolesPermitidos || []).join(', ') || 'sin datos') + '.');
     box.textContent = lines.join(' ');
@@ -482,12 +479,12 @@
     var detail = document.createElement('div');
     detail.className = 'portal-detail';
     detail.textContent = adminBlocked
-      ? 'La Habilitacion del Indice de Actividades esta bloqueada por el AIE.'
+      ? 'La Habilitación del Índice de Actividades está bloqueada por el AIE.'
       : enabled
-      ? 'Los alumnos pueden ver el indice mientras no venza la fecha configurada.'
+      ? 'Los alumnos pueden ver el índice mientras no venza la fecha configurada.'
       : admin
-        ? 'El indice esta cerrado para alumnos. Su perfil administrador puede habilitarlo sin restriccion horaria.'
-        : 'Los alumnos no deben ver el indice de actividades.';
+        ? 'El índice está cerrado para alumnos. Su perfil administrador puede habilitarlo sin restricción horaria.'
+        : 'Los alumnos no deben ver el índice de actividades.';
     box.appendChild(detail);
     if (adminBlocked && control.bloqueoAdminMotivo) {
       var blocked = document.createElement('div');
@@ -499,8 +496,8 @@
       var expired = document.createElement('div');
       expired.className = admin ? 'portal-muted' : 'portal-warning';
       expired.textContent = admin
-        ? 'La habilitacion para alumnos esta vencida; puede habilitarla nuevamente.'
-        : 'La habilitacion esta vencida.';
+        ? 'La habilitación para alumnos está vencida; puede habilitarla nuevamente.'
+        : 'La habilitación está vencida.';
       box.appendChild(expired);
     }
     if (control.actualizadoEn) {
@@ -514,7 +511,7 @@
       ? 'Mensaje visible para alumnos o perfiles sin acceso.'
       : 'Mensaje breve para docentes/alumnos.';
     until.value = enabled ? dateInputValue(control.vigenteHasta) : '';
-    toggle.textContent = enabled ? 'Deshabilitar indice' : 'Habilitar indice';
+    toggle.textContent = enabled ? 'Deshabilitar índice' : 'Habilitar índice';
     toggle.disabled = adminBlocked || !(state && state.autorizado && (admin || permission(state, 'puede_habilitar_indice')) && state.configuracion && state.configuracion.supabase.backendListo);
   }
 
@@ -538,7 +535,7 @@
     box.appendChild(classSessionBadge(classSession));
     var detail = document.createElement('div');
     detail.className = 'portal-detail';
-    detail.textContent = classSession.mensaje || 'La sesion AIE limita el indice de alumnos durante una clase.';
+    detail.textContent = classSession.mensaje || 'La sesión AIE limita el índice de alumnos durante una clase.';
     box.appendChild(detail);
     if (session.abiertaPorEmail) {
       var owner = document.createElement('div');
@@ -549,12 +546,12 @@
     if (classSession.soportado === false) {
       var pending = document.createElement('div');
       pending.className = 'portal-warning';
-      pending.textContent = 'Falta aplicar la migracion de sesiones AIE en Supabase.';
+      pending.textContent = 'Falta aplicar la migración de sesiones AIE en Supabase.';
       box.appendChild(pending);
     } else if (classSession.requerido === false) {
       var inactive = document.createElement('div');
       inactive.className = 'portal-muted';
-      inactive.textContent = 'Para exigir sesiones, aplicar la migracion y activar sesionesAieObligatorias.';
+      inactive.textContent = 'Para exigir sesiones, aplicar la migración y activar sesionesAieObligatorias.';
       box.appendChild(inactive);
     }
     start.disabled = !allowed;
@@ -590,8 +587,10 @@
 
     var save = document.createElement('button');
     save.type = 'button';
-    save.className = 'secondary compact-button';
-    save.textContent = 'Guardar';
+    save.className = 'portal-save-button compact-button';
+    save.setAttribute('aria-label', 'Guardar disponibilidad');
+    save.title = 'Guardar disponibilidad';
+    save.appendChild(actionIcon('save'));
     save.disabled = !canModify;
     save.onclick = function () {
       saveActivity(activity, available.value === 'true', from.value, until.value);
@@ -602,12 +601,15 @@
     row.appendChild(cell('portal-cell-compact', valueOrDash(activity.tipo)));
     row.appendChild(cell('', valueOrDash(activity.estado)));
     var availableCell = document.createElement('div');
+    availableCell.className = 'portal-editable-cell portal-editable-available';
     availableCell.appendChild(available);
     row.appendChild(availableCell);
     var fromCell = document.createElement('div');
+    fromCell.className = 'portal-editable-cell portal-editable-date';
     fromCell.appendChild(from);
     row.appendChild(fromCell);
     var untilCell = document.createElement('div');
+    untilCell.className = 'portal-editable-cell portal-editable-date';
     untilCell.appendChild(until);
     row.appendChild(untilCell);
     row.appendChild(cell('portal-cell-file', valueOrDash(activityFileName(activity))));
@@ -674,7 +676,7 @@
     }
     var table = document.createElement('div');
     table.className = 'portal-table portal-activity-table';
-    ['Titulo', 'Area', 'Tipo', 'Estado', 'Disponible', 'Visible desde', 'Visible hasta', 'Archivo', 'Acciones'].forEach(function (title) {
+    ['Título', 'Área', 'Tipo', 'Estado', 'Disponible', 'Visible desde', 'Visible hasta', 'Archivo', 'Acciones'].forEach(function (title) {
       table.appendChild(headerCell(title));
     });
     list.forEach(function (activity) {
