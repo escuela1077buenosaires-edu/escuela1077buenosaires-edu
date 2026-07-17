@@ -397,8 +397,7 @@
       deactivate: ['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z', 'M7 7l10 10'],
       search: ['M10 18a8 8 0 1 1 5.3-14A8 8 0 0 1 10 18z', 'M15 15l5 5'],
       open: ['M14 3h7v7', 'M21 3l-9 9', 'M5 5h6', 'M5 5v14h14v-6'],
-      save: ['M5 3h12l2 2v16H5V3z', 'M8 3v6h8V3', 'M8 17h8v4', 'M10 6h4'],
-      binoculars: ['M7 10a4 4 0 1 0 0 8 4 4 0 0 0 0-8z', 'M17 10a4 4 0 1 0 0 8 4 4 0 0 0 0-8z', 'M7 10V5a2 2 0 0 1 4 0v7', 'M17 10V5a2 2 0 0 0-4 0v7', 'M10 7h4']
+      save: ['M5 3h12l2 2v16H5V3z', 'M8 3v6h8V3', 'M8 17h8v4', 'M10 6h4']
     };
     (paths[name] || paths.edit).forEach(function (d) {
       var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -721,7 +720,7 @@
     [
       { text: 'Título' },
       { text: 'Área' },
-      { text: 'Tipo' },
+      { text: 'T', title: 'Tipo' },
       { text: 'EST.', title: 'Estado' },
       { text: 'DISP.', title: 'Disponible' },
       { text: 'Visible desde' },
@@ -1388,7 +1387,7 @@
       $('portalActivitiesSearch').classList.add('portal-search-icon-button');
       $('portalActivitiesSearch').setAttribute('aria-label', 'Buscar');
       $('portalActivitiesSearch').title = 'Buscar';
-      $('portalActivitiesSearch').appendChild(actionIcon('binoculars'));
+      $('portalActivitiesSearch').appendChild(actionIcon('search'));
       $('portalActivitiesSearch').onclick = function () {
         readActivityFilters();
         renderActivities(portal.state || {});

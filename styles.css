@@ -1679,7 +1679,7 @@ body {
 }
 
 #portalActivityFilters {
-  grid-template-columns: minmax(125px, 0.85fr) minmax(110px, 0.75fr) minmax(175px, 1.25fr) 68px 64px 86px 42px;
+  grid-template-columns: minmax(105px, 0.72fr) minmax(105px, 0.72fr) minmax(175px, 1.25fr) 78px 76px 86px 42px;
 }
 
 #portalActivityFilters.portal-activity-filter-row {
@@ -1804,7 +1804,7 @@ body {
 }
 
 .portal-table-header[title] {
-  cursor: help;
+  cursor: default;
 }
 
 .portal-table-row > div {
@@ -1826,7 +1826,7 @@ body {
 }
 
 .portal-activity-table {
-  grid-template-columns: minmax(170px, 1fr) 112px 48px 54px 76px 170px 170px minmax(260px, 1.55fr) 52px;
+  grid-template-columns: minmax(160px, 0.95fr) 112px 34px 54px 76px 170px 170px minmax(285px, 1.65fr) 52px;
   min-width: 1180px;
 }
 
@@ -1884,9 +1884,20 @@ body {
   min-width: 42px;
   height: 34px;
   padding: 6px;
+  border: 1px solid #d97706;
+  background: #facc15;
+  color: #422006;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.portal-search-icon-button:hover:not(:disabled) {
+  background: #eab308;
+}
+
+.portal-search-icon-button .action-icon {
+  stroke: currentColor;
 }
 
 .portal-cell-status {
@@ -1910,6 +1921,10 @@ body {
 .portal-state-check-ok {
   border-color: #16a34a;
   background: #f0fdf4;
+}
+
+.portal-activity-table .portal-cell-title {
+  align-items: center !important;
 }
 
 .portal-result-table {
