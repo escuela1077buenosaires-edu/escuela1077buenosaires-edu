@@ -123,6 +123,8 @@
     try {
       var params = new URLSearchParams(window.location.search || '');
       params.delete('login');
+      params.delete('rol');
+      params.delete('v');
       var text = params.toString();
       return text ? '?' + text : '';
     } catch (err) {
