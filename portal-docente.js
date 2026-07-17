@@ -71,11 +71,6 @@
     return !!(state && state.perfil && state.perfil.rol === 'administrador');
   }
 
-  function isDefaultUnauthorizedMessage(value) {
-    var text = clean(value).toLowerCase();
-    return text.indexOf('no estas autorizado') >= 0 && text.indexOf('profe jose') >= 0;
-  }
-
   function timestampForRpc(value) {
     var text = clean(value);
     if (!text) return null;
@@ -443,11 +438,18 @@
     box.className = 'portal-permission-summary';
   }
 
-  function stateBadge(enabled) {
+  function indexStateBadge(enabled, adminBlocked) {
     var span = document.createElement('span');
-    span.className = enabled ? 'publication-state publication-state-publicada' : 'publication-state publication-state-fallida';
-    span.textContent = enabled ? 'Índice habilitado' : 'Índice cerrado';
+    span.className = 'portal-index-state-title ' + (enabled && !adminBlocked ? 'portal-index-state-open' : 'portal-index-state-blocked');
+    span.textContent = enabled && !adminBlocked ? 'Índice habilitado' : 'Índice bloqueado';
     return span;
+  }
+
+  function indexSinceDate(control, enabled, adminBlocked) {
+    if (adminBlocked) return control.bloqueoAdminEn || control.actualizadoEn || '';
+    return enabled
+      ? control.habilitadoEn || control.actualizadoEn || ''
+      : control.deshabilitadoEn || control.actualizadoEn || '';
   }
 
   function classSessionBadge(classSession) {
@@ -502,26 +504,38 @@
 
   function renderIndex(state) {
     var box = $('portalIndexState');
-    var message = $('portalIndexMessage');
+    var since = $('portalIndexVigenteDesde');
     var until = $('portalIndexVigenteHasta');
-    var toggle = $('portalToggleIndex');
-    if (!box || !message || !until || !toggle) return;
+    var enable = $('portalEnableIndex');
+    var disable = $('portalDisableIndex');
+    if (!box || !since || !until || !enable || !disable) return;
     var control = state && state.control || {};
     var admin = isAdminState(state);
     var enabled = control.habilitado === true;
     var adminBlocked = control.bloqueoAdminActivo === true;
+    var canChange = !adminBlocked && state && state.autorizado &&
+      (admin || permission(state, 'puede_habilitar_indice')) &&
+      state.configuracion && state.configuracion.supabase.backendListo;
     box.innerHTML = '';
-    box.appendChild(stateBadge(enabled));
-    var detail = document.createElement('div');
-    detail.className = 'portal-detail';
-    detail.textContent = adminBlocked
-      ? 'La Habilitación del Índice de Actividades está bloqueada por el AIE.'
-      : enabled
-      ? 'Los alumnos pueden ver el índice mientras no venza la fecha configurada.'
-      : admin
-        ? 'El índice está cerrado para alumnos. Su perfil administrador puede habilitarlo sin restricción horaria.'
-        : 'Los alumnos no deben ver el índice de actividades.';
-    box.appendChild(detail);
+    box.appendChild(indexStateBadge(enabled, adminBlocked));
+
+    var dateGrid = document.createElement('div');
+    dateGrid.className = 'portal-index-state-grid';
+    [
+      { label: 'F. Desde', value: portalDate(indexSinceDate(control, enabled, adminBlocked)) || '-' },
+      { label: 'F. Hasta', value: enabled ? (portalDate(control.vigenteHasta) || '-') : '-' }
+    ].forEach(function (item) {
+      var cell = document.createElement('div');
+      var label = document.createElement('span');
+      var value = document.createElement('strong');
+      label.textContent = item.label;
+      value.textContent = item.value;
+      cell.appendChild(label);
+      cell.appendChild(value);
+      dateGrid.appendChild(cell);
+    });
+    box.appendChild(dateGrid);
+
     if (adminBlocked && control.bloqueoAdminMotivo) {
       var blocked = document.createElement('div');
       blocked.className = 'portal-warning';
@@ -542,13 +556,10 @@
       updated.textContent = 'Actualizado: ' + portalDate(control.actualizadoEn);
       box.appendChild(updated);
     }
-    message.value = admin && isDefaultUnauthorizedMessage(control.mensaje) ? '' : control.mensaje || '';
-    message.placeholder = admin
-      ? 'Mensaje visible para alumnos o perfiles sin acceso.'
-      : 'Mensaje breve para docentes/alumnos.';
+    since.value = '';
     until.value = enabled ? dateInputValue(control.vigenteHasta) : '';
-    toggle.textContent = enabled ? 'Deshabilitar índice' : 'Habilitar índice';
-    toggle.disabled = adminBlocked || !(state && state.autorizado && (admin || permission(state, 'puede_habilitar_indice')) && state.configuracion && state.configuracion.supabase.backendListo);
+    enable.disabled = !canChange || enabled;
+    disable.disabled = !canChange || !enabled;
   }
 
   function renderClassSession(state) {
@@ -1234,7 +1245,7 @@
     loadPortal();
   }
 
-  function toggleIndex() {
+  function toggleIndex(enabled) {
     var state = portal.state || {};
     var admin = isAdminState(state);
     if (!state.autorizado) {
@@ -1249,11 +1260,23 @@
       setStatus('La Habilitacion del Indice de Actividades esta bloqueada por el AIE.', true);
       return;
     }
-    var enabled = !(state.control && state.control.habilitado === true);
+    enabled = enabled === true;
+    var sinceValue = $('portalIndexVigenteDesde') ? $('portalIndexVigenteDesde').value : '';
+    if (enabled && sinceValue) {
+      var parsedSince = new Date(sinceValue);
+      if (Number.isNaN(parsedSince.getTime())) {
+        setStatus('F. Desde no tiene una fecha valida.', true);
+        return;
+      }
+      if (parsedSince.getTime() > Date.now() + 60000) {
+        setStatus('F. Desde futuro todavia no esta disponible: deje el campo vacio para habilitar desde este momento.', true);
+        return;
+      }
+    }
     setStatus(enabled ? 'Habilitando indice' : 'Deshabilitando indice');
     api('POST', '/api/portal-docente/indice', {
       habilitado: enabled,
-      mensaje: $('portalIndexMessage') ? $('portalIndexMessage').value : '',
+      mensaje: enabled ? 'Indice habilitado por personal autorizado.' : 'Indice deshabilitado.',
       vigenteHasta: $('portalIndexVigenteHasta') ? $('portalIndexVigenteHasta').value : '',
       motivo: enabled ? 'Habilitacion desde portal docente publico.' : 'Deshabilitacion desde portal docente publico.'
     }, function (err, data) {
@@ -1375,7 +1398,8 @@
   function bind() {
     if ($('portalLoginGoogle')) $('portalLoginGoogle').onclick = login;
     if ($('portalLogout')) $('portalLogout').onclick = logout;
-    if ($('portalToggleIndex')) $('portalToggleIndex').onclick = toggleIndex;
+    if ($('portalEnableIndex')) $('portalEnableIndex').onclick = function () { toggleIndex(true); };
+    if ($('portalDisableIndex')) $('portalDisableIndex').onclick = function () { toggleIndex(false); };
     if ($('portalStartClassSession')) $('portalStartClassSession').onclick = startClassSession;
     if ($('portalCloseClassSession')) $('portalCloseClassSession').onclick = closeClassSession;
     if ($('teacherPortalRefresh')) $('teacherPortalRefresh').onclick = loadPortal;

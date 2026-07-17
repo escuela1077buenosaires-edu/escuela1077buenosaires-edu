@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Portal funcional del personal docente - Escuela 1077</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css?v=admin-20260717-04">
+  <link rel="stylesheet" href="styles.css?v=admin-20260717-05">
 </head>
 <body>
   <header class="topbar">
@@ -42,20 +42,23 @@
           </div>
         </section>
 
-        <section class="portal-card portal-feature-block hidden" id="portalIndexCard" data-portal-any="puede_habilitar_indice">
+        <section class="portal-card portal-feature-block portal-index-card hidden" id="portalIndexCard" data-portal-any="puede_habilitar_indice">
           <h3>Habilitación del Índice de Actividades</h3>
           <div id="portalIndexState" class="portal-box">Sin datos.</div>
-          <label>
-            Mensaje
-            <textarea id="portalIndexMessage" rows="3" placeholder="Mensaje breve para docentes/alumnos."></textarea>
-          </label>
-          <label>
-            Vigente hasta
-            <input id="portalIndexVigenteHasta" type="datetime-local">
-            <small class="portal-muted">Si queda vacío, se habilita por 90 minutos o hasta el fin del horario autorizado.</small>
-          </label>
-          <div class="portal-actions">
-            <button type="button" id="portalToggleIndex">Habilitar indice</button>
+          <div class="portal-index-controls" aria-label="Fechas de habilitación del Índice de Actividades">
+            <label>
+              F. Desde
+              <input id="portalIndexVigenteDesde" type="datetime-local">
+            </label>
+            <label>
+              F. Hasta
+              <input id="portalIndexVigenteHasta" type="datetime-local">
+            </label>
+            <button type="button" id="portalEnableIndex">Habilitar</button>
+            <button type="button" id="portalDisableIndex" class="secondary">Bloquear</button>
+          </div>
+          <div class="portal-index-help">
+            F. Desde vacío: habilita desde este momento. F. Hasta vacío: habilita por 90 minutos o hasta el fin del horario autorizado, lo que ocurra primero.
           </div>
         </section>
 
@@ -375,8 +378,8 @@
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="portal-docente.js?v=admin-20260717-04"></script>
-  <script src="portal-docente-fixes.js?v=admin-20260717-04"></script>
+  <script src="portal-docente.js?v=admin-20260717-05"></script>
+  <script src="portal-docente-fixes.js?v=admin-20260717-05"></script>
   <script src="aie-login-redirect.js"></script>
 </body>
 </html>

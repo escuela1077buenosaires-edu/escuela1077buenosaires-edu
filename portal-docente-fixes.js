@@ -28,11 +28,6 @@
     return !!(box && /\|\s*administrador\b/i.test(box.textContent || ''));
   }
 
-  function isDefaultUnauthorizedMessage(value) {
-    var text = clean(value).toLowerCase();
-    return text.indexOf('no estas autorizado') >= 0 && text.indexOf('profe jose') >= 0;
-  }
-
   function currentSessionIdentity() {
     var box = $('portalSessionBox');
     var text = box ? clean(box.textContent || '') : '';
@@ -63,28 +58,10 @@
     if (card) card.style.display = isAdminSession() ? '' : 'none';
   }
 
-  function updateIndexHint() {
-    var input = $('portalIndexVigenteHasta');
-    if (!input || !input.parentNode || input.parentNode.querySelector('.portal-default-vigencia')) return;
-    var hint = document.createElement('small');
-    hint.className = 'portal-muted portal-default-vigencia';
-    hint.textContent = 'Si queda vacio, se habilita por 90 minutos o hasta el fin del horario autorizado.';
-    input.parentNode.appendChild(hint);
-  }
-
   function updateAdminIndexView() {
     if (!isAdminSession()) return;
-    var message = $('portalIndexMessage');
-    if (message) {
-      if (isDefaultUnauthorizedMessage(message.value)) message.value = '';
-      message.placeholder = 'Mensaje visible para alumnos o perfiles sin acceso.';
-    }
     var state = $('portalIndexState');
     if (!state) return;
-    var detail = state.querySelector('.portal-detail');
-    if (detail && /Los alumnos no deben ver el indice/i.test(detail.textContent || '')) {
-      detail.textContent = 'El indice esta cerrado para alumnos. Su perfil administrador puede habilitarlo sin restriccion horaria.';
-    }
     var warning = state.querySelector('.portal-warning');
     if (warning && /habilitacion esta vencida/i.test(warning.textContent || '')) {
       warning.className = 'portal-muted';
@@ -250,7 +227,6 @@
   function applyFixes() {
     updateAutomationMarkers();
     updateClassSessionVisibility();
-    updateIndexHint();
     updateAdminIndexView();
     ensureDivisionSelect();
     updateStudentsFormVisibility();
