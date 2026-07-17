@@ -1679,7 +1679,7 @@ body {
 }
 
 #portalActivityFilters {
-  grid-template-columns: minmax(150px, 1.1fr) minmax(125px, 0.8fr) 74px 72px 128px auto auto;
+  grid-template-columns: minmax(125px, 0.85fr) minmax(110px, 0.75fr) minmax(175px, 1.25fr) 68px 64px 86px 42px;
 }
 
 #portalActivityFilters.portal-activity-filter-row {
@@ -1803,6 +1803,10 @@ body {
   text-transform: uppercase;
 }
 
+.portal-table-header[title] {
+  cursor: help;
+}
+
 .portal-table-row > div {
   display: flex;
   align-items: center;
@@ -1822,8 +1826,8 @@ body {
 }
 
 .portal-activity-table {
-  grid-template-columns: minmax(185px, 1.35fr) 120px 54px 95px 125px 145px 145px minmax(170px, 1.1fr) 68px;
-  min-width: 1110px;
+  grid-template-columns: minmax(170px, 1fr) 112px 48px 54px 76px 170px 170px minmax(260px, 1.55fr) 52px;
+  min-width: 1180px;
 }
 
 .portal-editable-cell {
@@ -1837,6 +1841,14 @@ body {
   border: 1.5px solid #16a34a;
   border-radius: 7px;
   background: #fff;
+}
+
+.portal-editable-available select {
+  min-width: 58px;
+}
+
+.portal-editable-date input[type="datetime-local"] {
+  font-size: 12px;
 }
 
 .portal-save-button {
@@ -1865,6 +1877,39 @@ body {
 
 .portal-save-button .action-icon {
   stroke: currentColor;
+}
+
+.portal-search-icon-button {
+  width: 42px;
+  min-width: 42px;
+  height: 34px;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portal-cell-status {
+  justify-content: center;
+}
+
+.portal-state-check {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #cbd5d1;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #15803d;
+  font-size: 18px;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.portal-state-check-ok {
+  border-color: #16a34a;
+  background: #f0fdf4;
 }
 
 .portal-result-table {

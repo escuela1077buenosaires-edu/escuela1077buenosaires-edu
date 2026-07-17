@@ -29,6 +29,7 @@
     activityFilters: {
       titulo: '',
       area: '',
+      archivo: '',
       grado: '',
       tipo: '',
       disponible: ''
@@ -294,9 +295,43 @@
   }
 
   function activityFileName(activity) {
-    return clean(activity && (activity.archivo || activity.archivoNombre || activity.archivo_nombre)) ||
+    return clean(activity && (
+      activity.archivoOriginal ||
+      activity.archivo_original ||
+      activity.nombreArchivo ||
+      activity.nombre_archivo ||
+      activity.archivoNombre ||
+      activity.archivo_nombre ||
+      activity.archivo
+    )) ||
       fileNameFromPath(activity && activity.storagePath) ||
       fileNameFromPath(activity && activity.storage_path);
+  }
+
+  function activityFileBaseName(activity) {
+    return clean(activityFileName(activity)).replace(/\.html?$/i, '');
+  }
+
+  function activityDisplayTitle(activity) {
+    var title = clean(activity && activity.titulo);
+    var type = clean(activity && activity.tipo).toUpperCase();
+    if (title && /^[AB]$/.test(type)) {
+      title = title.replace(new RegExp('\\s*[-–—]?\\s*Tipo\\s+' + type + '\\s*$', 'i'), '').trim();
+    }
+    return title || clean(activity && (activity.codigo || activity.id));
+  }
+
+  function activityStateCell(activity) {
+    var div = document.createElement('div');
+    var state = clean(activity && activity.estado);
+    var published = /^publicad[ao]$/i.test(state);
+    div.className = 'portal-cell-status';
+    div.title = state || 'Estado';
+    var marker = document.createElement('span');
+    marker.className = published ? 'portal-state-check portal-state-check-ok' : 'portal-state-check';
+    marker.textContent = published ? '✓' : '';
+    div.appendChild(marker);
+    return div;
   }
 
   function resultDateText(result) {
@@ -311,15 +346,16 @@
     return [dateText, timeText].filter(Boolean).join(' - ');
   }
 
-  function cell(className, text) {
+  function cell(className, text, title) {
     var div = document.createElement('div');
     div.className = className || '';
     div.textContent = text == null ? '' : String(text);
+    if (title) div.title = title;
     return div;
   }
 
-  function headerCell(text) {
-    return cell('portal-table-header', text);
+  function headerCell(text, title) {
+    return cell('portal-table-header', text, title);
   }
 
   function permission(state, key) {
@@ -361,7 +397,8 @@
       deactivate: ['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z', 'M7 7l10 10'],
       search: ['M10 18a8 8 0 1 1 5.3-14A8 8 0 0 1 10 18z', 'M15 15l5 5'],
       open: ['M14 3h7v7', 'M21 3l-9 9', 'M5 5h6', 'M5 5v14h14v-6'],
-      save: ['M5 12l4 4 10-10']
+      save: ['M5 3h12l2 2v16H5V3z', 'M8 3v6h8V3', 'M8 17h8v4', 'M10 6h4'],
+      binoculars: ['M7 10a4 4 0 1 0 0 8 4 4 0 0 0 0-8z', 'M17 10a4 4 0 1 0 0 8 4 4 0 0 0 0-8z', 'M7 10V5a2 2 0 0 1 4 0v7', 'M17 10V5a2 2 0 0 0-4 0v7', 'M10 7h4']
     };
     (paths[name] || paths.edit).forEach(function (d) {
       var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -596,10 +633,12 @@
       saveActivity(activity, available.value === 'true', from.value, until.value);
     };
 
-    row.appendChild(cell('portal-cell-title', valueOrDash(activity.titulo || activity.codigo || activity.id)));
+    var fullFileName = activityFileName(activity);
+    var fileBaseName = activityFileBaseName(activity);
+    row.appendChild(cell('portal-cell-title', valueOrDash(activityDisplayTitle(activity))));
     row.appendChild(cell('', valueOrDash(activity.area)));
     row.appendChild(cell('portal-cell-compact', valueOrDash(activity.tipo)));
-    row.appendChild(cell('', valueOrDash(activity.estado)));
+    row.appendChild(activityStateCell(activity));
     var availableCell = document.createElement('div');
     availableCell.className = 'portal-editable-cell portal-editable-available';
     availableCell.appendChild(available);
@@ -612,7 +651,7 @@
     untilCell.className = 'portal-editable-cell portal-editable-date';
     untilCell.appendChild(until);
     row.appendChild(untilCell);
-    row.appendChild(cell('portal-cell-file', valueOrDash(activityFileName(activity))));
+    row.appendChild(cell('portal-cell-file', valueOrDash(fileBaseName), fullFileName));
     var actions = document.createElement('div');
     actions.className = 'portal-row-actions';
     actions.appendChild(save);
@@ -624,6 +663,7 @@
     portal.activityFilters = {
       titulo: $('portalActivityFilterTitle') ? clean($('portalActivityFilterTitle').value).toLowerCase() : '',
       area: $('portalActivityFilterArea') ? clean($('portalActivityFilterArea').value).toLowerCase() : '',
+      archivo: $('portalActivityFilterFile') ? clean($('portalActivityFilterFile').value).toLowerCase() : '',
       grado: $('portalActivityFilterGrade') ? clean($('portalActivityFilterGrade').value) : '',
       tipo: $('portalActivityFilterType') ? clean($('portalActivityFilterType').value) : '',
       disponible: $('portalActivityFilterAvailable') ? clean($('portalActivityFilterAvailable').value) : ''
@@ -632,9 +672,10 @@
   }
 
   function clearActivityFilters() {
-    portal.activityFilters = { titulo: '', area: '', grado: '', tipo: '', disponible: '' };
+    portal.activityFilters = { titulo: '', area: '', archivo: '', grado: '', tipo: '', disponible: '' };
     if ($('portalActivityFilterTitle')) $('portalActivityFilterTitle').value = '';
     if ($('portalActivityFilterArea')) $('portalActivityFilterArea').value = '';
+    if ($('portalActivityFilterFile')) $('portalActivityFilterFile').value = '';
     if ($('portalActivityFilterGrade')) $('portalActivityFilterGrade').value = '';
     if ($('portalActivityFilterType')) $('portalActivityFilterType').value = '';
     if ($('portalActivityFilterAvailable')) $('portalActivityFilterAvailable').value = '';
@@ -643,8 +684,9 @@
   function filteredActivities(list) {
     var filters = portal.activityFilters || {};
     return (list || []).filter(function (activity) {
-      if (filters.titulo && clean(activity.titulo).toLowerCase().indexOf(filters.titulo) < 0) return false;
+      if (filters.titulo && activityDisplayTitle(activity).toLowerCase().indexOf(filters.titulo) < 0) return false;
       if (filters.area && clean(activity.area).toLowerCase() !== filters.area) return false;
+      if (filters.archivo && activityFileBaseName(activity).toLowerCase().indexOf(filters.archivo) < 0) return false;
       if (filters.grado && String(activity.grado || '') !== filters.grado) return false;
       if (filters.tipo && String(activity.tipo || '').toUpperCase() !== filters.tipo.toUpperCase()) return false;
       if (filters.disponible === 'true' && activity.disponible !== true) return false;
@@ -676,8 +718,18 @@
     }
     var table = document.createElement('div');
     table.className = 'portal-table portal-activity-table';
-    ['Título', 'Área', 'Tipo', 'Estado', 'Disponible', 'Visible desde', 'Visible hasta', 'Archivo', 'Acciones'].forEach(function (title) {
-      table.appendChild(headerCell(title));
+    [
+      { text: 'Título' },
+      { text: 'Área' },
+      { text: 'Tipo' },
+      { text: 'EST.', title: 'Estado' },
+      { text: 'DISP.', title: 'Disponible' },
+      { text: 'Visible desde' },
+      { text: 'Visible hasta' },
+      { text: 'Archivo' },
+      { text: 'ACC.', title: 'Acciones' }
+    ].forEach(function (header) {
+      table.appendChild(headerCell(header.text, header.title));
     });
     list.forEach(function (activity) {
       table.appendChild(activityTableRow(state, activity));
@@ -1332,6 +1384,11 @@
     if ($('portalResultsApply')) $('portalResultsApply').onclick = loadResults;
     if ($('portalResultsExport')) $('portalResultsExport').onclick = exportResultsCsv;
     if ($('portalActivitiesSearch')) {
+      $('portalActivitiesSearch').innerHTML = '';
+      $('portalActivitiesSearch').classList.add('portal-search-icon-button');
+      $('portalActivitiesSearch').setAttribute('aria-label', 'Buscar');
+      $('portalActivitiesSearch').title = 'Buscar';
+      $('portalActivitiesSearch').appendChild(actionIcon('binoculars'));
       $('portalActivitiesSearch').onclick = function () {
         readActivityFilters();
         renderActivities(portal.state || {});
