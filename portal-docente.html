@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Portal funcional del personal docente - Escuela 1077</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css?v=admin-20260717-05">
+  <link rel="stylesheet" href="styles.css?v=admin-20260718-01">
 </head>
 <body>
   <header class="topbar">
@@ -167,15 +167,24 @@
             <h2>Resultados y seguimiento</h2>
             <p class="panel-subtitle">Consulta y exportación según permisos asignados.</p>
           </div>
+          <button type="button" id="portalResultsExport" class="secondary">Exportar para Excel</button>
         </div>
         <div class="portal-results-controls">
+          <label class="portal-results-filter-id">
+            ID
+            <input id="portalResultsStudentFilter" type="text" maxlength="3" inputmode="numeric">
+          </label>
           <label>
-            ID alumno
-            <input id="portalResultsStudentFilter" type="text" maxlength="40">
+            Apellido y Nombres
+            <input id="portalResultsStudentNameFilter" type="text" maxlength="140">
           </label>
           <label>
             Actividad
             <input id="portalResultsActivityFilter" type="text" maxlength="120">
+          </label>
+          <label>
+            Nombre de Archivo
+            <input id="portalResultsFileFilter" type="text" maxlength="140">
           </label>
           <label class="portal-filter-small">
             Área
@@ -229,7 +238,6 @@
             </select>
           </label>
           <button type="button" id="portalResultsApply" class="secondary">Filtrar</button>
-          <button type="button" id="portalResultsExport" class="secondary">Exportar para Excel</button>
         </div>
         <div id="portalResultsStatus" class="portal-muted">Sin datos.</div>
         <div id="portalResultsList" class="portal-list">Sin datos.</div>
@@ -378,8 +386,8 @@
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="portal-docente.js?v=admin-20260717-05"></script>
-  <script src="portal-docente-fixes.js?v=admin-20260717-05"></script>
+  <script src="portal-docente.js?v=admin-20260718-01"></script>
+  <script src="portal-docente-fixes.js?v=admin-20260718-01"></script>
   <script src="aie-login-redirect.js"></script>
 </body>
 </html>

@@ -9,7 +9,9 @@
     resultados: [],
     resultFilters: {
       alumno: '',
+      alumnoNombre: '',
       actividad: '',
+      archivo: '',
       area: '',
       grado: '',
       tipo: '',
@@ -810,7 +812,9 @@
   function readResultFilters() {
     portal.resultFilters = {
       alumno: $('portalResultsStudentFilter') ? clean($('portalResultsStudentFilter').value) : '',
+      alumnoNombre: $('portalResultsStudentNameFilter') ? clean($('portalResultsStudentNameFilter').value).toLowerCase() : '',
       actividad: $('portalResultsActivityFilter') ? clean($('portalResultsActivityFilter').value).toLowerCase() : '',
+      archivo: $('portalResultsFileFilter') ? clean($('portalResultsFileFilter').value).toLowerCase() : '',
       area: $('portalResultsAreaFilter') ? clean($('portalResultsAreaFilter').value).toLowerCase() : '',
       grado: $('portalResultsGradeFilter') ? clean($('portalResultsGradeFilter').value) : '',
       tipo: $('portalResultsTypeFilter') ? clean($('portalResultsTypeFilter').value).toUpperCase() : '',
@@ -825,13 +829,33 @@
     return clean(result && (result.actividadTitulo || result.actividadCodigo || result.actividadId)) || '-';
   }
 
+  function resultStudentText(result) {
+    return clean(result && (
+      result.alumnoNombreCompleto ||
+      [result.alumnoApellido, result.alumnoNombre].filter(Boolean).join(' ')
+    )) || '-';
+  }
+
+  function resultFileText(result) {
+    return clean(result && (
+      result.archivoNombre ||
+      result.archivo ||
+      result.nombreArchivo ||
+      result.archivo_nombre
+    )) || '-';
+  }
+
   function filteredResults(list) {
     var filters = portal.resultFilters || {};
     return (list || []).filter(function (result) {
       var activity = resultActivityText(result).toLowerCase();
+      var student = resultStudentText(result).toLowerCase();
+      var file = resultFileText(result).toLowerCase();
       var date = clean(result.fechaLocal);
       if (filters.alumno && clean(result.alumnoId).toLowerCase().indexOf(filters.alumno.toLowerCase()) < 0) return false;
+      if (filters.alumnoNombre && student.indexOf(filters.alumnoNombre) < 0) return false;
       if (filters.actividad && activity.indexOf(filters.actividad) < 0) return false;
+      if (filters.archivo && file.indexOf(filters.archivo) < 0) return false;
       if (filters.area && clean(result.area).toLowerCase() !== filters.area) return false;
       if (filters.grado && String(result.grado || '') !== filters.grado) return false;
       if (filters.tipo && String(result.tipoActividad || '').toUpperCase() !== filters.tipo) return false;
@@ -846,7 +870,9 @@
     row.className = 'portal-table-row portal-result-row';
     row.appendChild(cell('portal-cell-date', valueOrDash(resultDateText(result))));
     row.appendChild(cell('portal-cell-student', valueOrDash(result.alumnoId)));
+    row.appendChild(cell('portal-cell-student-name', resultStudentText(result)));
     row.appendChild(cell('portal-cell-title', resultActivityText(result)));
+    row.appendChild(cell('portal-cell-file', resultFileText(result)));
     row.appendChild(cell('', valueOrDash(result.area)));
     row.appendChild(cell('portal-cell-compact', valueOrDash(result.grado)));
     row.appendChild(cell('portal-cell-compact', valueOrDash(result.tipoActividad)));
@@ -881,7 +907,7 @@
     }
     var table = document.createElement('div');
     table.className = 'portal-table portal-result-table';
-    ['Fecha', 'Alumno', 'Actividad', 'Area', 'G', 'T', 'Cant.', 'OK', 'Err.', 'Nota', 'T/m'].forEach(function (title) {
+    ['Fecha', 'ID', 'Apellido y Nombres', 'Actividad', 'Archivo', 'Area', 'G', 'T', 'Cant.', 'OK', 'Err.', 'Nota', 'T/m'].forEach(function (title) {
       table.appendChild(headerCell(title));
     });
     list.forEach(function (result) {
@@ -910,7 +936,9 @@
     }
     var headers = [
       'alumno_id',
+      'apellido_y_nombres',
       'actividad',
+      'archivo',
       'grado',
       'area',
       'tipo',
@@ -927,7 +955,9 @@
     list.forEach(function (result) {
       lines.push([
         result.alumnoId,
+        resultStudentText(result),
         result.actividadTitulo || result.actividadCodigo || result.actividadId,
+        resultFileText(result),
         result.grado,
         result.area,
         result.tipoActividad,

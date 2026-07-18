@@ -1591,6 +1591,21 @@ body {
   font-size: 20px;
 }
 
+#portalResultsCard {
+  border: 3px solid #111827;
+}
+
+#portalResultsCard .panel-head {
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 2px solid #111827;
+  background: #f8fafc;
+}
+
+#portalResultsCard .panel-head h2 {
+  font-size: 20px;
+}
+
 .portal-card {
   display: grid;
   gap: 10px;
@@ -2022,8 +2037,8 @@ body {
 }
 
 .portal-result-table {
-  grid-template-columns: 145px 110px minmax(230px, 2fr) 140px 42px 42px 60px 48px 48px 60px 55px;
-  min-width: 1080px;
+  grid-template-columns: 135px 52px minmax(165px, 1.1fr) minmax(190px, 1.25fr) minmax(190px, 1.25fr) 118px 38px 38px 52px 42px 42px 54px 46px;
+  min-width: 1260px;
 }
 
 .portal-student-table {
@@ -2084,11 +2099,12 @@ body {
 
 .portal-results-controls {
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) minmax(160px, 1.4fr) 155px 80px 80px 130px 130px 80px auto auto;
+  grid-template-columns: 56px minmax(165px, 1.05fr) minmax(145px, 0.9fr) minmax(170px, 1.1fr) 142px 76px 72px 120px 120px 70px auto;
   align-items: end;
   gap: 8px;
   padding: 12px;
   border-bottom: 1px solid var(--line);
+  overflow-x: auto;
 }
 
 .portal-results-controls label {
@@ -2103,6 +2119,10 @@ body {
 .portal-results-controls select {
   width: 100%;
   min-height: 34px;
+}
+
+.portal-results-filter-id input {
+  text-align: center;
 }
 
 .portal-interface-grid {
