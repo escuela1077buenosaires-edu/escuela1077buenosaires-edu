@@ -1788,7 +1788,7 @@ body {
 }
 
 #portalActivityFilters {
-  grid-template-columns: minmax(105px, 0.72fr) minmax(105px, 0.72fr) minmax(175px, 1.25fr) 78px 76px 86px 42px;
+  grid-template-columns: minmax(96px, 0.62fr) minmax(96px, 0.62fr) minmax(155px, 1.15fr) 74px 72px 78px 42px 105px;
 }
 
 #portalActivityFilters.portal-activity-filter-row {
@@ -2037,8 +2037,12 @@ body {
 }
 
 .portal-result-table {
-  grid-template-columns: 135px 52px minmax(165px, 1.1fr) minmax(190px, 1.25fr) minmax(190px, 1.25fr) 118px 38px 38px 52px 42px 42px 54px 46px;
+  grid-template-columns: 135px 52px minmax(145px, 0.95fr) minmax(190px, 1.25fr) minmax(190px, 1.25fr) 118px 38px 38px 60px 42px 50px 60px 46px;
   min-width: 1260px;
+}
+
+.portal-result-table .portal-table-header {
+  white-space: nowrap;
 }
 
 .portal-student-table {
@@ -2823,6 +2827,34 @@ button.secondary {
 }
 
 button.secondary:hover {
+  background: #d8e0e4;
+}
+
+.portal-button-link {
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  background: var(--accent);
+}
+
+.portal-button-link:hover {
+  background: var(--accent-dark);
+}
+
+.portal-button-link-secondary {
+  color: var(--ink);
+  background: #e6ebee;
+}
+
+.portal-button-link-secondary:hover {
   background: #d8e0e4;
 }
 
