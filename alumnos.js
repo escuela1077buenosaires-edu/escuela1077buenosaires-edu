@@ -100,7 +100,7 @@
     if (!box) return;
     box.innerHTML = '';
     if (!searched) {
-      box.textContent = 'Use el buscador para listar actividades.';
+      box.textContent = 'Cargando actividades disponibles.';
       return;
     }
     if (!activities || !activities.length) {
@@ -131,15 +131,15 @@
   function renderOpen(data, searched) {
     $('studentIndexStatus').className = 'student-index-status open';
     $('studentIndexStatus').textContent = 'Indice habilitado';
-    $('studentIndexMessage').textContent = text(data && data.mensaje) || 'Busque una actividad para comenzar.';
+    $('studentIndexMessage').textContent = text(data && data.mensaje) || 'Actividades disponibles para comenzar.';
     renderActivities(data && data.actividades || [], searched);
   }
 
   function loadIndex(searchRequested) {
     var filters = readFilters();
     var searched = hasFilters(filters);
-    filters.listar_todas = searchRequested === true && !searched ? 'true' : '';
-    filters.listarTodas = searchRequested === true && !searched;
+    filters.listar_todas = !searched ? 'true' : '';
+    filters.listarTodas = !searched;
     searched = searched || filters.listarTodas === true;
     requestIndex(filters, function (err, data) {
       if (err) {
@@ -170,11 +170,7 @@
         if ($('studentActivityFilterArea')) $('studentActivityFilterArea').value = '';
         if ($('studentActivityFilterGrade')) $('studentActivityFilterGrade').value = '';
         if ($('studentActivityFilterType')) $('studentActivityFilterType').value = '';
-        if (lastIndexData && lastIndexData.indiceHabilitado === true) {
-          renderOpen(lastIndexData, false);
-        } else if (lastIndexData) {
-          renderClosed(lastIndexData);
-        }
+        loadIndex(false);
       };
     }
     var inputs = document.querySelectorAll('#studentIndexFilters input, #studentIndexFilters select');
