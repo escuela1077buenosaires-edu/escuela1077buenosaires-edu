@@ -1599,8 +1599,10 @@
     if ($('portalStudentCancel')) {
       $('portalStudentCancel').onclick = function () {
         clearStudentForm();
-        setStudentMode('alta');
-        setStudentsStatus('Alta de alumno.');
+        setStudentMode('');
+        portal.alumnosApoyo = [];
+        renderStudents(portal.state || {}, []);
+        setStudentsStatus('Operacion cancelada.');
       };
     }
   }
