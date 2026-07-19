@@ -1,6 +1,6 @@
 {
   "escuelaId": "1077",
-  "generadoEn": "2026-07-19T05:58:25.963Z",
+  "generadoEn": "2026-07-19T14:03:21.520Z",
   "githubPagesBasePath": "/escuela1077buenosaires-edu/",
   "backendBaseUrlConfigurado": false,
   "supabasePublicConfigConfigurada": true,
@@ -13,7 +13,7 @@
     {
       "nombre": "aie-hub-sw.js",
       "bytes": 1338,
-      "sha256": "c402aa59a96f081f5a587d2c1cf6553005d8b5a911557611ccce9e0e0745957e"
+      "sha256": "72c30e4f39491650a59e4984275fd1475d6fd30da9b7cb1345f1af4113b39b9a"
     },
     {
       "nombre": "aie-hub.webmanifest",
@@ -38,12 +38,12 @@
     {
       "nombre": "alumnos.html",
       "bytes": 2708,
-      "sha256": "c2536cc8e15f553197c7037a645aa473cc47f4b641fdd725fe64b55b3024bd6c"
+      "sha256": "acc1c0a4d5a81a38a3f69b06fb41f6a8847ea9b2aaae2cfefa6f751c93904d27"
     },
     {
       "nombre": "alumnos.js",
-      "bytes": 6880,
-      "sha256": "fe556e0d18e04508fbbadd82163b81473da9cad5ae0809bd7ef49dcc0f19698f"
+      "bytes": 6885,
+      "sha256": "4ba6594df2ef736602f41f6b22af50f4276959bade36122bdd5500f009170053"
     },
     {
       "nombre": "index.html",
@@ -78,7 +78,7 @@
     {
       "nombre": "manifest-publicacion.json",
       "bytes": 3147,
-      "sha256": "a204fdc940f0187896694dd486b614b907669cd4bdc51c2182d95b1b50092a73"
+      "sha256": "cde2b3a5477097cc6cf1374efcd816ddd631eec701251057899bc5f41c84634b"
     },
     {
       "nombre": "portal-docente-fixes.js",
@@ -88,17 +88,17 @@
     {
       "nombre": "portal-docente.html",
       "bytes": 17841,
-      "sha256": "02aa2d426bed91bcc62af19168d735bf48bc76ac729b38b945868a20cd6fb950"
+      "sha256": "6d5485a88e51493793159d0dffaf8d2eea115dad803c02c63180c0c7b37c9f51"
     },
     {
       "nombre": "portal-docente.js",
-      "bytes": 68567,
-      "sha256": "39a32e72178cfe5e36225190438d766bf225f8216a0c33ae810663385941dd6f"
+      "bytes": 69391,
+      "sha256": "729964158200bc42bdcad884d870f9f9700403ab0646385647ceb91f3a771b08"
     },
     {
       "nombre": "styles.css",
-      "bytes": 56876,
-      "sha256": "ca24a517c3b8f5b528c458f5a337a9502ce111b0542d3bd09b3a4f40b2194698"
+      "bytes": 56872,
+      "sha256": "ce2d4fc2e44882c3c9f516d82f18567c0c50dde4770c9aef8ca43cdde1aa7b96"
     }
   ]
 }

@@ -6,6 +6,7 @@
     state: null,
     accessToken: '',
     actividades: [],
+    activityListAll: false,
     alumnosApoyo: [],
     resultados: [],
     resultFilters: {
@@ -137,7 +138,8 @@
           p_tipo: parsed.params.get('tipo') || '',
           p_disponible: parsed.params.get('disponible') === 'true'
             ? true
-            : parsed.params.get('disponible') === 'false' ? false : null
+            : parsed.params.get('disponible') === 'false' ? false : null,
+          p_listar_todas: parsed.params.get('listar_todas') === 'true'
         }, callback, authenticated);
       }
       if (method === 'POST' && pathname === '/api/portal-docente/sesion') {
@@ -742,6 +744,7 @@
   }
 
   function clearActivityFilters() {
+    portal.activityListAll = false;
     portal.activityFilters = { titulo: '', area: '', archivo: '', grado: '', tipo: '', disponible: '' };
     if ($('portalActivityFilterTitle')) $('portalActivityFilterTitle').value = '';
     if ($('portalActivityFilterArea')) $('portalActivityFilterArea').value = '';
@@ -757,7 +760,7 @@
     });
   }
 
-  function activitySearchQuery(filters) {
+  function activitySearchQuery(filters, listAll) {
     var input = filters || {};
     return query({
       titulo: input.titulo || '',
@@ -765,7 +768,8 @@
       archivo: input.archivo || '',
       grado: input.grado || '',
       tipo: input.tipo || '',
-      disponible: input.disponible || ''
+      disponible: input.disponible || '',
+      listar_todas: listAll ? 'true' : ''
     });
   }
 
@@ -798,7 +802,7 @@
       return;
     }
     var filters = portal.activityFilters || {};
-    if (!hasActivitySearchFilters(filters)) {
+    if (!hasActivitySearchFilters(filters) && portal.activityListAll !== true) {
       box.textContent = 'Complete al menos un filtro y presione Buscar.';
       return;
     }
@@ -1316,7 +1320,7 @@
     }, true);
   }
 
-  function loadActivities() {
+  function loadActivities(listAllRequested) {
     var state = portal.state || {};
     var allowed = state && state.autorizado && portalHasAnyPermission(state, 'puede_visualizar_actividades puede_probar_actividades puede_habilitar_actividades puede_bloquear_actividades');
     if (!allowed) {
@@ -1325,7 +1329,9 @@
       return;
     }
     var filters = portal.activityFilters || {};
-    if (!hasActivitySearchFilters(filters)) {
+    var hasFilters = hasActivitySearchFilters(filters);
+    portal.activityListAll = !hasFilters && listAllRequested === true;
+    if (!hasFilters && portal.activityListAll !== true) {
       portal.actividades = [];
       renderActivities(state);
       return;
@@ -1335,7 +1341,7 @@
       box.innerHTML = '';
       box.textContent = 'Buscando actividades...';
     }
-    var qs = activitySearchQuery(filters);
+    var qs = activitySearchQuery(filters, portal.activityListAll === true);
     api('GET', '/api/portal-docente/actividades' + (qs ? '?' + qs : ''), null, function (err, data) {
       if (err) {
         portal.actividades = [];
@@ -1524,8 +1530,8 @@
         return;
       }
       renderState(data);
-      if (hasActivitySearchFilters(portal.activityFilters || {})) {
-        loadActivities();
+      if (hasActivitySearchFilters(portal.activityFilters || {}) || portal.activityListAll === true) {
+        loadActivities(portal.activityListAll === true);
       }
       setStatus('Actividad actualizada correctamente.');
     }, true);
@@ -1595,7 +1601,14 @@
     if ($('portalCloseClassSession')) $('portalCloseClassSession').onclick = closeClassSession;
     if ($('teacherPortalRefresh')) $('teacherPortalRefresh').onclick = loadPortal;
     if ($('portalStudentForm')) $('portalStudentForm').onsubmit = saveStudent;
-    if ($('portalResultsApply')) $('portalResultsApply').onclick = loadResults;
+    if ($('portalResultsApply')) {
+      $('portalResultsApply').innerHTML = '';
+      $('portalResultsApply').classList.add('portal-search-icon-button');
+      $('portalResultsApply').setAttribute('aria-label', 'Filtrar resultados');
+      $('portalResultsApply').title = 'Filtrar resultados';
+      $('portalResultsApply').appendChild(actionIcon('search'));
+      $('portalResultsApply').onclick = loadResults;
+    }
     if ($('portalResultsExport')) $('portalResultsExport').onclick = exportResultsCsv;
     if ($('portalActivitiesSearch')) {
       $('portalActivitiesSearch').innerHTML = '';
@@ -1605,7 +1618,7 @@
       $('portalActivitiesSearch').appendChild(actionIcon('search'));
       $('portalActivitiesSearch').onclick = function () {
         readActivityFilters();
-        loadActivities();
+        loadActivities(true);
       };
     }
     if ($('portalActivitiesClear')) {
@@ -1655,7 +1668,7 @@
         if (event.key === 'Enter') {
           event.preventDefault();
           readActivityFilters();
-          loadActivities();
+          loadActivities(true);
         }
       };
     }

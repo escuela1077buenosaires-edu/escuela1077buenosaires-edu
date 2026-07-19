@@ -2164,7 +2164,7 @@ body {
 
 .portal-results-controls {
   display: grid;
-  grid-template-columns: 56px minmax(165px, 1.05fr) minmax(145px, 0.9fr) minmax(170px, 1.1fr) 142px 76px 72px 120px 120px 70px auto;
+  grid-template-columns: 56px minmax(155px, 1fr) minmax(135px, 0.85fr) minmax(155px, 1fr) 120px 78px 74px 132px 132px 78px 42px;
   align-items: end;
   gap: 8px;
   padding: 12px;

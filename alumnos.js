@@ -46,7 +46,8 @@
           p_buscar: input.buscar || '',
           p_area: input.area || '',
           p_grado: input.grado || '',
-          p_tipo: input.tipo || ''
+          p_tipo: input.tipo || '',
+          p_listar_todas: input.listarTodas === true
         }, '', callback);
         return;
       }
@@ -137,14 +138,9 @@
   function loadIndex(searchRequested) {
     var filters = readFilters();
     var searched = hasFilters(filters);
-    if (searchRequested && !searched) {
-      if (lastIndexData && lastIndexData.indiceHabilitado === true) {
-        renderOpen(lastIndexData, false);
-      } else if (lastIndexData) {
-        renderClosed(lastIndexData);
-      }
-      return;
-    }
+    filters.listar_todas = searchRequested === true && !searched ? 'true' : '';
+    filters.listarTodas = searchRequested === true && !searched;
+    searched = searched || filters.listarTodas === true;
     requestIndex(filters, function (err, data) {
       if (err) {
         $('studentIndexStatus').className = 'student-index-status closed';
