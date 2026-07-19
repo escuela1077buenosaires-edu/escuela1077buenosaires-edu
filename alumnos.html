@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Actividades 1077</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=alumnos-20260719-01">
 </head>
 <body class="student-index-body">
   <main class="student-index">
@@ -17,12 +17,54 @@
 
     <section class="student-index-panel">
       <div id="studentIndexStatus" class="student-index-status">Espere un momento.</div>
+      <div id="studentIndexFilters" class="student-index-filters" aria-label="Buscar actividades">
+        <label class="student-index-search">
+          Buscar
+          <input id="studentActivityFilterSearch" type="text" maxlength="120" placeholder="Título, área o archivo">
+        </label>
+        <label>
+          Área
+          <select id="studentActivityFilterArea">
+            <option value="">Todas</option>
+            <option value="Lengua">Lengua</option>
+            <option value="Matematica">Matemática</option>
+            <option value="Ciencias Naturales">Ciencias Naturales</option>
+            <option value="Ciencias Sociales">Ciencias Sociales</option>
+            <option value="Formacion Etica y Ciudadana">Formación Ética y Ciudadana</option>
+            <option value="Tecnologia">Tecnología</option>
+            <option value="Otra">Otra</option>
+          </select>
+        </label>
+        <label>
+          Grado
+          <select id="studentActivityFilterGrade">
+            <option value="">Todos</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+          </select>
+        </label>
+        <label>
+          Tipo
+          <select id="studentActivityFilterType">
+            <option value="">Todos</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+          </select>
+        </label>
+        <button type="button" id="studentActivitySearch">Buscar</button>
+        <button type="button" id="studentActivityClear" class="secondary">Limpiar</button>
+      </div>
       <div id="studentActivities" class="student-activity-list"></div>
     </section>
   </main>
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="alumnos.js"></script>
+  <script src="alumnos.js?v=alumnos-20260719-01"></script>
 </body>
 </html>

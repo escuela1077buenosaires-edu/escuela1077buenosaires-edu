@@ -46,6 +46,11 @@
       if (method === 'GET' && path === '/api/portal-docente/estado') {
         return rpc('aie_1077_portal_estado', {}, callback, authenticated);
       }
+      if (method === 'GET' && path.indexOf('/api/portal-docente/actividades') === 0) {
+        return rpc('aie_1077_actividades_listar', {
+          p_disponible: true
+        }, callback, authenticated);
+      }
       if (method === 'POST' && path === '/api/resultados/validar') {
         window.setTimeout(function () {
           try {
@@ -192,7 +197,9 @@
       select.disabled = true;
       return;
     }
-    activities = state.actividades || [];
+    if (Array.isArray(state.actividades) && state.actividades.length) {
+      activities = state.actividades;
+    }
     if (!activities.length) {
       var empty = document.createElement('option');
       empty.value = '';
@@ -217,6 +224,22 @@
       if (activities[i].id === id) return activities[i];
     }
     return null;
+  }
+
+  function loadQrActivities() {
+    api('GET', '/api/portal-docente/actividades?disponible=true', null, function (err, data) {
+      if (err) {
+        activities = [];
+        renderActivities();
+        setStatus(err.error || 'No se pudieron cargar actividades para el lector QR.', true);
+        return;
+      }
+      activities = data && data.actividades || [];
+      renderActivities();
+      setStatus(activities.length
+        ? 'Sesion autorizada. Seleccione actividad y lea QR.'
+        : 'No hay actividades disponibles para el lector QR.', !activities.length);
+    }, true);
   }
 
   function showCameraWarning(text) {
@@ -485,7 +508,12 @@
       renderSession();
       renderActivities();
       if (state.autorizado && canUseQr()) {
-        setStatus('Sesion autorizada. Seleccione actividad y lea QR.');
+        if (!activities.length) {
+          setStatus('Cargando actividades para el lector QR.');
+          loadQrActivities();
+        } else {
+          setStatus('Sesion autorizada. Seleccione actividad y lea QR.');
+        }
       } else if (state.autorizado) {
         setStatus('Sesion autorizada, pero sin permiso para lector QR.', true);
       } else {

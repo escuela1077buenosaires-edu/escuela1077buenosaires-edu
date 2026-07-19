@@ -5,6 +5,7 @@
     config: null,
     state: null,
     accessToken: '',
+    actividades: [],
     alumnosApoyo: [],
     resultados: [],
     resultFilters: {
@@ -126,6 +127,18 @@
       }
       if (method === 'GET' && pathname === '/api/portal-docente/estado') {
         return rpc('aie_1077_portal_estado', {}, callback, authenticated);
+      }
+      if (method === 'GET' && pathname === '/api/portal-docente/actividades') {
+        return rpc('aie_1077_actividades_listar', {
+          p_titulo: parsed.params.get('titulo') || '',
+          p_area: parsed.params.get('area') || '',
+          p_archivo: parsed.params.get('archivo') || '',
+          p_grado: parsed.params.get('grado') || '',
+          p_tipo: parsed.params.get('tipo') || '',
+          p_disponible: parsed.params.get('disponible') === 'true'
+            ? true
+            : parsed.params.get('disponible') === 'false' ? false : null
+        }, callback, authenticated);
       }
       if (method === 'POST' && pathname === '/api/portal-docente/sesion') {
         return rpc('aie_1077_registrar_sesion', {}, callback, authenticated);
@@ -738,6 +751,24 @@
     if ($('portalActivityFilterAvailable')) $('portalActivityFilterAvailable').value = '';
   }
 
+  function hasActivitySearchFilters(filters) {
+    return Object.keys(filters || {}).some(function (key) {
+      return filters[key] !== undefined && filters[key] !== null && filters[key] !== '';
+    });
+  }
+
+  function activitySearchQuery(filters) {
+    var input = filters || {};
+    return query({
+      titulo: input.titulo || '',
+      area: input.area || '',
+      archivo: input.archivo || '',
+      grado: input.grado || '',
+      tipo: input.tipo || '',
+      disponible: input.disponible || ''
+    });
+  }
+
   function filteredActivities(list) {
     var filters = portal.activityFilters || {};
     return (list || []).filter(function (activity) {
@@ -766,7 +797,12 @@
       box.textContent = state && state.autorizado ? 'Sin permiso para visualizar actividades.' : 'Inicie sesion para ver actividades.';
       return;
     }
-    var list = filteredActivities(state && state.actividades || []);
+    var filters = portal.activityFilters || {};
+    if (!hasActivitySearchFilters(filters)) {
+      box.textContent = 'Complete al menos un filtro y presione Buscar.';
+      return;
+    }
+    var list = portal.actividades || [];
     if (!list.length) {
       box.textContent = state && state.autorizado
         ? 'No hay actividades registradas para los filtros seleccionados.'
@@ -1280,6 +1316,38 @@
     }, true);
   }
 
+  function loadActivities() {
+    var state = portal.state || {};
+    var allowed = state && state.autorizado && portalHasAnyPermission(state, 'puede_visualizar_actividades puede_probar_actividades puede_habilitar_actividades puede_bloquear_actividades');
+    if (!allowed) {
+      portal.actividades = [];
+      renderActivities(state);
+      return;
+    }
+    var filters = portal.activityFilters || {};
+    if (!hasActivitySearchFilters(filters)) {
+      portal.actividades = [];
+      renderActivities(state);
+      return;
+    }
+    var box = $('portalActivities');
+    if (box) {
+      box.innerHTML = '';
+      box.textContent = 'Buscando actividades...';
+    }
+    var qs = activitySearchQuery(filters);
+    api('GET', '/api/portal-docente/actividades' + (qs ? '?' + qs : ''), null, function (err, data) {
+      if (err) {
+        portal.actividades = [];
+        renderActivities(state);
+        setStatus(err.error || 'No se pudieron cargar actividades.', true);
+        return;
+      }
+      portal.actividades = data && data.actividades || [];
+      renderActivities(state);
+    }, true);
+  }
+
   function renderState(state) {
     portal.state = state || {};
     var config = state && state.configuracion || portal.config || {};
@@ -1456,6 +1524,9 @@
         return;
       }
       renderState(data);
+      if (hasActivitySearchFilters(portal.activityFilters || {})) {
+        loadActivities();
+      }
       setStatus('Actividad actualizada correctamente.');
     }, true);
   }
@@ -1534,12 +1605,13 @@
       $('portalActivitiesSearch').appendChild(actionIcon('search'));
       $('portalActivitiesSearch').onclick = function () {
         readActivityFilters();
-        renderActivities(portal.state || {});
+        loadActivities();
       };
     }
     if ($('portalActivitiesClear')) {
       $('portalActivitiesClear').onclick = function () {
         clearActivityFilters();
+        portal.actividades = [];
         renderActivities(portal.state || {});
       };
     }
@@ -1583,7 +1655,7 @@
         if (event.key === 'Enter') {
           event.preventDefault();
           readActivityFilters();
-          renderActivities(portal.state || {});
+          loadActivities();
         }
       };
     }
