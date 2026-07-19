@@ -1815,7 +1815,11 @@ body {
 }
 
 #portalStudentFilters {
-  grid-template-columns: 120px minmax(150px, 1fr) minmax(150px, 1fr) 78px 120px 105px auto;
+  grid-template-columns: 120px minmax(130px, 0.9fr) minmax(138px, 0.95fr) 78px 112px 95px 72px auto;
+}
+
+#portalStudentsStatus {
+  padding: 8px 12px 0;
 }
 
 .portal-list {

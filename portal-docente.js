@@ -26,7 +26,8 @@
       nombre: '',
       grado: '',
       turno: '',
-      division: ''
+      division: '',
+      activo: ''
     },
     activityFilters: {
       titulo: '',
@@ -1097,7 +1098,8 @@
       nombre: $('portalStudentFilterName') ? clean($('portalStudentFilterName').value).toLowerCase() : '',
       grado: $('portalStudentFilterGrade') ? clean($('portalStudentFilterGrade').value) : '',
       turno: $('portalStudentFilterShift') ? clean($('portalStudentFilterShift').value) : '',
-      division: $('portalStudentFilterDivision') ? clean($('portalStudentFilterDivision').value).toUpperCase() : ''
+      division: $('portalStudentFilterDivision') ? clean($('portalStudentFilterDivision').value).toUpperCase() : '',
+      activo: $('portalStudentFilterActive') ? clean($('portalStudentFilterActive').value) : ''
     };
     return portal.studentFilters;
   }
@@ -1111,6 +1113,8 @@
       if (filters.grado && String(student.grado || '') !== filters.grado) return false;
       if (filters.turno && String(student.turno || '') !== filters.turno) return false;
       if (filters.division && String(student.division || '').toUpperCase() !== filters.division) return false;
+      if (filters.activo === 'true' && student.activo !== true) return false;
+      if (filters.activo === 'false' && student.activo === true) return false;
       return true;
     });
   }

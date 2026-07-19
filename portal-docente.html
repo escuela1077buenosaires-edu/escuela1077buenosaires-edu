@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Portal funcional del personal docente - Escuela 1077</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css?v=admin-20260718-04">
+  <link rel="stylesheet" href="styles.css?v=admin-20260718-05">
 </head>
 <body>
   <header class="topbar">
@@ -302,6 +302,14 @@
               <option value="F">F</option>
             </select>
           </label>
+          <label class="portal-filter-small" title="Activo">
+            A
+            <select id="portalStudentFilterActive" title="Activo">
+              <option value="">Todos</option>
+              <option value="true">SI</option>
+              <option value="false">NO</option>
+            </select>
+          </label>
           <button type="button" id="portalStudentListar" class="secondary">Listar</button>
         </div>
         <div id="portalStudentsStatus" class="portal-muted">Sin datos.</div>
@@ -387,8 +395,8 @@
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="portal-docente.js?v=admin-20260718-04"></script>
-  <script src="portal-docente-fixes.js?v=admin-20260718-04"></script>
+  <script src="portal-docente.js?v=admin-20260718-05"></script>
+  <script src="portal-docente-fixes.js?v=admin-20260718-05"></script>
   <script src="aie-login-redirect.js"></script>
 </body>
 </html>
