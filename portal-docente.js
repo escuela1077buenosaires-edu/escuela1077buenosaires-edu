@@ -46,6 +46,26 @@
     return String(value == null ? '' : value).replace(/\s+/g, ' ').trim();
   }
 
+  function normalizeSearch(value) {
+    var text = clean(value).toLowerCase();
+    try {
+      text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    } catch (err) {
+      // Navegadores viejos pueden no soportar normalize; se conserva el texto limpio.
+    }
+    return text.replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+
+  function searchMatches(haystack, needle) {
+    var search = normalizeSearch(needle);
+    if (!search) return true;
+    var text = normalizeSearch(haystack);
+    if (text.indexOf(search) >= 0) return true;
+    var compactText = text.replace(/\s+/g, '');
+    var compactSearch = search.replace(/\s+/g, '');
+    return !!compactSearch && compactText.indexOf(compactSearch) >= 0;
+  }
+
   function query(params) {
     var parts = [];
     Object.keys(params || {}).forEach(function (key) {
@@ -307,6 +327,19 @@
 
   function activityFileBaseName(activity) {
     return clean(activityFileName(activity)).replace(/\.html?$/i, '');
+  }
+
+  function activityFileSearchText(activity) {
+    return [
+      activityFileName(activity),
+      activityFileBaseName(activity),
+      activity && activity.archivoNombre,
+      activity && activity.archivo_nombre,
+      activity && activity.nombreArchivo,
+      activity && activity.nombre_archivo,
+      activity && activity.storagePath,
+      activity && activity.storage_path
+    ].map(clean).filter(Boolean).join(' ');
   }
 
   function activityDisplayTitle(activity) {
@@ -649,6 +682,7 @@
     var fileBaseName = activityFileBaseName(activity);
     row.appendChild(cell('portal-cell-title', valueOrDash(activityDisplayTitle(activity))));
     row.appendChild(cell('', valueOrDash(activity.area)));
+    row.appendChild(cell('portal-cell-compact', valueOrDash(activity.grado)));
     row.appendChild(cell('portal-cell-compact', valueOrDash(activity.tipo)));
     row.appendChild(activityStateCell(activity));
     var availableCell = document.createElement('div');
@@ -696,9 +730,9 @@
   function filteredActivities(list) {
     var filters = portal.activityFilters || {};
     return (list || []).filter(function (activity) {
-      if (filters.titulo && activityDisplayTitle(activity).toLowerCase().indexOf(filters.titulo) < 0) return false;
+      if (filters.titulo && !searchMatches(activityDisplayTitle(activity), filters.titulo)) return false;
       if (filters.area && clean(activity.area).toLowerCase() !== filters.area) return false;
-      if (filters.archivo && activityFileBaseName(activity).toLowerCase().indexOf(filters.archivo) < 0) return false;
+      if (filters.archivo && !searchMatches(activityFileSearchText(activity), filters.archivo)) return false;
       if (filters.grado && String(activity.grado || '') !== filters.grado) return false;
       if (filters.tipo && String(activity.tipo || '').toUpperCase() !== filters.tipo.toUpperCase()) return false;
       if (filters.disponible === 'true' && activity.disponible !== true) return false;
@@ -733,6 +767,7 @@
     [
       { text: 'Título' },
       { text: 'Área' },
+      { text: 'G', title: 'Grado' },
       { text: 'T', title: 'Tipo' },
       { text: 'EST.', title: 'Estado' },
       { text: 'DISP.', title: 'Disponible' },

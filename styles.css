@@ -1935,7 +1935,7 @@ body {
 }
 
 .portal-activity-table {
-  grid-template-columns: minmax(160px, 0.95fr) 112px 34px 54px 76px 170px 170px minmax(285px, 1.65fr) 52px;
+  grid-template-columns: minmax(160px, 0.95fr) 112px 34px 34px 54px 76px 170px 170px minmax(251px, 1.45fr) 52px;
   min-width: 1180px;
 }
 
