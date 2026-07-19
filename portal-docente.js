@@ -165,7 +165,17 @@
         }, callback, authenticated);
       }
       if (method === 'GET' && pathname === '/api/portal-docente/alumnos-apoyo') {
-        return rpc('aie_1077_alumnos_apoyo_listar', {}, callback, authenticated);
+        return rpc('aie_1077_alumnos_apoyo_listar', {
+          p_id_alumno: parsed.params.get('id_alumno') || parsed.params.get('idAlumno') || '',
+          p_apellido: parsed.params.get('apellido') || '',
+          p_nombre: parsed.params.get('nombre') || '',
+          p_grado: parsed.params.get('grado') || '',
+          p_turno: parsed.params.get('turno') || '',
+          p_division: parsed.params.get('division') || '',
+          p_activo: parsed.params.get('activo') === 'true'
+            ? true
+            : parsed.params.get('activo') === 'false' ? false : null
+        }, callback, authenticated);
       }
       if (method === 'POST' && pathname === '/api/portal-docente/alumnos-apoyo') {
         return rpc('aie_1077_alumnos_apoyo_guardar', {
@@ -1104,6 +1114,24 @@
     return portal.studentFilters;
   }
 
+  function hasStudentSearchFilters(filters) {
+    return Object.keys(filters || {}).some(function (key) {
+      return !!filters[key];
+    });
+  }
+
+  function studentSearchQuery(filters) {
+    return query({
+      id_alumno: filters && filters.idAlumno,
+      apellido: filters && filters.apellido,
+      nombre: filters && filters.nombre,
+      grado: filters && filters.grado,
+      turno: filters && filters.turno,
+      division: filters && filters.division,
+      activo: filters && filters.activo
+    });
+  }
+
   function filteredStudents(list) {
     var filters = portal.studentFilters || {};
     return (list || []).filter(function (student) {
@@ -1203,6 +1231,11 @@
       return;
     }
     var list = filteredStudents(students || portal.alumnosApoyo || []);
+    if (portal.studentAction === 'buscar' && !hasStudentSearchFilters(portal.studentFilters || {})) {
+      setStudentsStatus('Complete al menos un filtro y presione Listar.');
+      listBox.textContent = 'Sin listado cargado.';
+      return;
+    }
     setStudentsStatus(portal.studentAction === 'buscar'
       ? 'Listado de alumnos - Cantidad: ' + list.length
       : 'Seleccione Altas para cargar o Buscar para consultar alumnos.');
@@ -1227,7 +1260,15 @@
       renderStudents(state, []);
       return;
     }
-    api('GET', '/api/portal-docente/alumnos-apoyo', null, function (err, data) {
+    var filters = portal.studentFilters || {};
+    if (!hasStudentSearchFilters(filters)) {
+      portal.alumnosApoyo = [];
+      renderStudents(state, []);
+      setStudentsStatus('Complete al menos un filtro y presione Listar.');
+      return;
+    }
+    var qs = studentSearchQuery(filters);
+    api('GET', '/api/portal-docente/alumnos-apoyo' + (qs ? '?' + qs : ''), null, function (err, data) {
       if (err) {
         portal.alumnosApoyo = [];
         renderStudents(state, []);
@@ -1437,9 +1478,14 @@
         return;
       }
       clearStudentForm();
-      setStudentsStatus('Alumno guardado correctamente.');
       setStudentMode('buscar');
-      loadStudents();
+      if (hasStudentSearchFilters(portal.studentFilters || {})) {
+        loadStudents();
+      } else {
+        portal.alumnosApoyo = [];
+        renderStudents(portal.state || {}, []);
+        setStudentsStatus('Alumno guardado correctamente. Use Buscar y Listar con filtro para consultarlo.');
+      }
       setStatus('Activo');
     }, true);
   }
@@ -1457,9 +1503,14 @@
         setStudentsStatus(err.error || 'No se pudo desactivar el alumno.', true);
         return;
       }
-      setStudentsStatus('Alumno desactivado.');
       setStudentMode('buscar');
-      loadStudents();
+      if (hasStudentSearchFilters(portal.studentFilters || {})) {
+        loadStudents();
+      } else {
+        portal.alumnosApoyo = [];
+        renderStudents(portal.state || {}, []);
+        setStudentsStatus('Alumno desactivado. Use Buscar y Listar con filtro para consultar alumnos.');
+      }
       setStatus('Activo');
     }, true);
   }
@@ -1503,8 +1554,9 @@
     if ($('portalStudentActionSearch')) {
       $('portalStudentActionSearch').onclick = function () {
         setStudentMode('buscar');
-        readStudentFilters();
-        loadStudents();
+        portal.alumnosApoyo = [];
+        renderStudents(portal.state || {}, []);
+        setStudentsStatus('Complete al menos un filtro y presione Listar.');
       };
     }
     if ($('portalStudentListar')) {
