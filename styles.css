@@ -1606,6 +1606,24 @@ body {
   font-size: 20px;
 }
 
+#portalStudentsCard {
+  border: 3px solid #7f1d1d;
+}
+
+#portalStudentsCard .panel-head {
+  border-bottom: 2px solid #7f1d1d;
+  background: #fff7f7;
+}
+
+#portalInterfacesCard {
+  border: 3px solid #111827;
+}
+
+#portalInterfacesCard .panel-head {
+  border-bottom: 2px solid #111827;
+  background: #f8fafc;
+}
+
 .portal-card {
   display: grid;
   gap: 10px;
@@ -2046,8 +2064,12 @@ body {
 }
 
 .portal-student-table {
-  grid-template-columns: 115px 150px 150px 42px 55px 95px 65px minmax(240px, 1.4fr) 88px;
+  grid-template-columns: 115px 150px 150px 42px 55px 95px 78px minmax(210px, 1.25fr) 104px;
   min-width: 1000px;
+}
+
+.portal-student-table .portal-table-header {
+  white-space: nowrap;
 }
 
 .portal-cell-title,
