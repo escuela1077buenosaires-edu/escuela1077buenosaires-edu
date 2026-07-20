@@ -33,6 +33,26 @@
     }
   }
 
+  function normalizeRole(value) {
+    var role = String(value == null ? '' : value).replace(/\s+/g, ' ').trim().toLowerCase();
+    if (role === 'directivo' || role === 'directora' || role === 'director') return 'directora';
+    if (role === 'supervision' || role === 'supervisor' || role === 'supervisora') return 'supervisora';
+    if (role === 'drt') return 'drt';
+    if (role === 'administrador') return 'administrador';
+    return '';
+  }
+
+  function persistRoleContext() {
+    try {
+      var role = normalizeRole(new URLSearchParams(window.location.search || '').get('rol') || '');
+      if (role && window.sessionStorage) {
+        window.sessionStorage.setItem('aiePortal1077RoleContext', role);
+      }
+    } catch (err) {
+      return;
+    }
+  }
+
   function cleanLoginParam() {
     if (!window.history || !window.history.replaceState) return;
     try {
@@ -63,6 +83,7 @@
     if (!wantsLogin() || hasAuthHash()) return;
     var target = pageTarget();
     if (!target) return;
+    persistRoleContext();
     if (hasStoredToken(target.sessionKey)) {
       cleanLoginParam();
       return;

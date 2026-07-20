@@ -1,6 +1,6 @@
 {
   "escuelaId": "1077",
-  "generadoEn": "2026-07-20T02:42:58.940Z",
+  "generadoEn": "2026-07-20T05:07:16.333Z",
   "githubPagesBasePath": "/escuela1077buenosaires-edu/",
   "backendBaseUrlConfigurado": false,
   "supabasePublicConfigConfigurada": true,
@@ -13,7 +13,7 @@
     {
       "nombre": "aie-hub-sw.js",
       "bytes": 1338,
-      "sha256": "d5613800c25170641be8f1fb93eea5d46a2bf9c18d588c135e84a1998874f5d1"
+      "sha256": "a2f0cfdfb6307ee2a4160458adc2d63f206020977aa3a4003b038ced2258a89a"
     },
     {
       "nombre": "aie-hub.webmanifest",
@@ -22,8 +22,8 @@
     },
     {
       "nombre": "aie-login-redirect.js",
-      "bytes": 1915,
-      "sha256": "3198242ee83f39e6eeac9850fd660367de03c37dd4d64201cb5700360b420f93"
+      "bytes": 2699,
+      "sha256": "7357cf66e872b9d56e86d74e41f2ab1b075eebdbd36e45710ff31e3bed2a1ae0"
     },
     {
       "nombre": "aie-public-config.js",
@@ -48,7 +48,7 @@
     {
       "nombre": "index.html",
       "bytes": 5969,
-      "sha256": "cb58f2298a09d67d94019c9afeed1933e163c27578500e1524cb34b512cf5ffb"
+      "sha256": "6f0a6664aef60d05d8ed8d4ea51c03094e64f79a3e68d35df7ab3eccb70fcffd"
     },
     {
       "nombre": "lector-qr-icon.svg",
@@ -78,7 +78,7 @@
     {
       "nombre": "manifest-publicacion.json",
       "bytes": 3147,
-      "sha256": "f69de730360a9362e6669836268185b2689a21874c749d81157bccf4f577ea8e"
+      "sha256": "a5430d8ff2d4795b10bb69abf4d8b7ad516e03371a63e11aeae6bd63f35de588"
     },
     {
       "nombre": "portal-docente-fixes.js",
@@ -87,13 +87,13 @@
     },
     {
       "nombre": "portal-docente.html",
-      "bytes": 18200,
-      "sha256": "bed9b048225cf915da85fe94958828462abc2cc22b3fa149a53184726fca273e"
+      "bytes": 18253,
+      "sha256": "68ebd51e2771051554dd61287d9b9a5df343e6be28da1b2c9f391e439c31d7c2"
     },
     {
       "nombre": "portal-docente.js",
-      "bytes": 73505,
-      "sha256": "d057a3c4d2d2397c63dcb176b499f1becfba206d8d3f72f67522ad473e329205"
+      "bytes": 77115,
+      "sha256": "63d0de4434c1376afe8be6f64dfb678ec66dc62129ce54ffcd39b8af074dd3dd"
     },
     {
       "nombre": "styles.css",

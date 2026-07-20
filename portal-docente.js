@@ -1,10 +1,12 @@
 (function () {
   var sessionKey = 'aiePortal1077AccessToken';
+  var roleContextKey = 'aiePortal1077RoleContext';
   var DEFAULT_INDEX_MINUTES = 90;
   var portal = {
     config: null,
     state: null,
     accessToken: '',
+    roleContext: '',
     actividades: [],
     activityControls: {},
     activityListAll: false,
@@ -264,6 +266,82 @@
       return window.sessionStorage;
     } catch (err) {
       return null;
+    }
+  }
+
+  function normalizeRoleContext(value) {
+    var role = clean(value).toLowerCase();
+    if (role === 'directivo' || role === 'directora' || role === 'director') return 'directora';
+    if (role === 'supervision' || role === 'supervisor' || role === 'supervisora') return 'supervisora';
+    if (role === 'drt') return 'drt';
+    if (role === 'administrador') return 'administrador';
+    return '';
+  }
+
+  function roleContextFromUrl() {
+    try {
+      return normalizeRoleContext(new URLSearchParams(window.location.search || '').get('rol') || '');
+    } catch (err) {
+      return '';
+    }
+  }
+
+  function roleLabel(role) {
+    role = normalizeRoleContext(role);
+    if (role === 'drt') return 'Docente DRT';
+    if (role === 'directora') return 'Personal Directivo';
+    if (role === 'supervisora') return 'Personal de Supervisión';
+    if (role === 'administrador') return 'Administrador del Sistema';
+    return 'Personal docente';
+  }
+
+  function roleContextInfo(role) {
+    role = normalizeRoleContext(role);
+    if (role === 'drt') {
+      return {
+        heading: 'Portal funcional - Docente DRT',
+        subtitle: 'La Docente DRT debe iniciar sesión con Google. Los bloques visibles dependen de los permisos asignados por el AIE.'
+      };
+    }
+    if (role === 'directora') {
+      return {
+        heading: 'Portal funcional - Personal Directivo',
+        subtitle: 'La Directora debe iniciar sesión con Google. Los bloques visibles dependen de los permisos asignados por el AIE.'
+      };
+    }
+    if (role === 'supervisora') {
+      return {
+        heading: 'Portal funcional - Personal de Supervisión',
+        subtitle: 'Supervisión debe iniciar sesión con Google. Los bloques visibles dependen de los permisos asignados por el AIE.'
+      };
+    }
+    return {
+      heading: 'Portal funcional del personal docente',
+      subtitle: 'DRT, directora y supervisora deben iniciar sesión con Google y tener perfil activo.'
+    };
+  }
+
+  function initRoleContext() {
+    var store = storage();
+    var fromUrl = roleContextFromUrl();
+    if (fromUrl) {
+      portal.roleContext = fromUrl;
+      if (store) store.setItem(roleContextKey, fromUrl);
+    } else if (store) {
+      portal.roleContext = normalizeRoleContext(store.getItem(roleContextKey) || '');
+    }
+    applyPortalRoleContext();
+  }
+
+  function applyPortalRoleContext(state) {
+    var role = portal.roleContext || normalizeRoleContext(state && state.perfil && state.perfil.rol || '');
+    var info = roleContextInfo(role);
+    var heading = $('teacherPortalHeading');
+    var subtitle = $('teacherPortalSubtitle');
+    if (heading) heading.textContent = info.heading;
+    if (subtitle) subtitle.textContent = info.subtitle;
+    if (document && document.documentElement) {
+      document.documentElement.setAttribute('data-aie-portal-role-context', role || 'general');
     }
   }
 
@@ -553,7 +631,7 @@
       var name = document.createElement('strong');
       name.textContent = state.perfil.nombre || state.perfil.email;
       var detail = document.createElement('span');
-      detail.textContent = state.perfil.email + ' | ' + state.perfil.rol;
+      detail.textContent = state.perfil.email + ' | ' + roleLabel(state.perfil.rol);
       profile.appendChild(name);
       profile.appendChild(detail);
       box.appendChild(profile);
@@ -881,6 +959,9 @@
     var canQr = isAdminState(state) || permission(state, 'puede_usar_lector_qr');
     var canIndex = isAdminState(state) || permission(state, 'puede_ver_indice_alumnos');
     var canPortal = isAdminState(state) || permission(state, 'puede_ver_portal_funcional');
+    if (portalLink) {
+      portalLink.href = 'portal-docente.html' + (portal.roleContext ? '?rol=' + encodeURIComponent(portal.roleContext) : '');
+    }
     setHidden(portalLink, !(state && state.autorizado && canPortal));
     setHidden(qr, !(state && state.autorizado && canQr));
     setHidden(index, !(state && state.autorizado && canIndex));
@@ -1374,6 +1455,7 @@
   function renderState(state) {
     portal.state = state || {};
     var config = state && state.configuracion || portal.config || {};
+    applyPortalRoleContext(state);
     updatePortalFeatureVisibility(state);
     renderSession(state);
     renderIndex(state);
@@ -1388,7 +1470,12 @@
       return;
     }
     if (state.autorizado) {
-      setStatus('Sesion autorizada. Se muestran solo las funcionalidades habilitadas para su rol.');
+      var currentRole = normalizeRoleContext(state.perfil && state.perfil.rol || '');
+      if (portal.roleContext && currentRole && portal.roleContext !== currentRole && currentRole !== 'administrador') {
+        setStatus('Sesion autorizada como ' + roleLabel(currentRole) + '. Esta entrada corresponde a ' + roleLabel(portal.roleContext) + '; se muestran solo las funcionalidades habilitadas para el perfil autenticado.');
+      } else {
+        setStatus('Sesion autorizada. Se muestran solo las funcionalidades habilitadas para su rol.');
+      }
     } else if (portal.accessToken) {
       setStatus('Sesion pendiente de autorizacion: verifique que el Gmail exista en Perfiles y roles.', true);
     } else if (config.supabase && config.supabase.loginGoogleListo) {
@@ -1792,6 +1879,7 @@
     }
   }
 
+  initRoleContext();
   bind();
   loadPortal();
 }());
