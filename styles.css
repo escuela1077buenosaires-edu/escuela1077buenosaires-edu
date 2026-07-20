@@ -1634,6 +1634,35 @@ body {
   justify-content: flex-end;
 }
 
+.portal-availability-bulk-button {
+  color: #fff;
+  font-weight: 900;
+}
+
+.portal-availability-yes {
+  border: 1px solid #166534;
+  background: #15803d;
+}
+
+.portal-availability-no {
+  border: 1px solid #7f1d1d;
+  background: #991b1b;
+}
+
+.portal-availability-yes:hover:not(:disabled) {
+  background: #166534;
+}
+
+.portal-availability-no:hover:not(:disabled) {
+  background: #7f1d1d;
+}
+
+.portal-availability-bulk-button:disabled {
+  border-color: #cbd5d1;
+  background: #dbe7df;
+  color: #6b7a70;
+}
+
 .portal-update-index-button {
   border: 1px solid #166534;
   background: #15803d;
@@ -1651,6 +1680,7 @@ body {
   color: #6b7a70;
 }
 
+.portal-availability-notice,
 .portal-update-index-notice {
   margin: 0;
   padding: 9px 14px;

@@ -95,10 +95,11 @@
           </div>
           <div class="portal-head-actions">
             <button type="button" id="portalActivitiesClear" class="secondary">Limpiar filtros</button>
-            <button type="button" id="portalActivitiesUpdateIndex" class="portal-update-index-button">Actualizar Índice</button>
+            <button type="button" id="portalActivitiesSetAllYes" class="portal-availability-bulk-button portal-availability-yes">Todos disponibles = SI</button>
+            <button type="button" id="portalActivitiesSetAllNo" class="portal-availability-bulk-button portal-availability-no">Todos disponibles = NO</button>
           </div>
         </div>
-        <p class="portal-update-index-notice">Actualizar Índice, habilita todas las actividades marcadas como disponibles o bloquea las que no figuran como tal.</p>
+        <p class="portal-availability-notice">Por defecto se buscan actividades con DISP. = NO. Para casos puntuales cambie el combo a SI o NO y presione el icono guardar.</p>
         <div id="portalActivityFilters" class="portal-filter-row portal-activity-filter-row" aria-label="Filtros de actividades">
           <label>
             Título
@@ -145,9 +146,9 @@
           <label class="portal-filter-small">
             Disp.
             <select id="portalActivityFilterAvailable">
-              <option value="">Todos</option>
+              <option value="false" selected>NO</option>
               <option value="true">SI</option>
-              <option value="false">NO</option>
+              <option value="">Todos</option>
             </select>
           </label>
           <button type="button" id="portalActivitiesSearch">Buscar</button>
@@ -399,8 +400,8 @@
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="portal-docente.js?v=admin-20260720-02"></script>
-  <script src="portal-docente-fixes.js?v=admin-20260720-02"></script>
+  <script src="portal-docente.js?v=admin-20260720-03"></script>
+  <script src="portal-docente-fixes.js?v=admin-20260720-03"></script>
   <script src="aie-login-redirect.js"></script>
 </body>
 </html>

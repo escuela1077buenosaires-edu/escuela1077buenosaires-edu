@@ -10,6 +10,7 @@
     actividades: [],
     activityControls: {},
     activityListAll: false,
+    activitySearchStarted: false,
     alumnosApoyo: [],
     resultados: [],
     resultFilters: {
@@ -41,7 +42,7 @@
       archivo: '',
       grado: '',
       tipo: '',
-      disponible: ''
+      disponible: 'false'
     }
   };
 
@@ -833,13 +834,14 @@
 
   function clearActivityFilters() {
     portal.activityListAll = false;
-    portal.activityFilters = { titulo: '', area: '', archivo: '', grado: '', tipo: '', disponible: '' };
+    portal.activitySearchStarted = false;
+    portal.activityFilters = { titulo: '', area: '', archivo: '', grado: '', tipo: '', disponible: 'false' };
     if ($('portalActivityFilterTitle')) $('portalActivityFilterTitle').value = '';
     if ($('portalActivityFilterArea')) $('portalActivityFilterArea').value = '';
     if ($('portalActivityFilterFile')) $('portalActivityFilterFile').value = '';
     if ($('portalActivityFilterGrade')) $('portalActivityFilterGrade').value = '';
     if ($('portalActivityFilterType')) $('portalActivityFilterType').value = '';
-    if ($('portalActivityFilterAvailable')) $('portalActivityFilterAvailable').value = '';
+    if ($('portalActivityFilterAvailable')) $('portalActivityFilterAvailable').value = 'false';
   }
 
   function hasActivitySearchFilters(filters) {
@@ -891,6 +893,11 @@
       return;
     }
     var filters = portal.activityFilters || {};
+    if (portal.activitySearchStarted !== true) {
+      portal.activityControls = {};
+      box.textContent = 'Presione Buscar para listar actividades con DISP. = NO o ajuste los filtros.';
+      return;
+    }
     if (!hasActivitySearchFilters(filters) && portal.activityListAll !== true) {
       portal.activityControls = {};
       box.textContent = 'Complete al menos un filtro y presione Buscar.';
@@ -1429,6 +1436,7 @@
     var filters = portal.activityFilters || {};
     var hasFilters = hasActivitySearchFilters(filters);
     portal.activityListAll = !hasFilters && listAllRequested === true;
+    portal.activitySearchStarted = true;
     if (!hasFilters && portal.activityListAll !== true) {
       portal.actividades = [];
       renderActivities(state);
@@ -1634,7 +1642,7 @@
         return;
       }
       renderState(data);
-      if (hasActivitySearchFilters(portal.activityFilters || {}) || portal.activityListAll === true) {
+      if (portal.activitySearchStarted === true && (hasActivitySearchFilters(portal.activityFilters || {}) || portal.activityListAll === true)) {
         loadActivities(portal.activityListAll === true);
       }
       setStatus('Actividad actualizada correctamente.');
@@ -1650,7 +1658,8 @@
       if (control.until) control.until.disabled = disabled;
       if (control.save) control.save.disabled = disabled;
     });
-    if ($('portalActivitiesUpdateIndex')) $('portalActivitiesUpdateIndex').disabled = disabled;
+    if ($('portalActivitiesSetAllYes')) $('portalActivitiesSetAllYes').disabled = disabled;
+    if ($('portalActivitiesSetAllNo')) $('portalActivitiesSetAllNo').disabled = disabled;
   }
 
   function updateIndexFromVisibleActivities() {
@@ -1709,6 +1718,75 @@
       }, function (err) {
         if (err) {
           finish(false, err.error || 'No se pudo actualizar: ' + (activity.titulo || 'actividad') + '.');
+          return;
+        }
+        next(index + 1);
+      }, true);
+    }
+
+    next(0);
+  }
+
+  function setListedActivitiesAvailability(available) {
+    var state = portal.state || {};
+    if (!state.autorizado) {
+      setStatus('Debe iniciar sesión para cambiar la disponibilidad.', true);
+      return;
+    }
+    var controls = Object.keys(portal.activityControls || {}).map(function (id) {
+      return portal.activityControls[id];
+    }).filter(Boolean);
+    if (!controls.length) {
+      setStatus('No hay actividades listadas para cambiar.', true);
+      return;
+    }
+    available = available === true;
+    var requiredPermission = available ? 'puede_habilitar_actividades' : 'puede_bloquear_actividades';
+    if (!permission(state, requiredPermission)) {
+      setStatus('Su perfil no tiene permiso para cambiar todas las actividades listadas.', true);
+      return;
+    }
+    var pending = controls.filter(function (control) {
+      return control.available && control.available.value !== (available ? 'true' : 'false');
+    });
+    if (!pending.length) {
+      setStatus('Las actividades listadas ya tienen DISP. = ' + (available ? 'SI' : 'NO') + '.');
+      return;
+    }
+    if (!window.confirm('Cambiar ' + pending.length + ' actividad(es) listada(s) a DISP. = ' + (available ? 'SI' : 'NO') + '?')) return;
+
+    var total = pending.length;
+    setActivityControlsDisabled(true);
+    setStatus('Cambiando disponibilidad de actividades');
+
+    function finish(ok, message) {
+      setActivityControlsDisabled(false);
+      if (!ok) {
+        setStatus(message || 'No se pudo cambiar la disponibilidad.', true);
+        return;
+      }
+      setStatus('Disponibilidad actualizada correctamente. Actividades modificadas: ' + total + '.');
+      if (portal.activitySearchStarted === true && (hasActivitySearchFilters(portal.activityFilters || {}) || portal.activityListAll === true)) {
+        loadActivities(portal.activityListAll === true);
+      }
+    }
+
+    function next(index) {
+      if (index >= pending.length) {
+        finish(true);
+        return;
+      }
+      var control = pending[index];
+      var activity = control.activity || {};
+      if (control.available) control.available.value = available ? 'true' : 'false';
+      setStatus('Cambiando disponibilidad (' + (index + 1) + '/' + total + ')');
+      api('POST', '/api/portal-docente/actividades/' + encodeURIComponent(activity.id), {
+        disponible: available,
+        visibleDesde: control.from ? control.from.value || '' : '',
+        visibleHasta: control.until ? control.until.value || '' : ''
+      }, function (err) {
+        if (err) {
+          finish(false, err.error || 'No se pudo cambiar: ' + (activity.titulo || 'actividad') + '.');
           return;
         }
         next(index + 1);
@@ -1810,8 +1888,11 @@
         renderActivities(portal.state || {});
       };
     }
-    if ($('portalActivitiesUpdateIndex')) {
-      $('portalActivitiesUpdateIndex').onclick = updateIndexFromVisibleActivities;
+    if ($('portalActivitiesSetAllYes')) {
+      $('portalActivitiesSetAllYes').onclick = function () { setListedActivitiesAvailability(true); };
+    }
+    if ($('portalActivitiesSetAllNo')) {
+      $('portalActivitiesSetAllNo').onclick = function () { setListedActivitiesAvailability(false); };
     }
     if ($('portalStudentActionNew')) {
       $('portalStudentActionNew').onclick = function () {

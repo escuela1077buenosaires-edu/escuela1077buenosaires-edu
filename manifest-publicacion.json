@@ -1,6 +1,6 @@
 {
   "escuelaId": "1077",
-  "generadoEn": "2026-07-20T05:10:26.144Z",
+  "generadoEn": "2026-07-20T17:49:42.443Z",
   "githubPagesBasePath": "/escuela1077buenosaires-edu/",
   "backendBaseUrlConfigurado": false,
   "supabasePublicConfigConfigurada": true,
@@ -13,7 +13,7 @@
     {
       "nombre": "aie-hub-sw.js",
       "bytes": 1338,
-      "sha256": "a2f0cfdfb6307ee2a4160458adc2d63f206020977aa3a4003b038ced2258a89a"
+      "sha256": "f469609df57997f8c0049331579257e18d9126a864f6e31b7be8ddc622105c40"
     },
     {
       "nombre": "aie-hub.webmanifest",
@@ -78,7 +78,7 @@
     {
       "nombre": "manifest-publicacion.json",
       "bytes": 3147,
-      "sha256": "73103623165629714bba7aa411eff47ae04ad49fcfec3f10f4ea766c13705bf9"
+      "sha256": "73647986bd0248b1e6ff570d9deb43b648810cc8e22b45cd3c87cb79df7e3cc2"
     },
     {
       "nombre": "portal-docente-fixes.js",
@@ -87,18 +87,18 @@
     },
     {
       "nombre": "portal-docente.html",
-      "bytes": 18253,
-      "sha256": "68ebd51e2771051554dd61287d9b9a5df343e6be28da1b2c9f391e439c31d7c2"
+      "bytes": 18462,
+      "sha256": "97420f0822fd2c1a46c31938c4ad41c96f2c7169e05ad102e2839516e125b3c2"
     },
     {
       "nombre": "portal-docente.js",
-      "bytes": 77104,
-      "sha256": "d9705328bb500bb69e2f5dd88b5e3b1d8cdb6e132b38d5161e6bef48074ab135"
+      "bytes": 80475,
+      "sha256": "e626713d75aaf8ca4ddaa57cd4606a18c19336b97e99bd350cb17a383e05500d"
     },
     {
       "nombre": "styles.css",
-      "bytes": 57487,
-      "sha256": "8c2dd44287fa4a72adde51212c08ded315bfaf8a30733496cba8d1ade535f86f"
+      "bytes": 58012,
+      "sha256": "4a5f1ea6b1c53d25952fb734852ec8fe6e830e0cefd9421beb99a6bbd6cb698f"
     }
   ]
 }
