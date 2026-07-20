@@ -754,7 +754,6 @@
     var canModify = state && state.autorizado && permissionAny(state, ['puede_habilitar_actividades', 'puede_bloquear_actividades']);
 
     var available = document.createElement('select');
-    available.value = activity.disponible === true ? 'true' : 'false';
     available.disabled = !canModify;
     var yes = document.createElement('option');
     yes.value = 'true';
@@ -764,6 +763,7 @@
     no.textContent = 'NO';
     available.appendChild(yes);
     available.appendChild(no);
+    available.value = activity.disponible === true ? 'true' : 'false';
 
     var from = document.createElement('input');
     from.type = 'datetime-local';
@@ -1662,6 +1662,104 @@
     if ($('portalActivitiesSetAllNo')) $('portalActivitiesSetAllNo').disabled = disabled;
   }
 
+  function allActivitiesQueryForBulk() {
+    return query({
+      titulo: '',
+      area: '',
+      archivo: '',
+      grado: '',
+      tipo: '',
+      disponible: '',
+      listar_todas: 'true'
+    });
+  }
+
+  function updateVisibleActivityAvailability(available) {
+    Object.keys(portal.activityControls || {}).forEach(function (id) {
+      var control = portal.activityControls[id];
+      if (!control) return;
+      if (control.available) control.available.value = available ? 'true' : 'false';
+      if (control.activity) control.activity.disponible = available === true;
+    });
+    (portal.actividades || []).forEach(function (activity) {
+      if (activity) activity.disponible = available === true;
+    });
+  }
+
+  function setAllActivitiesAvailability(available) {
+    var state = portal.state || {};
+    if (!state.autorizado) {
+      setStatus('Debe iniciar sesión para cambiar la disponibilidad.', true);
+      return;
+    }
+    available = available === true;
+    var label = available ? 'SI' : 'NO';
+    var requiredPermission = available ? 'puede_habilitar_actividades' : 'puede_bloquear_actividades';
+    if (!permission(state, requiredPermission)) {
+      setStatus('Su perfil no tiene permiso para cambiar todas las actividades.', true);
+      return;
+    }
+    if (!window.confirm('Cambiar TODAS las actividades subidas a DISP. = ' + label + '?')) return;
+
+    setActivityControlsDisabled(true);
+    setStatus('Buscando todas las actividades subidas');
+    var qs = allActivitiesQueryForBulk();
+    api('GET', '/api/portal-docente/actividades' + (qs ? '?' + qs : ''), null, function (err, data) {
+      if (err) {
+        setActivityControlsDisabled(false);
+        setStatus(err.error || 'No se pudieron listar las actividades.', true);
+        return;
+      }
+      var all = data && data.actividades || [];
+      if (!all.length) {
+        setActivityControlsDisabled(false);
+        setStatus('No hay actividades subidas para cambiar.', true);
+        return;
+      }
+      var pending = all.filter(function (activity) {
+        return activity && activity.id && activity.disponible !== available;
+      });
+      if (!pending.length) {
+        updateVisibleActivityAvailability(available);
+        setActivityControlsDisabled(false);
+        setStatus('Todas las actividades subidas ya tienen DISP. = ' + label + '.');
+        return;
+      }
+
+      function finish(ok, message) {
+        setActivityControlsDisabled(false);
+        if (!ok) {
+          setStatus(message || 'No se pudo cambiar la disponibilidad.', true);
+          return;
+        }
+        updateVisibleActivityAvailability(available);
+        setStatus('Disponibilidad global actualizada. Actividades modificadas: ' + pending.length + '. Presione Buscar para aplicar los filtros actuales.');
+      }
+
+      function next(index) {
+        if (index >= pending.length) {
+          finish(true);
+          return;
+        }
+        var activity = pending[index] || {};
+        setStatus('Cambiando disponibilidad global (' + (index + 1) + '/' + pending.length + ')');
+        api('POST', '/api/portal-docente/actividades/' + encodeURIComponent(activity.id), {
+          disponible: available,
+          visibleDesde: activity.visibleDesde || '',
+          visibleHasta: activity.visibleHasta || ''
+        }, function (postErr) {
+          if (postErr) {
+            finish(false, postErr.error || 'No se pudo cambiar: ' + (activity.titulo || 'actividad') + '.');
+            return;
+          }
+          next(index + 1);
+        }, true);
+      }
+
+      next(0);
+    }, true);
+  }
+
   function updateIndexFromVisibleActivities() {
     var state = portal.state || {};
     if (!state.autorizado) {
@@ -1889,10 +1987,10 @@
       };
     }
     if ($('portalActivitiesSetAllYes')) {
-      $('portalActivitiesSetAllYes').onclick = function () { setListedActivitiesAvailability(true); };
+      $('portalActivitiesSetAllYes').onclick = function () { setAllActivitiesAvailability(true); };
     }
     if ($('portalActivitiesSetAllNo')) {
-      $('portalActivitiesSetAllNo').onclick = function () { setListedActivitiesAvailability(false); };
+      $('portalActivitiesSetAllNo').onclick = function () { setAllActivitiesAvailability(false); };
     }
     if ($('portalStudentActionNew')) {
       $('portalStudentActionNew').onclick = function () {
