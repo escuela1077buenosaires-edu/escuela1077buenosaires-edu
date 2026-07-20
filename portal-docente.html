@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Portal funcional del personal docente - Escuela 1077</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css?v=admin-20260719-04">
+  <link rel="stylesheet" href="styles.css?v=admin-20260719-05">
 </head>
 <body>
   <header class="topbar">
@@ -93,8 +93,12 @@
             <h2>Listado de Actividades</h2>
             <p class="panel-subtitle">Visualización, prueba y disponibilidad según permisos asignados.</p>
           </div>
-          <button type="button" id="portalActivitiesClear" class="secondary">Limpiar filtros</button>
+          <div class="portal-head-actions">
+            <button type="button" id="portalActivitiesClear" class="secondary">Limpiar filtros</button>
+            <button type="button" id="portalActivitiesUpdateIndex" class="portal-update-index-button">Actualizar Índice</button>
+          </div>
         </div>
+        <p class="portal-update-index-notice">Actualizar Índice, habilita todas las actividades marcadas como disponibles o bloquea las que no figuran como tal.</p>
         <div id="portalActivityFilters" class="portal-filter-row portal-activity-filter-row" aria-label="Filtros de actividades">
           <label>
             Título
@@ -395,8 +399,8 @@
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="portal-docente.js?v=admin-20260719-04"></script>
-  <script src="portal-docente-fixes.js?v=admin-20260719-04"></script>
+  <script src="portal-docente.js?v=admin-20260719-05"></script>
+  <script src="portal-docente-fixes.js?v=admin-20260719-05"></script>
   <script src="aie-login-redirect.js"></script>
 </body>
 </html>

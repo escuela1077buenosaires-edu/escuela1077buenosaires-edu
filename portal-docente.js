@@ -6,6 +6,7 @@
     state: null,
     accessToken: '',
     actividades: [],
+    activityControls: {},
     activityListAll: false,
     alumnosApoyo: [],
     resultados: [],
@@ -703,6 +704,13 @@
     save.onclick = function () {
       saveActivity(activity, available.value === 'true', from.value, until.value);
     };
+    portal.activityControls[activity.id] = {
+      activity: activity,
+      available: available,
+      from: from,
+      until: until,
+      save: save
+    };
 
     var fullFileName = activityFileName(activity);
     var fileBaseName = activityFileBaseName(activity);
@@ -798,21 +806,25 @@
     box.innerHTML = '';
     var allowed = state && state.autorizado && portalHasAnyPermission(state, 'puede_visualizar_actividades puede_probar_actividades puede_habilitar_actividades puede_bloquear_actividades');
     if (!allowed) {
+      portal.activityControls = {};
       box.textContent = state && state.autorizado ? 'Sin permiso para visualizar actividades.' : 'Inicie sesion para ver actividades.';
       return;
     }
     var filters = portal.activityFilters || {};
     if (!hasActivitySearchFilters(filters) && portal.activityListAll !== true) {
+      portal.activityControls = {};
       box.textContent = 'Complete al menos un filtro y presione Buscar.';
       return;
     }
     var list = portal.actividades || [];
     if (!list.length) {
+      portal.activityControls = {};
       box.textContent = state && state.autorizado
         ? 'No hay actividades registradas para los filtros seleccionados.'
         : 'Indice cerrado o sin sesion autorizada. No se listan actividades para alumnos.';
       return;
     }
+    portal.activityControls = {};
     var table = document.createElement('div');
     table.className = 'portal-table portal-activity-table';
     [
@@ -1537,6 +1549,83 @@
     }, true);
   }
 
+  function setActivityControlsDisabled(disabled) {
+    Object.keys(portal.activityControls || {}).forEach(function (id) {
+      var control = portal.activityControls[id];
+      if (!control) return;
+      if (control.available) control.available.disabled = disabled;
+      if (control.from) control.from.disabled = disabled;
+      if (control.until) control.until.disabled = disabled;
+      if (control.save) control.save.disabled = disabled;
+    });
+    if ($('portalActivitiesUpdateIndex')) $('portalActivitiesUpdateIndex').disabled = disabled;
+  }
+
+  function updateIndexFromVisibleActivities() {
+    var state = portal.state || {};
+    if (!state.autorizado) {
+      setStatus('Debe iniciar sesión para actualizar el índice.', true);
+      return;
+    }
+    var controls = Object.keys(portal.activityControls || {}).map(function (id) {
+      return portal.activityControls[id];
+    }).filter(Boolean);
+    if (!controls.length) {
+      setStatus('No hay actividades listadas para actualizar.', true);
+      return;
+    }
+    var missingPermission = controls.some(function (control) {
+      var available = control.available && control.available.value === 'true';
+      var requiredPermission = available ? 'puede_habilitar_actividades' : 'puede_bloquear_actividades';
+      return !permission(state, requiredPermission);
+    });
+    if (missingPermission) {
+      setStatus('Su perfil no tiene permisos suficientes para habilitar o bloquear todas las actividades listadas.', true);
+      return;
+    }
+    if (!window.confirm('Actualizar el índice con todas las actividades listadas?')) return;
+
+    var total = controls.length;
+    setActivityControlsDisabled(true);
+    setStatus('Actualizando índice de actividades');
+
+    function finish(ok, message) {
+      setActivityControlsDisabled(false);
+      if (!ok) {
+        setStatus(message || 'No se pudo actualizar el índice.', true);
+        return;
+      }
+      setStatus('Índice actualizado correctamente. Actividades procesadas: ' + total + '.');
+      if (hasActivitySearchFilters(portal.activityFilters || {}) || portal.activityListAll === true) {
+        loadActivities(portal.activityListAll === true);
+      }
+    }
+
+    function next(index) {
+      if (index >= controls.length) {
+        finish(true);
+        return;
+      }
+      var control = controls[index];
+      var activity = control.activity || {};
+      var available = control.available && control.available.value === 'true';
+      setStatus('Actualizando índice de actividades (' + (index + 1) + '/' + total + ')');
+      api('POST', '/api/portal-docente/actividades/' + encodeURIComponent(activity.id), {
+        disponible: available,
+        visibleDesde: control.from ? control.from.value || '' : '',
+        visibleHasta: control.until ? control.until.value || '' : ''
+      }, function (err) {
+        if (err) {
+          finish(false, err.error || 'No se pudo actualizar: ' + (activity.titulo || 'actividad') + '.');
+          return;
+        }
+        next(index + 1);
+      }, true);
+    }
+
+    next(0);
+  }
+
   function saveStudent(event) {
     event.preventDefault();
     var state = portal.state || {};
@@ -1625,8 +1714,12 @@
       $('portalActivitiesClear').onclick = function () {
         clearActivityFilters();
         portal.actividades = [];
+        portal.activityControls = {};
         renderActivities(portal.state || {});
       };
+    }
+    if ($('portalActivitiesUpdateIndex')) {
+      $('portalActivitiesUpdateIndex').onclick = updateIndexFromVisibleActivities;
     }
     if ($('portalStudentActionNew')) {
       $('portalStudentActionNew').onclick = function () {

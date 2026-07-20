@@ -1626,6 +1626,41 @@ body {
   font-size: 20px;
 }
 
+.portal-head-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.portal-update-index-button {
+  border: 1px solid #166534;
+  background: #15803d;
+  color: #fff;
+  font-weight: 900;
+}
+
+.portal-update-index-button:hover:not(:disabled) {
+  background: #166534;
+}
+
+.portal-update-index-button:disabled {
+  border-color: #cbd5d1;
+  background: #dbe7df;
+  color: #6b7a70;
+}
+
+.portal-update-index-notice {
+  margin: 0;
+  padding: 9px 14px;
+  border-bottom: 1px solid #e6caca;
+  background: #fff7f7;
+  color: #7f1d1d;
+  font-size: 13px;
+  font-weight: 900;
+}
+
 #portalResultsCard {
   border: 3px solid #111827;
 }
