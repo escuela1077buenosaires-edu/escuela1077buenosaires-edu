@@ -23,6 +23,7 @@
       limit: '50'
     },
     studentAction: '',
+    studentListAll: false,
     studentFilters: {
       idAlumno: '',
       apellido: '',
@@ -190,7 +191,8 @@
           p_division: parsed.params.get('division') || '',
           p_activo: parsed.params.get('activo') === 'true'
             ? true
-            : parsed.params.get('activo') === 'false' ? false : null
+            : parsed.params.get('activo') === 'false' ? false : null,
+          p_listar_todos: parsed.params.get('listar_todos') === 'true'
         }, callback, authenticated);
       }
       if (method === 'POST' && pathname === '/api/portal-docente/alumnos-apoyo') {
@@ -1180,7 +1182,8 @@
       grado: filters && filters.grado,
       turno: filters && filters.turno,
       division: filters && filters.division,
-      activo: filters && filters.activo
+      activo: filters && filters.activo,
+      listar_todos: portal.studentListAll ? 'true' : ''
     });
   }
 
@@ -1283,7 +1286,7 @@
       return;
     }
     var list = filteredStudents(students || portal.alumnosApoyo || []);
-    if (portal.studentAction === 'buscar' && !hasStudentSearchFilters(portal.studentFilters || {})) {
+    if (portal.studentAction === 'buscar' && !hasStudentSearchFilters(portal.studentFilters || {}) && portal.studentListAll !== true) {
       setStudentsStatus('Complete al menos un filtro y presione Listar.');
       listBox.textContent = 'Sin listado cargado.';
       return;
@@ -1306,14 +1309,16 @@
     listBox.appendChild(table);
   }
 
-  function loadStudents() {
+  function loadStudents(listAllRequested) {
     var state = portal.state || {};
     if (!state.autorizado || !permission(state, 'puede_gestionar_alumnos')) {
       renderStudents(state, []);
       return;
     }
     var filters = portal.studentFilters || {};
-    if (!hasStudentSearchFilters(filters)) {
+    var hasFilters = hasStudentSearchFilters(filters);
+    portal.studentListAll = !hasFilters && listAllRequested === true;
+    if (!hasFilters && portal.studentListAll !== true) {
       portal.alumnosApoyo = [];
       renderStudents(state, []);
       setStudentsStatus('Complete al menos un filtro y presione Listar.');
@@ -1645,8 +1650,8 @@
       }
       clearStudentForm();
       setStudentMode('buscar');
-      if (hasStudentSearchFilters(portal.studentFilters || {})) {
-        loadStudents();
+      if (hasStudentSearchFilters(portal.studentFilters || {}) || portal.studentListAll === true) {
+        loadStudents(portal.studentListAll === true);
       } else {
         portal.alumnosApoyo = [];
         renderStudents(portal.state || {}, []);
@@ -1670,8 +1675,8 @@
         return;
       }
       setStudentMode('buscar');
-      if (hasStudentSearchFilters(portal.studentFilters || {})) {
-        loadStudents();
+      if (hasStudentSearchFilters(portal.studentFilters || {}) || portal.studentListAll === true) {
+        loadStudents(portal.studentListAll === true);
       } else {
         portal.alumnosApoyo = [];
         renderStudents(portal.state || {}, []);
@@ -1725,6 +1730,7 @@
       $('portalStudentActionNew').onclick = function () {
         clearStudentForm();
         setStudentMode('alta');
+        portal.studentListAll = false;
         renderStudents(portal.state || {}, portal.alumnosApoyo || []);
         setStudentsStatus('Alta de alumno.');
       };
@@ -1732,6 +1738,7 @@
     if ($('portalStudentActionSearch')) {
       $('portalStudentActionSearch').onclick = function () {
         setStudentMode('buscar');
+        portal.studentListAll = false;
         portal.alumnosApoyo = [];
         renderStudents(portal.state || {}, []);
         setStudentsStatus('Complete al menos un filtro y presione Listar.');
@@ -1741,7 +1748,7 @@
       $('portalStudentListar').onclick = function () {
         setStudentMode('buscar');
         readStudentFilters();
-        loadStudents();
+        loadStudents(true);
       };
     }
     var studentFilterInputs = document.querySelectorAll('#portalStudentFilters input, #portalStudentFilters select');
@@ -1751,7 +1758,7 @@
           event.preventDefault();
           setStudentMode('buscar');
           readStudentFilters();
-          loadStudents();
+          loadStudents(true);
         }
       };
     }
