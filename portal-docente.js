@@ -631,7 +631,7 @@
       var name = document.createElement('strong');
       name.textContent = state.perfil.nombre || state.perfil.email;
       var detail = document.createElement('span');
-      detail.textContent = state.perfil.email + ' | ' + roleLabel(state.perfil.rol);
+      detail.textContent = state.perfil.email + ' | ' + state.perfil.rol;
       profile.appendChild(name);
       profile.appendChild(detail);
       box.appendChild(profile);
