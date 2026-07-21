@@ -27,7 +27,10 @@
 
   function hasStoredToken(sessionKey) {
     try {
-      return !!(sessionKey && window.sessionStorage && window.sessionStorage.getItem(sessionKey));
+      return !!(sessionKey && (
+        window.sessionStorage && window.sessionStorage.getItem(sessionKey) ||
+        window.localStorage && window.localStorage.getItem(sessionKey)
+      ));
     } catch (err) {
       return false;
     }

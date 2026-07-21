@@ -7,7 +7,7 @@
   <title>Lector QR 1077</title>
   <link rel="icon" href="lector-qr-icon.svg" type="image/svg+xml">
   <link rel="manifest" href="lector-qr.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=qr-20260721-01">
+  <link rel="stylesheet" href="styles.css?v=qr-20260721-02">
 </head>
 <body class="qr-reader-body">
   <main class="qr-reader">
@@ -48,13 +48,7 @@
       </div>
 
       <details class="qr-manual">
-        <summary>Modo manual si la camara no esta disponible</summary>
-        <label class="qr-reader-label">
-          Contenido del QR
-          <textarea id="qrManualText" rows="5" placeholder='{"id":"ALU-001","pts":8,"err":2,"ej":10,"nota":8,"m":12}'></textarea>
-        </label>
-        <button type="button" id="qrReadManual" class="secondary">Procesar texto</button>
-        <div class="qr-manual-separator">Carga manual guiada</div>
+        <summary>Modo manual guiado si la camara no esta disponible</summary>
         <div class="qr-manual-grid">
           <label class="qr-reader-label">
             ID alumno
@@ -83,6 +77,15 @@
         </div>
         <p class="qr-manual-note">La fecha y hora se registran automaticamente al enviar. La nota se calcula con correctos/cantidad.</p>
         <button type="button" id="qrReadManualFields" class="secondary">Procesar campos</button>
+
+        <details class="qr-json-advanced">
+          <summary>Avanzado: pegar contenido JSON del QR</summary>
+          <label class="qr-reader-label">
+            Contenido del QR
+            <textarea id="qrManualText" rows="5" placeholder='{"id":"ALU-001","pts":8,"err":2,"ej":10,"nota":8,"m":12}'></textarea>
+          </label>
+          <button type="button" id="qrReadManual" class="secondary">Procesar JSON</button>
+        </details>
       </details>
     </section>
 
@@ -98,7 +101,7 @@
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="lector-qr.js?v=qr-20260721-01"></script>
+  <script src="lector-qr.js?v=qr-20260721-02"></script>
   <script src="aie-login-redirect.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

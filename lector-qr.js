@@ -111,6 +111,35 @@
     }
   }
 
+  function persistentStorage() {
+    try {
+      return window.localStorage;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function tokenExpired(token) {
+    try {
+      var parts = String(token || '').split('.');
+      if (parts.length < 2) return true;
+      var encoded = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (encoded.length % 4) encoded += '=';
+      var payload = JSON.parse(window.atob(encoded));
+      var exp = Number(payload.exp || 0);
+      return !exp || exp * 1000 < Date.now() + 30000;
+    } catch (err) {
+      return true;
+    }
+  }
+
+  function saveToken(token) {
+    var session = storage();
+    var persistent = persistentStorage();
+    if (session) session.setItem(sessionKey, token);
+    if (persistent) persistent.setItem(sessionKey, token);
+  }
+
   function captureTokenFromHash() {
     var hash = window.location.hash || '';
     if (hash.indexOf('access_token=') < 0) return false;
@@ -118,8 +147,7 @@
     var token = params.get('access_token') || '';
     if (!token) return false;
     accessToken = token;
-    var store = storage();
-    if (store) store.setItem(sessionKey, token);
+    saveToken(token);
     if (window.history && window.history.replaceState) {
       var cleanPath = window.AIE_RUNTIME ? window.AIE_RUNTIME.currentPagePath('') : window.location.pathname;
       window.history.replaceState(null, '', cleanPath);
@@ -129,14 +157,21 @@
 
   function loadStoredToken() {
     if (accessToken) return;
-    var store = storage();
-    accessToken = store ? store.getItem(sessionKey) || '' : '';
+    var session = storage();
+    var persistent = persistentStorage();
+    accessToken = session ? session.getItem(sessionKey) || '' : '';
+    if (!accessToken && persistent) accessToken = persistent.getItem(sessionKey) || '';
+    if (accessToken && tokenExpired(accessToken)) {
+      clearToken();
+    }
   }
 
   function clearToken() {
     accessToken = '';
-    var store = storage();
-    if (store) store.removeItem(sessionKey);
+    var session = storage();
+    var persistent = persistentStorage();
+    if (session) session.removeItem(sessionKey);
+    if (persistent) persistent.removeItem(sessionKey);
   }
 
   function loginUrl() {
@@ -151,7 +186,7 @@
     var login = $('qrLoginGoogle');
     var logout = $('qrLogout');
     if (!box || !login || !logout) return;
-    login.disabled = !loginUrl();
+    login.disabled = !loginUrl() || !!(state && state.autorizado);
     logout.disabled = !accessToken;
     box.innerHTML = '';
     var profile = state && state.perfil;
@@ -403,23 +438,30 @@
       box.textContent = 'Todavia no hay QR leido.';
       return;
     }
-    var rows = [
-      ['Alumno', payload.id_alumno],
-      ['Actividad', (selectedActivity() && selectedActivity().titulo) || payload.actividad_id],
-      ['Ejercicios', payload.cantidad_ejercicios],
-      ['Correctos', payload.correctos],
-      ['Incorrectos', payload.incorrectos],
-      ['Nota', payload.nota],
-      ['Tiempo', payload.tiempo_minutos + ' minutos']
+    var table = document.createElement('div');
+    table.className = 'qr-result-table';
+    var headers = ['ID', 'Actividad', 'Cant.', 'OK', 'Err.', 'Nota', 'T/m'];
+    var values = [
+      payload.id_alumno,
+      (selectedActivity() && selectedActivity().titulo) || payload.actividad_id,
+      payload.cantidad_ejercicios,
+      payload.correctos,
+      payload.incorrectos,
+      payload.nota,
+      payload.tiempo_minutos
     ];
-    rows.forEach(function (row) {
-      var line = document.createElement('div');
-      line.className = 'qr-result-row';
-      line.innerHTML = '<strong></strong><span></span>';
-      line.querySelector('strong').textContent = row[0];
-      line.querySelector('span').textContent = row[1];
-      box.appendChild(line);
+    headers.forEach(function (header) {
+      var cell = document.createElement('strong');
+      cell.textContent = header;
+      table.appendChild(cell);
     });
+    values.forEach(function (value, index) {
+      var cell = document.createElement('span');
+      cell.className = index === 1 ? 'qr-result-activity' : '';
+      cell.textContent = value == null || value === '' ? '-' : value;
+      table.appendChild(cell);
+    });
+    box.appendChild(table);
     if (validated) {
       var ok = document.createElement('div');
       ok.className = 'result-ok';
@@ -572,6 +614,9 @@
   function loadState() {
     api('GET', '/api/portal-docente/estado', null, function (err, data) {
       if (err) {
+        if (/jwt|token|expired|expir/i.test(err.error || err.message || '')) {
+          clearToken();
+        }
         state = null;
         renderSession();
         renderActivities();

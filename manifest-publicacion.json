@@ -1,6 +1,6 @@
 {
   "escuelaId": "1077",
-  "generadoEn": "2026-07-21T03:36:13.823Z",
+  "generadoEn": "2026-07-21T03:50:00.429Z",
   "githubPagesBasePath": "/escuela1077buenosaires-edu/",
   "backendBaseUrlConfigurado": false,
   "supabasePublicConfigConfigurada": true,
@@ -13,7 +13,7 @@
     {
       "nombre": "aie-hub-sw.js",
       "bytes": 1338,
-      "sha256": "c2683e7f320d52e88ef9866184afb9548a19ddfd45a353c1006b26ec9d86d14b"
+      "sha256": "5efca4b688df6be89e187119fc24fe89e279a6815f04ff5bb00d70c72c8ec799"
     },
     {
       "nombre": "aie-hub.webmanifest",
@@ -22,8 +22,8 @@
     },
     {
       "nombre": "aie-login-redirect.js",
-      "bytes": 2699,
-      "sha256": "7357cf66e872b9d56e86d74e41f2ab1b075eebdbd36e45710ff31e3bed2a1ae0"
+      "bytes": 2791,
+      "sha256": "87dc864e2ea584c9fd4ab001760888ec2477c99012e09f53749ac9e60a223757"
     },
     {
       "nombre": "aie-public-config.js",
@@ -62,13 +62,13 @@
     },
     {
       "nombre": "lector-qr.html",
-      "bytes": 4566,
-      "sha256": "b339965c334d159f63562855a7496228a07ed55a39748b4ed536af8942844df4"
+      "bytes": 4645,
+      "sha256": "87112396404ab58ea3e837111585dad7121eb7d0ba05e251b89553e3c4cc9c9c"
     },
     {
       "nombre": "lector-qr.js",
-      "bytes": 22629,
-      "sha256": "3b19103d85c13358d6f386d9061d3ae8e0cb917db545e4cd3b07034b77f0dc97"
+      "bytes": 24021,
+      "sha256": "85181e223cf2d22d4e50d48be0d1361bc3833da19731cf829eb5c32fcfc0bafa"
     },
     {
       "nombre": "lector-qr.webmanifest",
@@ -78,7 +78,7 @@
     {
       "nombre": "manifest-publicacion.json",
       "bytes": 3147,
-      "sha256": "afbc3d428d0bb96ac90f13e26c2fe9a9c08f0d439741167b5930836465fb8d9b"
+      "sha256": "800ad336e40e7c925a85d43dea19ca64d687153647bf479a219b75aa421c063a"
     },
     {
       "nombre": "portal-docente-fixes.js",
@@ -97,8 +97,8 @@
     },
     {
       "nombre": "styles.css",
-      "bytes": 60752,
-      "sha256": "8bed29e8f075e033dccc455aa02db8e88c0ee2517ff9e06b70e5cfb54f49c8dd"
+      "bytes": 61665,
+      "sha256": "7d74ea867634f4c22c6a33eb394767a42d49d2f394e22cc23fa88a4cc5f8098e"
     }
   ]
 }
