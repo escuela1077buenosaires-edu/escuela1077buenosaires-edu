@@ -2272,7 +2272,7 @@ body {
 
 .portal-analytics-controls {
   display: grid;
-  grid-template-columns: 56px minmax(155px, 1fr) minmax(135px, 0.85fr) minmax(155px, 1fr) 120px 78px 74px 132px 132px 78px;
+  grid-template-columns: 56px minmax(155px, 1fr) minmax(135px, 0.85fr) minmax(155px, 1fr) 120px 78px 74px 132px 132px 78px 42px;
   align-items: end;
   gap: 8px;
   padding: 12px;

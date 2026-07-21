@@ -1240,6 +1240,33 @@
     return portal.analyticsFilters;
   }
 
+  function clearAnalyticsFilters() {
+    portal.analyticsFilters = {
+      alumno: '',
+      alumnoTexto: '',
+      actividad: '',
+      archivo: '',
+      area: '',
+      grado: '',
+      tipo: '',
+      desde: '',
+      hasta: '',
+      limit: '10'
+    };
+    if ($('portalAnalyticsStudentFilter')) $('portalAnalyticsStudentFilter').value = '';
+    if ($('portalAnalyticsStudentNameFilter')) $('portalAnalyticsStudentNameFilter').value = '';
+    if ($('portalAnalyticsActivityFilter')) $('portalAnalyticsActivityFilter').value = '';
+    if ($('portalAnalyticsFileFilter')) $('portalAnalyticsFileFilter').value = '';
+    if ($('portalAnalyticsAreaFilter')) $('portalAnalyticsAreaFilter').value = '';
+    if ($('portalAnalyticsGradeFilter')) $('portalAnalyticsGradeFilter').value = '';
+    if ($('portalAnalyticsTypeFilter')) $('portalAnalyticsTypeFilter').value = '';
+    if ($('portalAnalyticsFromFilter')) $('portalAnalyticsFromFilter').value = '';
+    if ($('portalAnalyticsToFilter')) $('portalAnalyticsToFilter').value = '';
+    if ($('portalAnalyticsLimit')) $('portalAnalyticsLimit').value = '10';
+    portal.estadisticas = null;
+    renderAnalytics(portal.state || {}, null);
+  }
+
   function formatMetric(value, suffix) {
     if (value === null || value === undefined || value === '') return '-';
     var number = Number(value);
@@ -1290,12 +1317,14 @@
   function renderAnalytics(state, data) {
     var summaryBox = $('portalAnalyticsSummary');
     var listsBox = $('portalAnalyticsLists');
-    var button = $('portalAnalyticsRefresh');
+    var button = $('portalAnalyticsSearch');
+    var clearButton = $('portalAnalyticsClear');
     var allowed = state && state.autorizado && permissionAny(state, ['puede_ver_analiticas_generales', 'puede_ver_analiticas_alumno']);
     if (!summaryBox || !listsBox) return;
     summaryBox.innerHTML = '';
     listsBox.innerHTML = '';
     if (button) button.disabled = !allowed;
+    if (clearButton) clearButton.disabled = !allowed;
     if (!allowed) {
       setAnalyticsStatus(state && state.autorizado
         ? 'Su perfil no tiene permiso para ver estadísticas.'
@@ -1408,7 +1437,11 @@
       if (err) {
         portal.estadisticas = null;
         renderAnalytics(state, null);
-        setAnalyticsStatus(err.error || 'No se pudieron calcular estadísticas.', true);
+        var message = err.error || 'No se pudieron calcular estadísticas.';
+        if (/aie_1077_estadisticas_resumen|schema cache|Could not find the function/i.test(message)) {
+          message = 'Falta aplicar en Supabase la migración 20260721_1077_estadisticas_analiticas.sql, o esperar/refrescar el caché de esquema después de aplicarla.';
+        }
+        setAnalyticsStatus(message, true);
         return;
       }
       portal.estadisticas = data || null;
@@ -2194,8 +2227,16 @@
       $('portalResultsApply').onclick = loadResults;
     }
     if ($('portalResultsExport')) $('portalResultsExport').onclick = exportResultsCsv;
-    if ($('portalAnalyticsRefresh')) {
-      $('portalAnalyticsRefresh').onclick = loadAnalytics;
+    if ($('portalAnalyticsSearch')) {
+      $('portalAnalyticsSearch').innerHTML = '';
+      $('portalAnalyticsSearch').classList.add('portal-search-icon-button');
+      $('portalAnalyticsSearch').setAttribute('aria-label', 'Listar estadísticas');
+      $('portalAnalyticsSearch').title = 'Listar estadísticas';
+      $('portalAnalyticsSearch').appendChild(actionIcon('search'));
+      $('portalAnalyticsSearch').onclick = loadAnalytics;
+    }
+    if ($('portalAnalyticsClear')) {
+      $('portalAnalyticsClear').onclick = clearAnalyticsFilters;
     }
     if ($('portalActivitiesSearch')) {
       $('portalActivitiesSearch').innerHTML = '';
