@@ -13,6 +13,7 @@
     activitySearchStarted: false,
     alumnosApoyo: [],
     resultados: [],
+    estadisticas: null,
     resultFilters: {
       alumno: '',
       alumnoNombre: '',
@@ -24,6 +25,18 @@
       desde: '',
       hasta: '',
       limit: '50'
+    },
+    analyticsFilters: {
+      alumno: '',
+      alumnoTexto: '',
+      actividad: '',
+      archivo: '',
+      area: '',
+      grado: '',
+      tipo: '',
+      desde: '',
+      hasta: '',
+      limit: '10'
     },
     studentAction: '',
     studentListAll: false,
@@ -182,6 +195,20 @@
         return rpc('aie_1077_resultados_recientes', {
           p_id_alumno: parsed.params.get('alumno') || parsed.params.get('id_alumno') || '',
           p_limite: Number(parsed.params.get('limit') || 50)
+        }, callback, authenticated);
+      }
+      if (method === 'GET' && pathname === '/api/portal-docente/estadisticas') {
+        return rpc('aie_1077_estadisticas_resumen', {
+          p_id_alumno: parsed.params.get('alumno') || parsed.params.get('id_alumno') || '',
+          p_alumno_texto: parsed.params.get('alumno_texto') || parsed.params.get('alumnoTexto') || '',
+          p_actividad: parsed.params.get('actividad') || '',
+          p_archivo: parsed.params.get('archivo') || '',
+          p_area: parsed.params.get('area') || '',
+          p_grado: parsed.params.get('grado') || '',
+          p_tipo: parsed.params.get('tipo') || '',
+          p_desde: parsed.params.get('desde') || null,
+          p_hasta: parsed.params.get('hasta') || null,
+          p_limite: Number(parsed.params.get('limit') || parsed.params.get('limite') || 10)
         }, callback, authenticated);
       }
       if (method === 'GET' && pathname === '/api/portal-docente/alumnos-apoyo') {
@@ -1190,6 +1217,205 @@
     }, true);
   }
 
+  function setAnalyticsStatus(text, error) {
+    var box = $('portalAnalyticsStatus');
+    if (!box) return;
+    box.textContent = text || '';
+    box.className = error ? 'portal-warning' : 'portal-muted';
+  }
+
+  function readAnalyticsFilters() {
+    portal.analyticsFilters = {
+      alumno: $('portalAnalyticsStudentFilter') ? clean($('portalAnalyticsStudentFilter').value) : '',
+      alumnoTexto: $('portalAnalyticsStudentNameFilter') ? clean($('portalAnalyticsStudentNameFilter').value) : '',
+      actividad: $('portalAnalyticsActivityFilter') ? clean($('portalAnalyticsActivityFilter').value) : '',
+      archivo: $('portalAnalyticsFileFilter') ? clean($('portalAnalyticsFileFilter').value) : '',
+      area: $('portalAnalyticsAreaFilter') ? clean($('portalAnalyticsAreaFilter').value) : '',
+      grado: $('portalAnalyticsGradeFilter') ? clean($('portalAnalyticsGradeFilter').value) : '',
+      tipo: $('portalAnalyticsTypeFilter') ? clean($('portalAnalyticsTypeFilter').value).toUpperCase() : '',
+      desde: $('portalAnalyticsFromFilter') ? clean($('portalAnalyticsFromFilter').value) : '',
+      hasta: $('portalAnalyticsToFilter') ? clean($('portalAnalyticsToFilter').value) : '',
+      limit: $('portalAnalyticsLimit') ? $('portalAnalyticsLimit').value : '10'
+    };
+    return portal.analyticsFilters;
+  }
+
+  function formatMetric(value, suffix) {
+    if (value === null || value === undefined || value === '') return '-';
+    var number = Number(value);
+    if (!Number.isFinite(number)) return String(value);
+    var text = number.toFixed(2).replace(/\.?0+$/, '');
+    return suffix ? text + ' ' + suffix : text;
+  }
+
+  function analyticsCard(label, value, suffix) {
+    var card = document.createElement('div');
+    card.className = 'portal-analytics-card';
+    var title = document.createElement('span');
+    var body = document.createElement('strong');
+    title.textContent = label;
+    body.textContent = formatMetric(value, suffix);
+    card.appendChild(title);
+    card.appendChild(body);
+    return card;
+  }
+
+  function analyticsTable(title, headers, rows, mapper) {
+    var panel = document.createElement('section');
+    panel.className = 'portal-analytics-table-panel';
+    var h = document.createElement('h3');
+    h.textContent = title;
+    panel.appendChild(h);
+    if (!(rows || []).length) {
+      var empty = document.createElement('div');
+      empty.className = 'portal-muted';
+      empty.textContent = 'Sin datos para los filtros aplicados.';
+      panel.appendChild(empty);
+      return panel;
+    }
+    var table = document.createElement('div');
+    table.className = 'portal-table portal-analytics-table';
+    headers.forEach(function (header) {
+      table.appendChild(headerCell(header.label, header.title || header.label));
+    });
+    rows.forEach(function (row) {
+      mapper(row).forEach(function (item) {
+        table.appendChild(cell(item.className || '', item.value, item.title || item.value));
+      });
+    });
+    panel.appendChild(table);
+    return panel;
+  }
+
+  function renderAnalytics(state, data) {
+    var summaryBox = $('portalAnalyticsSummary');
+    var listsBox = $('portalAnalyticsLists');
+    var button = $('portalAnalyticsRefresh');
+    var allowed = state && state.autorizado && permissionAny(state, ['puede_ver_analiticas_generales', 'puede_ver_analiticas_alumno']);
+    if (!summaryBox || !listsBox) return;
+    summaryBox.innerHTML = '';
+    listsBox.innerHTML = '';
+    if (button) button.disabled = !allowed;
+    if (!allowed) {
+      setAnalyticsStatus(state && state.autorizado
+        ? 'Su perfil no tiene permiso para ver estadísticas.'
+        : 'Inicie sesión para ver estadísticas.', true);
+      return;
+    }
+    if (!data) {
+      setAnalyticsStatus('Presione Actualizar estadísticas para calcular el resumen con los filtros actuales.');
+      return;
+    }
+    var resumen = data.resumen || {};
+    setAnalyticsStatus('Estadísticas calculadas - Registros base: ' + (data.totalFilasBase || resumen.ejecuciones || 0) + '.');
+    [
+      ['Ejecuciones', resumen.ejecuciones],
+      ['Alumnos', resumen.alumnos],
+      ['Actividades', resumen.actividades],
+      ['Prom. nota', resumen.promedioNota],
+      ['Prom. tiempo', resumen.promedioTiempo, 'min'],
+      ['Prom. OK', resumen.promedioCorrectos],
+      ['Prom. errores', resumen.promedioIncorrectos]
+    ].forEach(function (item) {
+      summaryBox.appendChild(analyticsCard(item[0], item[1], item[2]));
+    });
+
+    listsBox.appendChild(analyticsTable('Actividades con menor rendimiento', [
+      { label: 'Actividad' }, { label: 'Archivo' }, { label: 'Área' }, { label: 'G' }, { label: 'T' }, { label: 'Cant.' }, { label: 'Alum.' }, { label: 'Prom.' }, { label: 'T/m' }
+    ], data.actividadesBajoRendimiento || [], function (row) {
+      return [
+        { className: 'portal-cell-title', value: row.actividad || '-' },
+        { className: 'portal-cell-file', value: row.archivo || '-' },
+        { value: row.area || '-' },
+        { className: 'portal-cell-compact', value: row.grado || '-' },
+        { className: 'portal-cell-compact', value: row.tipo || '-' },
+        { className: 'portal-cell-compact', value: row.ejecuciones },
+        { className: 'portal-cell-compact', value: row.alumnos },
+        { className: 'portal-cell-compact', value: formatMetric(row.promedioNota) },
+        { className: 'portal-cell-compact', value: formatMetric(row.promedioTiempo) }
+      ];
+    }));
+    listsBox.appendChild(analyticsTable('Alumnos con menor rendimiento', [
+      { label: 'ID' }, { label: 'Apellido y Nombres' }, { label: 'G' }, { label: 'Turno' }, { label: 'Div.' }, { label: 'Cant.' }, { label: 'Act.' }, { label: 'Prom.' }, { label: 'T/m' }
+    ], data.alumnosBajoRendimiento || [], function (row) {
+      return [
+        { className: 'portal-cell-student', value: row.alumnoId || '-' },
+        { className: 'portal-cell-student-name', value: row.alumno || '-' },
+        { className: 'portal-cell-compact', value: row.grado || '-' },
+        { className: 'portal-cell-compact', value: row.turno || '-' },
+        { className: 'portal-cell-compact', value: row.division || '-' },
+        { className: 'portal-cell-compact', value: row.ejecuciones },
+        { className: 'portal-cell-compact', value: row.actividades },
+        { className: 'portal-cell-compact', value: formatMetric(row.promedioNota) },
+        { className: 'portal-cell-compact', value: formatMetric(row.promedioTiempo) }
+      ];
+    }));
+    listsBox.appendChild(analyticsTable('Resumen por área', [
+      { label: 'Área' }, { label: 'Cant.' }, { label: 'Alum.' }, { label: 'Prom.' }, { label: 'T/m' }
+    ], data.porArea || [], function (row) {
+      return [
+        { value: row.area || '-' },
+        { className: 'portal-cell-compact', value: row.ejecuciones },
+        { className: 'portal-cell-compact', value: row.alumnos },
+        { className: 'portal-cell-compact', value: formatMetric(row.promedioNota) },
+        { className: 'portal-cell-compact', value: formatMetric(row.promedioTiempo) }
+      ];
+    }));
+    listsBox.appendChild(analyticsTable('Resumen por grado', [
+      { label: 'G' }, { label: 'Cant.' }, { label: 'Alum.' }, { label: 'Prom.' }, { label: 'T/m' }
+    ], data.porGrado || [], function (row) {
+      return [
+        { className: 'portal-cell-compact', value: row.grado || '-' },
+        { className: 'portal-cell-compact', value: row.ejecuciones },
+        { className: 'portal-cell-compact', value: row.alumnos },
+        { className: 'portal-cell-compact', value: formatMetric(row.promedioNota) },
+        { className: 'portal-cell-compact', value: formatMetric(row.promedioTiempo) }
+      ];
+    }));
+    listsBox.appendChild(analyticsTable('Tendencia mensual', [
+      { label: 'Mes' }, { label: 'Cant.' }, { label: 'Prom.' }, { label: 'T/m' }
+    ], data.tendenciaMensual || [], function (row) {
+      return [
+        { className: 'portal-cell-compact', value: row.mes || '-' },
+        { className: 'portal-cell-compact', value: row.ejecuciones },
+        { className: 'portal-cell-compact', value: formatMetric(row.promedioNota) },
+        { className: 'portal-cell-compact', value: formatMetric(row.promedioTiempo) }
+      ];
+    }));
+  }
+
+  function loadAnalytics() {
+    var state = portal.state || {};
+    if (!state.autorizado || !permissionAny(state, ['puede_ver_analiticas_generales', 'puede_ver_analiticas_alumno'])) {
+      renderAnalytics(state, null);
+      return;
+    }
+    var filters = readAnalyticsFilters();
+    var qs = query({
+      alumno: filters.alumno,
+      alumno_texto: filters.alumnoTexto,
+      actividad: filters.actividad,
+      archivo: filters.archivo,
+      area: filters.area,
+      grado: filters.grado,
+      tipo: filters.tipo,
+      desde: filters.desde,
+      hasta: filters.hasta,
+      limit: filters.limit
+    });
+    setAnalyticsStatus('Calculando estadísticas...');
+    api('GET', '/api/portal-docente/estadisticas' + (qs ? '?' + qs : ''), null, function (err, data) {
+      if (err) {
+        portal.estadisticas = null;
+        renderAnalytics(state, null);
+        setAnalyticsStatus(err.error || 'No se pudieron calcular estadísticas.', true);
+        return;
+      }
+      portal.estadisticas = data || null;
+      renderAnalytics(state, portal.estadisticas);
+    }, true);
+  }
+
   function setStudentsStatus(text, error) {
     var box = $('portalStudentsStatus');
     if (!box) return;
@@ -1471,6 +1697,7 @@
     renderActivities(state);
     renderAccessLog(state);
     renderResults(state, portal.resultados || []);
+    renderAnalytics(state, portal.estadisticas);
     renderStudents(state, portal.alumnosApoyo || []);
     renderInterfaces(state);
     if (!state || state.ok === false) {
@@ -1967,6 +2194,9 @@
       $('portalResultsApply').onclick = loadResults;
     }
     if ($('portalResultsExport')) $('portalResultsExport').onclick = exportResultsCsv;
+    if ($('portalAnalyticsRefresh')) {
+      $('portalAnalyticsRefresh').onclick = loadAnalytics;
+    }
     if ($('portalActivitiesSearch')) {
       $('portalActivitiesSearch').innerHTML = '';
       $('portalActivitiesSearch').classList.add('portal-search-icon-button');

@@ -1706,6 +1706,21 @@ body {
   font-size: 20px;
 }
 
+#portalAnalyticsCard {
+  border: 3px solid #111827;
+}
+
+#portalAnalyticsCard .panel-head {
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 2px solid #111827;
+  background: #f8fafc;
+}
+
+#portalAnalyticsCard .panel-head h2 {
+  font-size: 20px;
+}
+
 #portalStudentsCard {
   border: 3px solid #7f1d1d;
 }
@@ -2253,6 +2268,98 @@ body {
 
 .portal-results-filter-id input {
   text-align: center;
+}
+
+.portal-analytics-controls {
+  display: grid;
+  grid-template-columns: 56px minmax(155px, 1fr) minmax(135px, 0.85fr) minmax(155px, 1fr) 120px 78px 74px 132px 132px 78px;
+  align-items: end;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.portal-analytics-controls label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.portal-analytics-controls input,
+.portal-analytics-controls select {
+  width: 100%;
+  min-height: 34px;
+}
+
+.portal-analytics-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.portal-analytics-card {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.portal-analytics-card span {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.portal-analytics-card strong {
+  color: #111827;
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.portal-analytics-lists {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.portal-analytics-table-panel {
+  display: grid;
+  gap: 8px;
+}
+
+.portal-analytics-table-panel h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 16px;
+}
+
+.portal-analytics-table {
+  grid-template-columns: minmax(190px, 1.25fr) minmax(160px, 1fr) 110px 40px 40px 60px 60px 60px 52px;
+  min-width: 980px;
+}
+
+.portal-analytics-table-panel:nth-child(3) .portal-analytics-table,
+.portal-analytics-table-panel:nth-child(4) .portal-analytics-table {
+  grid-template-columns: minmax(150px, 1fr) 70px 70px 70px 58px;
+  min-width: 520px;
+}
+
+.portal-analytics-table-panel:nth-child(2) .portal-analytics-table {
+  grid-template-columns: 70px minmax(220px, 1.3fr) 40px 76px 52px 60px 60px 60px 52px;
+  min-width: 760px;
+}
+
+.portal-analytics-table-panel:nth-child(5) .portal-analytics-table {
+  grid-template-columns: 90px 70px 70px 58px;
+  min-width: 360px;
 }
 
 .portal-interface-grid {
