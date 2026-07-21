@@ -167,6 +167,149 @@
         <div id="portalAccessLog" class="portal-list">Sin datos.</div>
       </section>
 
+      <section class="panel portal-panel portal-feature-block hidden" id="portalThirdPartyActivitiesCard" data-portal-any="puede_ver_actividades_terceros puede_gestionar_actividades_terceros puede_usar_actividades_terceros">
+        <div class="panel-head">
+          <div>
+            <h2>Actividades desarrolladas por terceros</h2>
+            <p class="panel-subtitle">Catálogo validado para carga manual QR, resultados y analíticas.</p>
+          </div>
+        </div>
+        <div class="portal-feature-toolbar">
+          <button type="button" id="portalThirdPartyActionSearch" class="secondary">Buscar</button>
+          <button type="button" id="portalThirdPartyActionNew">Agregar</button>
+        </div>
+        <div id="portalThirdPartyFilters" class="portal-filter-row hidden" aria-label="Filtros de actividades de terceros">
+          <label>
+            Título
+            <input id="portalThirdPartyFilterTitle" type="text" maxlength="120">
+          </label>
+          <label>
+            Área
+            <select id="portalThirdPartyFilterArea">
+              <option value="">Todas</option>
+              <option value="Lengua">Lengua</option>
+              <option value="Matematica">Matemática</option>
+              <option value="Ciencias Naturales">Ciencias Naturales</option>
+              <option value="Ciencias Sociales">Ciencias Sociales</option>
+              <option value="Formacion Etica y Ciudadana">Formación Ética y Ciudadana</option>
+              <option value="Tecnologia">Tecnología</option>
+              <option value="Otra">Otra</option>
+            </select>
+          </label>
+          <label>
+            Recurso / proveedor
+            <input id="portalThirdPartyFilterResource" type="text" maxlength="140">
+          </label>
+          <label class="portal-filter-small">
+            Grado
+            <select id="portalThirdPartyFilterGrade">
+              <option value="">Todos</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+            </select>
+          </label>
+          <label class="portal-filter-small">
+            Tipo
+            <select id="portalThirdPartyFilterType">
+              <option value="">Todos</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="OTRA">Otra</option>
+            </select>
+          </label>
+          <label class="portal-filter-small">
+            Activo
+            <select id="portalThirdPartyFilterActive">
+              <option value="true" selected>SI</option>
+              <option value="false">NO</option>
+              <option value="">Todos</option>
+            </select>
+          </label>
+          <label class="portal-filter-small">
+            Disp.
+            <select id="portalThirdPartyFilterAvailable">
+              <option value="true" selected>SI</option>
+              <option value="false">NO</option>
+              <option value="">Todos</option>
+            </select>
+          </label>
+          <button type="button" id="portalThirdPartyListar" class="secondary">Listar</button>
+        </div>
+        <form id="portalThirdPartyForm" class="portal-student-form hidden" data-portal-managed="true">
+          <input type="hidden" id="portalThirdPartyId">
+          <label>
+            Título
+            <input id="portalThirdPartyTitle" type="text" maxlength="180" required>
+          </label>
+          <label>
+            Área
+            <select id="portalThirdPartyArea" required>
+              <option value="">Seleccionar</option>
+              <option value="Lengua">Lengua</option>
+              <option value="Matematica">Matemática</option>
+              <option value="Ciencias Naturales">Ciencias Naturales</option>
+              <option value="Ciencias Sociales">Ciencias Sociales</option>
+              <option value="Formacion Etica y Ciudadana">Formación Ética y Ciudadana</option>
+              <option value="Tecnologia">Tecnología</option>
+              <option value="Otra">Otra</option>
+            </select>
+          </label>
+          <label>
+            Grado
+            <select id="portalThirdPartyGrade" required>
+              <option value="">Seleccionar</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+            </select>
+          </label>
+          <label>
+            Tipo
+            <select id="portalThirdPartyType" required>
+              <option value="">Seleccionar</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="OTRA">Otra</option>
+            </select>
+          </label>
+          <label>
+            Proveedor
+            <input id="portalThirdPartyProvider" type="text" maxlength="140">
+          </label>
+          <label>
+            Recurso
+            <input id="portalThirdPartyResource" type="text" maxlength="180">
+          </label>
+          <label class="portal-check-row">
+            <input id="portalThirdPartyActive" type="checkbox" checked>
+            Activa
+          </label>
+          <label class="portal-check-row">
+            <input id="portalThirdPartyAvailable" type="checkbox" checked>
+            Disponible
+          </label>
+          <label class="portal-student-notes">
+            Descripción
+            <textarea id="portalThirdPartyDescription" rows="2" maxlength="1000"></textarea>
+          </label>
+          <div class="portal-actions portal-student-actions">
+            <button type="submit" id="portalThirdPartySave">Guardar actividad</button>
+            <button type="button" id="portalThirdPartyCancel" class="secondary">Cancelar</button>
+          </div>
+        </form>
+        <div id="portalThirdPartyStatus" class="portal-muted">Sin datos.</div>
+        <div id="portalThirdPartyList" class="portal-list">Sin datos.</div>
+      </section>
+
       <section class="panel portal-panel portal-feature-block hidden" id="portalResultsCard" data-portal-any="puede_ver_resultados puede_exportar_resultados puede_ver_analiticas_generales puede_ver_analiticas_alumno">
         <div class="panel-head">
           <div>

@@ -4,6 +4,7 @@
   var config = null;
   var state = null;
   var activities = [];
+  var thirdPartyActivities = [];
   var selectedPayload = null;
   var stream = null;
   var scanning = false;
@@ -56,6 +57,19 @@
           p_tipo: '',
           p_listar_todas: true
         }, callback, false);
+      }
+      if (method === 'GET' && path.indexOf('/api/lector-qr/actividades-terceros') === 0) {
+        return rpc('aie_1077_actividades_terceros_listar', {
+          p_buscar: '',
+          p_titulo: '',
+          p_area: '',
+          p_recurso: '',
+          p_grado: '',
+          p_tipo: '',
+          p_activo: true,
+          p_disponible: true,
+          p_listar_todas: true
+        }, callback, authenticated);
       }
       if (method === 'POST' && path === '/api/resultados/validar') {
         window.setTimeout(function () {
@@ -226,28 +240,31 @@
     return profile.puede_usar_lector_qr === true || permissions.puede_usar_lector_qr === true;
   }
 
-  function renderActivities() {
-    var select = $('qrActivitySelect');
-    if (!select) return;
+  function canUseThirdPartyActivities() {
+    var profile = state && state.perfil || {};
+    var permissions = profile.permisos || {};
+    return profile.puede_usar_actividades_terceros === true ||
+      profile.puede_gestionar_actividades_terceros === true ||
+      permissions.puede_usar_actividades_terceros === true ||
+      permissions.puede_gestionar_actividades_terceros === true;
+  }
+
+  function renderSelectOptions(select, list, emptyText) {
     select.innerHTML = '';
-    if (!state || !state.autorizado || !canUseQr()) {
-      var option = document.createElement('option');
-      option.value = '';
-      option.textContent = state && state.autorizado ? 'Sin permiso para lector QR' : 'Inicie sesion con cuenta autorizada';
-      select.appendChild(option);
-      select.disabled = true;
-      return;
-    }
-    if (!activities.length) {
+    if (!list.length) {
       var empty = document.createElement('option');
       empty.value = '';
-      empty.textContent = 'No hay actividades registradas';
+      empty.textContent = emptyText;
       select.appendChild(empty);
       select.disabled = true;
       return;
     }
+    var first = document.createElement('option');
+    first.value = '';
+    first.textContent = 'Sin seleccionar';
+    select.appendChild(first);
     select.disabled = false;
-    activities.forEach(function (activity) {
+    list.forEach(function (activity) {
       var option = document.createElement('option');
       option.value = activity.id;
       option.textContent = (activity.titulo || activity.codigo || activity.id) + ' - ' + activityMeta(activity);
@@ -255,13 +272,68 @@
     });
   }
 
+  function renderActivities() {
+    var select = $('qrActivitySelect');
+    var thirdSelect = $('qrThirdPartyActivitySelect');
+    if (!select || !thirdSelect) return;
+    if (!state || !state.autorizado || !canUseQr()) {
+      var option = document.createElement('option');
+      option.value = '';
+      option.textContent = state && state.autorizado ? 'Sin permiso para lector QR' : 'Inicie sesion con cuenta autorizada';
+      var thirdOption = option.cloneNode(true);
+      select.innerHTML = '';
+      thirdSelect.innerHTML = '';
+      select.appendChild(option);
+      thirdSelect.appendChild(thirdOption);
+      select.disabled = true;
+      thirdSelect.disabled = true;
+      return;
+    }
+    renderSelectOptions(select, activities, 'No hay actividades propias visibles');
+    if (!canUseThirdPartyActivities()) {
+      thirdSelect.innerHTML = '';
+      var denied = document.createElement('option');
+      denied.value = '';
+      denied.textContent = 'Sin permiso para actividades de terceros';
+      thirdSelect.appendChild(denied);
+      thirdSelect.disabled = true;
+      return;
+    }
+    renderSelectOptions(thirdSelect, thirdPartyActivities, 'No hay actividades de terceros disponibles');
+  }
+
   function selectedActivity() {
     var select = $('qrActivitySelect');
+    var thirdSelect = $('qrThirdPartyActivitySelect');
     var id = select ? select.value : '';
+    var thirdId = thirdSelect ? thirdSelect.value : '';
     for (var i = 0; i < activities.length; i++) {
       if (activities[i].id === id) return activities[i];
     }
+    for (var j = 0; j < thirdPartyActivities.length; j++) {
+      if (thirdPartyActivities[j].id === thirdId) return thirdPartyActivities[j];
+    }
     return null;
+  }
+
+  function selectedActivityPayload(activity) {
+    var payload = {};
+    if (!activity) return payload;
+    if (activity.origen === 'tercero') {
+      payload.actividad_tercero_id = activity.id;
+      payload.actividad_origen = 'tercero';
+    } else {
+      payload.actividad_id = activity.id;
+      payload.actividad_origen = 'propia';
+    }
+    return payload;
+  }
+
+  function setActivityStatusAfterLoads() {
+    var total = activities.length + thirdPartyActivities.length;
+    setStatus(total
+      ? 'Sesion autorizada. Seleccione actividad y lea QR.'
+      : 'No hay actividades disponibles para el lector QR.', !total);
   }
 
   function loadQrActivities() {
@@ -270,13 +342,25 @@
         activities = [];
         renderActivities();
         setStatus(err.error || 'No se pudieron cargar actividades para el lector QR.', true);
+      } else {
+        activities = data && data.actividades || [];
+      }
+      renderActivities();
+      if (!canUseThirdPartyActivities()) {
+        setActivityStatusAfterLoads();
         return;
       }
-      activities = data && data.actividades || [];
-      renderActivities();
-      setStatus(activities.length
-        ? 'Sesion autorizada. Seleccione actividad y lea QR.'
-        : (data && data.mensaje || 'No hay actividades visibles para el lector QR.'), !activities.length);
+      api('GET', '/api/lector-qr/actividades-terceros?listar_todas=true', null, function (thirdErr, thirdData) {
+        if (thirdErr) {
+          thirdPartyActivities = [];
+          renderActivities();
+          setStatus(thirdErr.error || 'No se pudieron cargar actividades de terceros.', true);
+          return;
+        }
+        thirdPartyActivities = thirdData && thirdData.actividades || [];
+        renderActivities();
+        setActivityStatusAfterLoads();
+      }, true);
     }, true);
   }
 
@@ -324,8 +408,7 @@
     if (!canUseQr()) throw new Error('Su perfil no tiene permiso para usar el lector QR.');
     var activity = selectedActivity();
     if (!activity) throw new Error('Seleccione una actividad antes de leer el QR.');
-    return {
-      actividad_id: activity.id,
+    return Object.assign(selectedActivityPayload(activity), {
       intento_id: randomUuid(),
       id_alumno: studentField(qr),
       tipo_actividad: qr.tipo || activity.tipo || '',
@@ -335,7 +418,7 @@
       cantidad_ejercicios: numberField(qr, ['ej', 'cantidad_ejercicios', 'total'], 'cantidad de ejercicios'),
       nota: numberField(qr, ['nota', 'n'], 'nota'),
       tiempo_minutos: numberField(qr, ['m', 'tiempo_minutos', 'tiempoMinutos'], 'tiempo en minutos')
-    };
+    });
   }
 
   function validateNumber(value, label, min, max, integer) {
@@ -385,8 +468,7 @@
     syncManualGrade();
     var idAlumno = clean($('qrManualStudent') && $('qrManualStudent').value);
     if (!idAlumno) throw new Error('Falta ID de alumno.');
-    return {
-      actividad_id: activity.id,
+    return Object.assign(selectedActivityPayload(activity), {
       intento_id: randomUuid(),
       id_alumno: idAlumno,
       tipo_actividad: activity.tipo || '',
@@ -396,13 +478,16 @@
       cantidad_ejercicios: validateNumber(manualInputNumber('qrManualTotal'), 'cantidad_ejercicios', 1, 200, true),
       nota: validateNumber(manualInputNumber('qrManualGrade'), 'nota', 0, 10, false),
       tiempo_minutos: validateNumber(manualInputNumber('qrManualMinutes'), 'tiempo_minutos', 0, 600, false)
-    };
+    });
   }
 
   function validateResultPayload(payload) {
     var activityId = clean(payload.actividad_id);
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(activityId)) {
-      throw new Error('Falta actividad_id valido.');
+    var thirdPartyActivityId = clean(payload.actividad_tercero_id);
+    var ownValid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(activityId);
+    var thirdValid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(thirdPartyActivityId);
+    if ((ownValid ? 1 : 0) + (thirdValid ? 1 : 0) !== 1) {
+      throw new Error('Seleccione una actividad propia o una actividad de terceros valida.');
     }
     var studentId = clean(payload.id_alumno);
     if (!studentId) throw new Error('Falta ID de alumno.');
@@ -422,6 +507,8 @@
       ok: true,
       resultado: {
         actividad_id: activityId,
+        actividad_tercero_id: thirdPartyActivityId,
+        actividad_origen: thirdValid ? 'tercero' : 'propia',
         intento_id: payload.intento_id || '',
         id_alumno: studentId,
         cantidad_ejercicios: total,
@@ -621,6 +708,8 @@
           clearToken();
         }
         state = null;
+        activities = [];
+        thirdPartyActivities = [];
         renderSession();
         renderActivities();
         setStatus(err.error || 'No se pudo validar la sesion.', true);
@@ -628,6 +717,7 @@
       }
       state = data || {};
       activities = [];
+      thirdPartyActivities = [];
       renderSession();
       renderActivities();
       if (state.autorizado && canUseQr()) {
@@ -679,6 +769,18 @@
     };
     $('qrStartCamera').onclick = startCamera;
     $('qrStopCamera').onclick = stopCamera;
+    $('qrActivitySelect').onchange = function () {
+      var thirdSelect = $('qrThirdPartyActivitySelect');
+      if (this.value && thirdSelect) thirdSelect.value = '';
+      selectedPayload = null;
+      renderResult(null);
+    };
+    $('qrThirdPartyActivitySelect').onchange = function () {
+      var ownSelect = $('qrActivitySelect');
+      if (this.value && ownSelect) ownSelect.value = '';
+      selectedPayload = null;
+      renderResult(null);
+    };
     $('qrReadManual').onclick = function () {
       handleQrText($('qrManualText').value);
     };

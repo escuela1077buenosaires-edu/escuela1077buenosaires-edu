@@ -2269,6 +2269,15 @@ body {
   white-space: nowrap;
 }
 
+.portal-third-party-table {
+  grid-template-columns: minmax(190px, 1.2fr) 130px 42px 52px 150px minmax(190px, 1.2fr) 70px 70px 104px;
+  min-width: 1080px;
+}
+
+.portal-third-party-table .portal-table-header {
+  white-space: nowrap;
+}
+
 .portal-cell-title,
 .portal-cell-file,
 .portal-cell-created {

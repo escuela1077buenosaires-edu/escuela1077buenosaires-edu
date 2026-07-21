@@ -12,6 +12,7 @@
     activityListAll: false,
     activitySearchStarted: false,
     alumnosApoyo: [],
+    actividadesTerceros: [],
     resultados: [],
     estadisticas: null,
     resultFilters: {
@@ -40,6 +41,8 @@
     },
     studentAction: '',
     studentListAll: false,
+    thirdPartyAction: '',
+    thirdPartyListAll: false,
     studentFilters: {
       idAlumno: '',
       apellido: '',
@@ -56,6 +59,15 @@
       grado: '',
       tipo: '',
       disponible: 'false'
+    },
+    thirdPartyFilters: {
+      titulo: '',
+      area: '',
+      recurso: '',
+      grado: '',
+      tipo: '',
+      activo: 'true',
+      disponible: 'true'
     }
   };
 
@@ -158,6 +170,41 @@
             ? true
             : parsed.params.get('disponible') === 'false' ? false : null,
           p_listar_todas: parsed.params.get('listar_todas') === 'true'
+        }, callback, authenticated);
+      }
+      if (method === 'GET' && pathname === '/api/portal-docente/actividades-terceros') {
+        return rpc('aie_1077_actividades_terceros_listar', {
+          p_buscar: parsed.params.get('buscar') || '',
+          p_titulo: parsed.params.get('titulo') || '',
+          p_area: parsed.params.get('area') || '',
+          p_recurso: parsed.params.get('recurso') || '',
+          p_grado: parsed.params.get('grado') || '',
+          p_tipo: parsed.params.get('tipo') || '',
+          p_activo: parsed.params.get('activo') === 'true'
+            ? true
+            : parsed.params.get('activo') === 'false' ? false : null,
+          p_disponible: parsed.params.get('disponible') === 'true'
+            ? true
+            : parsed.params.get('disponible') === 'false' ? false : null,
+          p_listar_todas: parsed.params.get('listar_todas') === 'true'
+        }, callback, authenticated);
+      }
+      match = pathname.match(/^\/api\/portal-docente\/actividades-terceros\/([^\/]+)$/);
+      if (method === 'PATCH' && match) {
+        return rpc('aie_1077_actividad_tercero_guardar', {
+          p_id: decodeURIComponent(match[1]),
+          p_actividad: data || {}
+        }, callback, authenticated);
+      }
+      if (method === 'DELETE' && match) {
+        return rpc('aie_1077_actividad_tercero_desactivar', {
+          p_id: decodeURIComponent(match[1])
+        }, callback, authenticated);
+      }
+      if (method === 'POST' && pathname === '/api/portal-docente/actividades-terceros') {
+        return rpc('aie_1077_actividad_tercero_guardar', {
+          p_id: null,
+          p_actividad: data || {}
         }, callback, authenticated);
       }
       if (method === 'POST' && pathname === '/api/portal-docente/sesion') {
@@ -961,6 +1008,234 @@
     box.appendChild(table);
   }
 
+  function thirdPartyActivityTitle(activity) {
+    return clean(activity && activity.titulo) || clean(activity && activity.id);
+  }
+
+  function thirdPartyActivityResourceText(activity) {
+    return [
+      activity && activity.recursoNombre,
+      activity && activity.recurso_nombre,
+      activity && activity.proveedor,
+      activity && activity.descripcion
+    ].map(clean).filter(Boolean).join(' ');
+  }
+
+  function thirdPartyCanManage(state) {
+    return state && state.autorizado && permission(state, 'puede_gestionar_actividades_terceros');
+  }
+
+  function thirdPartyCanView(state) {
+    return state && state.autorizado && portalHasAnyPermission(state, 'puede_ver_actividades_terceros puede_gestionar_actividades_terceros puede_usar_actividades_terceros');
+  }
+
+  function setThirdPartyStatus(text, error) {
+    var box = $('portalThirdPartyStatus');
+    if (!box) return;
+    box.textContent = text || '';
+    box.className = error ? 'portal-warning' : 'portal-muted';
+  }
+
+  function setThirdPartyMode(mode) {
+    portal.thirdPartyAction = mode || '';
+    var form = $('portalThirdPartyForm');
+    var filters = $('portalThirdPartyFilters');
+    var newButton = $('portalThirdPartyActionNew');
+    var searchButton = $('portalThirdPartyActionSearch');
+    setHidden(form, !(mode === 'alta' || mode === 'editar'));
+    setHidden(filters, mode !== 'buscar');
+    if (newButton) newButton.className = mode === 'alta' ? 'active' : '';
+    if (searchButton) searchButton.className = mode === 'buscar' ? 'secondary active' : 'secondary';
+  }
+
+  function thirdPartyControls() {
+    return [
+      $('portalThirdPartyId'),
+      $('portalThirdPartyTitle'),
+      $('portalThirdPartyArea'),
+      $('portalThirdPartyGrade'),
+      $('portalThirdPartyType'),
+      $('portalThirdPartyProvider'),
+      $('portalThirdPartyResource'),
+      $('portalThirdPartyActive'),
+      $('portalThirdPartyAvailable'),
+      $('portalThirdPartyDescription'),
+      $('portalThirdPartySave'),
+      $('portalThirdPartyCancel')
+    ].filter(Boolean);
+  }
+
+  function setThirdPartyFormEnabled(enabled) {
+    thirdPartyControls().forEach(function (control) {
+      control.disabled = !enabled;
+    });
+  }
+
+  function clearThirdPartyForm() {
+    if ($('portalThirdPartyId')) $('portalThirdPartyId').value = '';
+    if ($('portalThirdPartyTitle')) $('portalThirdPartyTitle').value = '';
+    if ($('portalThirdPartyArea')) $('portalThirdPartyArea').value = '';
+    if ($('portalThirdPartyGrade')) $('portalThirdPartyGrade').value = '';
+    if ($('portalThirdPartyType')) $('portalThirdPartyType').value = '';
+    if ($('portalThirdPartyProvider')) $('portalThirdPartyProvider').value = '';
+    if ($('portalThirdPartyResource')) $('portalThirdPartyResource').value = '';
+    if ($('portalThirdPartyActive')) $('portalThirdPartyActive').checked = true;
+    if ($('portalThirdPartyAvailable')) $('portalThirdPartyAvailable').checked = true;
+    if ($('portalThirdPartyDescription')) $('portalThirdPartyDescription').value = '';
+  }
+
+  function fillThirdPartyForm(activity) {
+    if (!activity) {
+      clearThirdPartyForm();
+      return;
+    }
+    if ($('portalThirdPartyId')) $('portalThirdPartyId').value = activity.id || '';
+    if ($('portalThirdPartyTitle')) $('portalThirdPartyTitle').value = activity.titulo || '';
+    if ($('portalThirdPartyArea')) $('portalThirdPartyArea').value = activity.area || '';
+    if ($('portalThirdPartyGrade')) $('portalThirdPartyGrade').value = activity.grado || '';
+    if ($('portalThirdPartyType')) $('portalThirdPartyType').value = activity.tipo || '';
+    if ($('portalThirdPartyProvider')) $('portalThirdPartyProvider').value = activity.proveedor || '';
+    if ($('portalThirdPartyResource')) $('portalThirdPartyResource').value = activity.recursoNombre || '';
+    if ($('portalThirdPartyActive')) $('portalThirdPartyActive').checked = activity.activo === true;
+    if ($('portalThirdPartyAvailable')) $('portalThirdPartyAvailable').checked = activity.disponible === true;
+    if ($('portalThirdPartyDescription')) $('portalThirdPartyDescription').value = activity.descripcion || '';
+  }
+
+  function thirdPartyPayload() {
+    return {
+      titulo: $('portalThirdPartyTitle') ? clean($('portalThirdPartyTitle').value) : '',
+      area: $('portalThirdPartyArea') ? clean($('portalThirdPartyArea').value) : '',
+      grado: $('portalThirdPartyGrade') ? clean($('portalThirdPartyGrade').value) : '',
+      tipo_actividad: $('portalThirdPartyType') ? clean($('portalThirdPartyType').value).toUpperCase() : '',
+      proveedor: $('portalThirdPartyProvider') ? clean($('portalThirdPartyProvider').value) : '',
+      recurso_nombre: $('portalThirdPartyResource') ? clean($('portalThirdPartyResource').value) : '',
+      activo: $('portalThirdPartyActive') ? $('portalThirdPartyActive').checked : true,
+      disponible: $('portalThirdPartyAvailable') ? $('portalThirdPartyAvailable').checked : true,
+      descripcion: $('portalThirdPartyDescription') ? clean($('portalThirdPartyDescription').value) : ''
+    };
+  }
+
+  function readThirdPartyFilters() {
+    portal.thirdPartyFilters = {
+      titulo: $('portalThirdPartyFilterTitle') ? clean($('portalThirdPartyFilterTitle').value).toLowerCase() : '',
+      area: $('portalThirdPartyFilterArea') ? clean($('portalThirdPartyFilterArea').value).toLowerCase() : '',
+      recurso: $('portalThirdPartyFilterResource') ? clean($('portalThirdPartyFilterResource').value).toLowerCase() : '',
+      grado: $('portalThirdPartyFilterGrade') ? clean($('portalThirdPartyFilterGrade').value) : '',
+      tipo: $('portalThirdPartyFilterType') ? clean($('portalThirdPartyFilterType').value).toUpperCase() : '',
+      activo: $('portalThirdPartyFilterActive') ? clean($('portalThirdPartyFilterActive').value) : '',
+      disponible: $('portalThirdPartyFilterAvailable') ? clean($('portalThirdPartyFilterAvailable').value) : ''
+    };
+    return portal.thirdPartyFilters;
+  }
+
+  function hasThirdPartyFilters(filters) {
+    return Object.keys(filters || {}).some(function (key) {
+      return !!filters[key];
+    });
+  }
+
+  function thirdPartySearchQuery(filters) {
+    return query({
+      titulo: filters && filters.titulo,
+      area: filters && filters.area,
+      recurso: filters && filters.recurso,
+      grado: filters && filters.grado,
+      tipo: filters && filters.tipo,
+      activo: filters && filters.activo,
+      disponible: filters && filters.disponible,
+      listar_todas: portal.thirdPartyListAll ? 'true' : ''
+    });
+  }
+
+  function filteredThirdPartyActivities(list) {
+    var filters = portal.thirdPartyFilters || {};
+    return (list || []).filter(function (activity) {
+      if (filters.titulo && !searchMatches(thirdPartyActivityTitle(activity), filters.titulo)) return false;
+      if (filters.area && clean(activity.area).toLowerCase() !== filters.area) return false;
+      if (filters.recurso && !searchMatches(thirdPartyActivityResourceText(activity), filters.recurso)) return false;
+      if (filters.grado && String(activity.grado || '') !== filters.grado) return false;
+      if (filters.tipo && String(activity.tipo || '').toUpperCase() !== filters.tipo) return false;
+      if (filters.activo === 'true' && activity.activo !== true) return false;
+      if (filters.activo === 'false' && activity.activo === true) return false;
+      if (filters.disponible === 'true' && activity.disponible !== true) return false;
+      if (filters.disponible === 'false' && activity.disponible === true) return false;
+      return true;
+    });
+  }
+
+  function thirdPartyTableRow(activity, canManage) {
+    var row = document.createElement('div');
+    row.className = 'portal-table-row portal-third-party-row';
+    row.appendChild(cell('portal-cell-title', valueOrDash(thirdPartyActivityTitle(activity))));
+    row.appendChild(cell('', valueOrDash(activity.area)));
+    row.appendChild(cell('portal-cell-compact', valueOrDash(activity.grado)));
+    row.appendChild(cell('portal-cell-compact', valueOrDash(activity.tipo)));
+    row.appendChild(cell('', valueOrDash(activity.proveedor)));
+    row.appendChild(cell('portal-cell-file', valueOrDash(activity.recursoNombre)));
+    row.appendChild(cell('portal-cell-compact', activity.activo ? 'SI' : 'NO'));
+    row.appendChild(cell('portal-cell-compact', activity.disponible ? 'SI' : 'NO'));
+    var actions = document.createElement('div');
+    actions.className = 'portal-row-actions';
+    if (canManage) {
+      actions.appendChild(iconButton('edit', 'Editar actividad de terceros', 'portal-icon-button secondary', function () {
+        setThirdPartyMode('editar');
+        fillThirdPartyForm(activity);
+        setThirdPartyStatus('Editando actividad de terceros.');
+      }));
+      if (activity.activo) {
+        actions.appendChild(iconButton('deactivate', 'Desactivar actividad de terceros', 'portal-icon-button danger', function () {
+          deactivateThirdPartyActivity(activity);
+        }));
+      }
+    }
+    row.appendChild(actions);
+    return row;
+  }
+
+  function renderThirdPartyActivities(state, activities) {
+    var listBox = $('portalThirdPartyList');
+    var form = $('portalThirdPartyForm');
+    var allowed = thirdPartyCanView(state);
+    var canManage = thirdPartyCanManage(state);
+    if ($('portalThirdPartyActionSearch')) $('portalThirdPartyActionSearch').disabled = !allowed;
+    if ($('portalThirdPartyActionNew')) $('portalThirdPartyActionNew').disabled = !canManage;
+    if ($('portalThirdPartyListar')) $('portalThirdPartyListar').disabled = !allowed;
+    if (!listBox) return;
+    listBox.innerHTML = '';
+    if (form) setHidden(form, !(portal.thirdPartyAction === 'alta' || portal.thirdPartyAction === 'editar') || !canManage);
+    setThirdPartyFormEnabled(canManage);
+    if (!allowed) {
+      clearThirdPartyForm();
+      setThirdPartyStatus(state && state.autorizado
+        ? 'Su perfil no tiene permiso para ver actividades de terceros.'
+        : 'Inicie sesión para ver actividades de terceros.', true);
+      listBox.textContent = state && state.autorizado ? 'Sin permiso.' : 'Sin sesión autorizada.';
+      return;
+    }
+    var list = filteredThirdPartyActivities(activities || portal.actividadesTerceros || []);
+    if (portal.thirdPartyAction === 'buscar' && !hasThirdPartyFilters(portal.thirdPartyFilters || {}) && portal.thirdPartyListAll !== true) {
+      setThirdPartyStatus('Complete al menos un filtro y presione Listar.');
+      listBox.textContent = 'Sin listado cargado.';
+      return;
+    }
+    setThirdPartyStatus(portal.thirdPartyAction === 'buscar'
+      ? 'Listado de actividades de terceros - Cantidad: ' + list.length
+      : 'Seleccione Agregar o Buscar.');
+    if (!list.length) {
+      listBox.textContent = portal.thirdPartyAction === 'buscar' ? 'No hay actividades para los filtros seleccionados.' : 'Sin listado cargado.';
+      return;
+    }
+    var table = document.createElement('div');
+    table.className = 'portal-table portal-third-party-table';
+    ['Título', 'Área', 'G', 'T', 'Proveedor', 'Recurso', 'Activo', 'Disp.', 'Acc.'].forEach(function (title) {
+      table.appendChild(headerCell(title));
+    });
+    list.forEach(function (activity) {
+      table.appendChild(thirdPartyTableRow(activity, canManage));
+    });
+    listBox.appendChild(table);
+  }
+
   function renderAccessLog(state) {
     var box = $('portalAccessLog');
     if (!box) return;
@@ -1719,6 +1994,90 @@
     }, true);
   }
 
+  function loadThirdPartyActivities(listAllRequested) {
+    var state = portal.state || {};
+    if (!thirdPartyCanView(state)) {
+      portal.actividadesTerceros = [];
+      renderThirdPartyActivities(state, []);
+      return;
+    }
+    var filters = portal.thirdPartyFilters || {};
+    var hasFilters = hasThirdPartyFilters(filters);
+    portal.thirdPartyListAll = !hasFilters && listAllRequested === true;
+    if (!hasFilters && portal.thirdPartyListAll !== true) {
+      portal.actividadesTerceros = [];
+      renderThirdPartyActivities(state, []);
+      setThirdPartyStatus('Complete al menos un filtro y presione Listar.');
+      return;
+    }
+    var qs = thirdPartySearchQuery(filters);
+    setThirdPartyStatus('Buscando actividades de terceros...');
+    api('GET', '/api/portal-docente/actividades-terceros' + (qs ? '?' + qs : ''), null, function (err, data) {
+      if (err) {
+        portal.actividadesTerceros = [];
+        renderThirdPartyActivities(state, []);
+        setThirdPartyStatus(err.error || 'No se pudieron cargar actividades de terceros.', true);
+        return;
+      }
+      portal.actividadesTerceros = data && data.actividades || [];
+      renderThirdPartyActivities(state, portal.actividadesTerceros);
+    }, true);
+  }
+
+  function saveThirdPartyActivity(event) {
+    event.preventDefault();
+    var state = portal.state || {};
+    if (!thirdPartyCanManage(state)) {
+      setThirdPartyStatus('Su perfil no tiene permiso para guardar actividades de terceros.', true);
+      return;
+    }
+    var id = $('portalThirdPartyId') ? $('portalThirdPartyId').value : '';
+    var method = id ? 'PATCH' : 'POST';
+    var path = '/api/portal-docente/actividades-terceros' + (id ? '/' + encodeURIComponent(id) : '');
+    setStatus('Guardando actividad de terceros');
+    api(method, path, thirdPartyPayload(), function (err) {
+      if (err) {
+        setThirdPartyStatus(err.error || 'No se pudo guardar la actividad de terceros.', true);
+        return;
+      }
+      clearThirdPartyForm();
+      setThirdPartyMode('buscar');
+      if (hasThirdPartyFilters(portal.thirdPartyFilters || {}) || portal.thirdPartyListAll === true) {
+        loadThirdPartyActivities(portal.thirdPartyListAll === true);
+      } else {
+        portal.actividadesTerceros = [];
+        renderThirdPartyActivities(portal.state || {}, []);
+        setThirdPartyStatus('Actividad guardada correctamente. Use Buscar y Listar con filtro para consultarla.');
+      }
+      setStatus('Activo');
+    }, true);
+  }
+
+  function deactivateThirdPartyActivity(activity) {
+    if (!activity || !activity.id) return;
+    if (!thirdPartyCanManage(portal.state || {})) {
+      setThirdPartyStatus('Su perfil no tiene permiso para desactivar actividades de terceros.', true);
+      return;
+    }
+    if (!window.confirm('Desactivar actividad de terceros ' + (activity.titulo || '') + '?')) return;
+    setStatus('Desactivando actividad de terceros');
+    api('DELETE', '/api/portal-docente/actividades-terceros/' + encodeURIComponent(activity.id), null, function (err) {
+      if (err) {
+        setThirdPartyStatus(err.error || 'No se pudo desactivar la actividad de terceros.', true);
+        return;
+      }
+      setThirdPartyMode('buscar');
+      if (hasThirdPartyFilters(portal.thirdPartyFilters || {}) || portal.thirdPartyListAll === true) {
+        loadThirdPartyActivities(portal.thirdPartyListAll === true);
+      } else {
+        portal.actividadesTerceros = [];
+        renderThirdPartyActivities(portal.state || {}, []);
+        setThirdPartyStatus('Actividad desactivada. Use Buscar y Listar con filtro para consultar actividades.');
+      }
+      setStatus('Activo');
+    }, true);
+  }
+
   function renderState(state) {
     portal.state = state || {};
     var config = state && state.configuracion || portal.config || {};
@@ -1728,6 +2087,7 @@
     renderIndex(state);
     renderClassSession(state);
     renderActivities(state);
+    renderThirdPartyActivities(state, portal.actividadesTerceros || []);
     renderAccessLog(state);
     renderResults(state, portal.resultados || []);
     renderAnalytics(state, portal.estadisticas);
@@ -2218,6 +2578,7 @@
     if ($('portalCloseClassSession')) $('portalCloseClassSession').onclick = closeClassSession;
     if ($('teacherPortalRefresh')) $('teacherPortalRefresh').onclick = loadPortal;
     if ($('portalStudentForm')) $('portalStudentForm').onsubmit = saveStudent;
+    if ($('portalThirdPartyForm')) $('portalThirdPartyForm').onsubmit = saveThirdPartyActivity;
     if ($('portalResultsApply')) {
       $('portalResultsApply').innerHTML = '';
       $('portalResultsApply').classList.add('portal-search-icon-button');
@@ -2262,6 +2623,31 @@
     }
     if ($('portalActivitiesSetAllNo')) {
       $('portalActivitiesSetAllNo').onclick = function () { setAllActivitiesAvailability(false); };
+    }
+    if ($('portalThirdPartyActionNew')) {
+      $('portalThirdPartyActionNew').onclick = function () {
+        clearThirdPartyForm();
+        setThirdPartyMode('alta');
+        portal.thirdPartyListAll = false;
+        renderThirdPartyActivities(portal.state || {}, portal.actividadesTerceros || []);
+        setThirdPartyStatus('Alta de actividad desarrollada por terceros.');
+      };
+    }
+    if ($('portalThirdPartyActionSearch')) {
+      $('portalThirdPartyActionSearch').onclick = function () {
+        setThirdPartyMode('buscar');
+        portal.thirdPartyListAll = false;
+        portal.actividadesTerceros = [];
+        renderThirdPartyActivities(portal.state || {}, []);
+        setThirdPartyStatus('Complete al menos un filtro y presione Listar.');
+      };
+    }
+    if ($('portalThirdPartyListar')) {
+      $('portalThirdPartyListar').onclick = function () {
+        setThirdPartyMode('buscar');
+        readThirdPartyFilters();
+        loadThirdPartyActivities(true);
+      };
     }
     if ($('portalStudentActionNew')) {
       $('portalStudentActionNew').onclick = function () {
@@ -2309,6 +2695,17 @@
         }
       };
     }
+    var thirdPartyFilterInputs = document.querySelectorAll('#portalThirdPartyFilters input, #portalThirdPartyFilters select');
+    for (var thirdPartyFilterIndex = 0; thirdPartyFilterIndex < thirdPartyFilterInputs.length; thirdPartyFilterIndex++) {
+      thirdPartyFilterInputs[thirdPartyFilterIndex].onkeydown = function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          setThirdPartyMode('buscar');
+          readThirdPartyFilters();
+          loadThirdPartyActivities(true);
+        }
+      };
+    }
     var resultFilterInputs = document.querySelectorAll('.portal-results-controls input, .portal-results-controls select');
     for (var resultFilterIndex = 0; resultFilterIndex < resultFilterInputs.length; resultFilterIndex++) {
       resultFilterInputs[resultFilterIndex].onkeydown = function (event) {
@@ -2325,6 +2722,15 @@
         portal.alumnosApoyo = [];
         renderStudents(portal.state || {}, []);
         setStudentsStatus('Operacion cancelada.');
+      };
+    }
+    if ($('portalThirdPartyCancel')) {
+      $('portalThirdPartyCancel').onclick = function () {
+        clearThirdPartyForm();
+        setThirdPartyMode('');
+        portal.actividadesTerceros = [];
+        renderThirdPartyActivities(portal.state || {}, []);
+        setThirdPartyStatus('Operación cancelada.');
       };
     }
   }

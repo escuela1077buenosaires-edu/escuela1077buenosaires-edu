@@ -30,12 +30,18 @@
     <section class="qr-reader-panel">
       <h2>1. Seleccionar actividad</h2>
       <label class="qr-reader-label">
-        Actividad publicada
+        Actividad de desarrollo propio
         <select id="qrActivitySelect">
           <option value="">Inicie sesion para cargar actividades</option>
         </select>
       </label>
-      <p id="qrActivityHint" class="portal-muted">El QR no incluye el ID interno de actividad; por eso se selecciona aqui.</p>
+      <label class="qr-reader-label">
+        Actividad desarrollada por terceros
+        <select id="qrThirdPartyActivitySelect">
+          <option value="">Inicie sesion para cargar actividades de terceros</option>
+        </select>
+      </label>
+      <p id="qrActivityHint" class="portal-muted">Seleccione una sola fuente. Las propias se toman del indice visible; las de terceros deben estar cargadas y disponibles.</p>
     </section>
 
     <section class="qr-reader-panel">

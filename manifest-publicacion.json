@@ -1,6 +1,6 @@
 {
   "escuelaId": "1077",
-  "generadoEn": "2026-07-21T22:54:17.150Z",
+  "generadoEn": "2026-07-21T23:39:09.920Z",
   "githubPagesBasePath": "/escuela1077buenosaires-edu/",
   "backendBaseUrlConfigurado": false,
   "supabasePublicConfigConfigurada": true,
@@ -62,13 +62,13 @@
     },
     {
       "nombre": "lector-qr.html",
-      "bytes": 4645,
-      "sha256": "42c91ae4cb6920a63b3d58c361393407da53498ad0105edfded391877618ce03"
+      "bytes": 4954,
+      "sha256": "57c59513a88876bf7a9184b1e260d94f2d4a8b2731ffd56a516d651d3fe188e1"
     },
     {
       "nombre": "lector-qr.js",
-      "bytes": 23929,
-      "sha256": "009230663ed5e0d68b9c2819a0f6ad8a4172356dcb4837b337d6c601a89367e6"
+      "bytes": 27999,
+      "sha256": "e41c3f136546310d7152296d8dfcedda4689ae04753b4afe7fe65a33863390e9"
     },
     {
       "nombre": "lector-qr.webmanifest",
@@ -77,8 +77,8 @@
     },
     {
       "nombre": "manifest-publicacion.json",
-      "bytes": 3147,
-      "sha256": "4c3caa78fb25eadb1d1e3487faac3588c568343fd6530bfed852ebd4f958d832"
+      "bytes": 3148,
+      "sha256": "466ad736c847aaaa31eae64efc9e53e2ca19569eed244e9a9ba4d3b898657a09"
     },
     {
       "nombre": "portal-docente-fixes.js",
@@ -87,18 +87,18 @@
     },
     {
       "nombre": "portal-docente.html",
-      "bytes": 22118,
-      "sha256": "93f5c00916714568d8d52e742c7ccd6c9d8af157453d059e868df16efbd247be"
+      "bytes": 28464,
+      "sha256": "186ff7c21748d54c948de83d3044c769b1f933ad6f74c4cbf17945dfb98afc18"
     },
     {
       "nombre": "portal-docente.js",
-      "bytes": 96651,
-      "sha256": "d3340c1ce4d20eb5c9ad455cea358f7f106a78dae6462e4bd8aa956f781b1fe4"
+      "bytes": 115533,
+      "sha256": "8e293c00ca05514e7e4203e2a6f1074ef9c01db05c8712d94291ed5097410567"
     },
     {
       "nombre": "styles.css",
-      "bytes": 61665,
-      "sha256": "7d74ea867634f4c22c6a33eb394767a42d49d2f394e22cc23fa88a4cc5f8098e"
+      "bytes": 61898,
+      "sha256": "4ffd9578bff19ee253c9ed51e43cbf61a69e37bbc3ba393dda9be726ad42aaf7"
     }
   ]
 }
