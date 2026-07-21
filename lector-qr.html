@@ -7,7 +7,7 @@
   <title>Lector QR 1077</title>
   <link rel="icon" href="lector-qr-icon.svg" type="image/svg+xml">
   <link rel="manifest" href="lector-qr.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=qr-20260719-01">
+  <link rel="stylesheet" href="styles.css?v=qr-20260721-01">
 </head>
 <body class="qr-reader-body">
   <main class="qr-reader">
@@ -54,6 +54,35 @@
           <textarea id="qrManualText" rows="5" placeholder='{"id":"ALU-001","pts":8,"err":2,"ej":10,"nota":8,"m":12}'></textarea>
         </label>
         <button type="button" id="qrReadManual" class="secondary">Procesar texto</button>
+        <div class="qr-manual-separator">Carga manual guiada</div>
+        <div class="qr-manual-grid">
+          <label class="qr-reader-label">
+            ID alumno
+            <input id="qrManualStudent" type="text" inputmode="numeric" maxlength="40">
+          </label>
+          <label class="qr-reader-label">
+            Cant.
+            <input id="qrManualTotal" type="number" min="1" max="200" step="1">
+          </label>
+          <label class="qr-reader-label">
+            Correctos
+            <input id="qrManualCorrect" type="number" min="0" max="200" step="1">
+          </label>
+          <label class="qr-reader-label">
+            Incorrectos
+            <input id="qrManualIncorrect" type="number" min="0" max="200" step="1">
+          </label>
+          <label class="qr-reader-label">
+            Nota
+            <input id="qrManualGrade" type="number" min="0" max="10" step="0.01" readonly>
+          </label>
+          <label class="qr-reader-label">
+            Tiempo min.
+            <input id="qrManualMinutes" type="number" min="0" max="600" step="0.01">
+          </label>
+        </div>
+        <p class="qr-manual-note">La fecha y hora se registran automaticamente al enviar. La nota se calcula con correctos/cantidad.</p>
+        <button type="button" id="qrReadManualFields" class="secondary">Procesar campos</button>
       </details>
     </section>
 
@@ -69,7 +98,7 @@
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="lector-qr.js?v=qr-20260719-01"></script>
+  <script src="lector-qr.js?v=qr-20260721-01"></script>
   <script src="aie-login-redirect.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

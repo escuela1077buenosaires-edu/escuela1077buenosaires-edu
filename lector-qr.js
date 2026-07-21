@@ -311,6 +311,56 @@
     return number;
   }
 
+  function manualInputNumber(id) {
+    var input = $(id);
+    return input ? clean(input.value) : '';
+  }
+
+  function roundedGrade(correctos, total) {
+    var value = Math.round((correctos / total) * 10 * 100) / 100;
+    return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+  }
+
+  function syncManualGrade() {
+    var totalText = manualInputNumber('qrManualTotal');
+    var correctText = manualInputNumber('qrManualCorrect');
+    var incorrectInput = $('qrManualIncorrect');
+    var gradeInput = $('qrManualGrade');
+    var total = Number(totalText);
+    var correctos = Number(correctText);
+    if (!Number.isFinite(total) || total <= 0 || !Number.isFinite(correctos) || correctos < 0) {
+      if (gradeInput) gradeInput.value = '';
+      return;
+    }
+    if (incorrectInput && !clean(incorrectInput.value) && correctos <= total) {
+      incorrectInput.value = String(total - correctos);
+    }
+    if (gradeInput) {
+      gradeInput.value = roundedGrade(correctos, total);
+    }
+  }
+
+  function resultPayloadFromManualFields() {
+    if (!canUseQr()) throw new Error('Su perfil no tiene permiso para usar el lector QR.');
+    var activity = selectedActivity();
+    if (!activity) throw new Error('Seleccione una actividad antes de cargar el resultado.');
+    syncManualGrade();
+    var idAlumno = clean($('qrManualStudent') && $('qrManualStudent').value);
+    if (!idAlumno) throw new Error('Falta ID de alumno.');
+    return {
+      actividad_id: activity.id,
+      intento_id: randomUuid(),
+      id_alumno: idAlumno,
+      tipo_actividad: activity.tipo || '',
+      titulo: activity.titulo || '',
+      correctos: validateNumber(manualInputNumber('qrManualCorrect'), 'correctos', 0, 200, true),
+      incorrectos: validateNumber(manualInputNumber('qrManualIncorrect'), 'incorrectos', 0, 200, true),
+      cantidad_ejercicios: validateNumber(manualInputNumber('qrManualTotal'), 'cantidad_ejercicios', 1, 200, true),
+      nota: validateNumber(manualInputNumber('qrManualGrade'), 'nota', 0, 10, false),
+      tiempo_minutos: validateNumber(manualInputNumber('qrManualMinutes'), 'tiempo_minutos', 0, 600, false)
+    };
+  }
+
   function validateResultPayload(payload) {
     var activityId = clean(payload.actividad_id);
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(activityId)) {
@@ -398,6 +448,30 @@
       selectedPayload = payload;
       renderResult(payload, true);
       setStatus('QR leido y validado.');
+      stopCamera();
+    });
+  }
+
+  function handleManualFields() {
+    var payload;
+    try {
+      payload = resultPayloadFromManualFields();
+    } catch (err) {
+      selectedPayload = null;
+      renderResult(null);
+      setStatus(err.message, true);
+      return;
+    }
+    api('POST', '/api/resultados/validar', payload, function (err) {
+      if (err) {
+        selectedPayload = null;
+        renderResult(payload, false);
+        setStatus(err.error || 'El resultado manual no paso la validacion.', true);
+        return;
+      }
+      selectedPayload = payload;
+      renderResult(payload, true);
+      setStatus('Resultado manual validado. Listo para enviar.');
       stopCamera();
     });
   }
@@ -563,6 +637,11 @@
     $('qrReadManual').onclick = function () {
       handleQrText($('qrManualText').value);
     };
+    $('qrReadManualFields').onclick = handleManualFields;
+    ['qrManualTotal', 'qrManualCorrect', 'qrManualIncorrect'].forEach(function (id) {
+      var input = $(id);
+      if (input) input.oninput = syncManualGrade;
+    });
     $('qrSendResult').onclick = sendResult;
     $('qrClearResult').onclick = function () {
       selectedPayload = null;
