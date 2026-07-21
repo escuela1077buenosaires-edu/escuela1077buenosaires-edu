@@ -46,10 +46,16 @@
       if (method === 'GET' && path === '/api/portal-docente/estado') {
         return rpc('aie_1077_portal_estado', {}, callback, authenticated);
       }
-      if (method === 'GET' && path.indexOf('/api/portal-docente/actividades') === 0) {
-        return rpc('aie_1077_actividades_listar', {
-          p_disponible: true
-        }, callback, authenticated);
+      if (method === 'GET' && path.indexOf('/api/indice-alumnos') === 0) {
+        return rpc('aie_1077_indice_alumnos', {
+          p_buscar: '',
+          p_titulo: '',
+          p_area: '',
+          p_archivo: '',
+          p_grado: '',
+          p_tipo: '',
+          p_listar_todas: true
+        }, callback, false);
       }
       if (method === 'POST' && path === '/api/resultados/validar') {
         window.setTimeout(function () {
@@ -232,9 +238,6 @@
       select.disabled = true;
       return;
     }
-    if (Array.isArray(state.actividades) && state.actividades.length) {
-      activities = state.actividades;
-    }
     if (!activities.length) {
       var empty = document.createElement('option');
       empty.value = '';
@@ -262,7 +265,7 @@
   }
 
   function loadQrActivities() {
-    api('GET', '/api/portal-docente/actividades?disponible=true', null, function (err, data) {
+    api('GET', '/api/indice-alumnos?listar_todas=true', null, function (err, data) {
       if (err) {
         activities = [];
         renderActivities();
@@ -273,7 +276,7 @@
       renderActivities();
       setStatus(activities.length
         ? 'Sesion autorizada. Seleccione actividad y lea QR.'
-        : 'No hay actividades disponibles para el lector QR.', !activities.length);
+        : (data && data.mensaje || 'No hay actividades visibles para el lector QR.'), !activities.length);
     }, true);
   }
 
@@ -624,15 +627,12 @@
         return;
       }
       state = data || {};
+      activities = [];
       renderSession();
       renderActivities();
       if (state.autorizado && canUseQr()) {
-        if (!activities.length) {
-          setStatus('Cargando actividades para el lector QR.');
-          loadQrActivities();
-        } else {
-          setStatus('Sesion autorizada. Seleccione actividad y lea QR.');
-        }
+        setStatus('Cargando actividades visibles para el lector QR.');
+        loadQrActivities();
       } else if (state.autorizado) {
         setStatus('Sesion autorizada, pero sin permiso para lector QR.', true);
       } else {

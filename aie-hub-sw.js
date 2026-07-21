@@ -1,4 +1,4 @@
-var CACHE_NAME = 'aie-pages-1077-v30';
+var CACHE_NAME = 'aie-pages-1077-v31';
 var STATIC_FILES = [
   './',
   './index.html',
