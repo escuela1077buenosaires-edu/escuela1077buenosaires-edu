@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Portal funcional del personal docente - Escuela 1077</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css?v=admin-20260721-02">
+  <link rel="stylesheet" href="styles.css?v=admin-20260725-04">
 </head>
 <body>
   <header class="topbar">
@@ -179,11 +179,11 @@
           <button type="button" id="portalThirdPartyActionNew">Agregar</button>
         </div>
         <div id="portalThirdPartyFilters" class="portal-filter-row hidden" aria-label="Filtros de actividades de terceros">
-          <label>
+          <label class="portal-third-party-filter-title">
             Título
             <input id="portalThirdPartyFilterTitle" type="text" maxlength="120">
           </label>
-          <label>
+          <label class="portal-third-party-filter-area">
             Área
             <select id="portalThirdPartyFilterArea">
               <option value="">Todas</option>
@@ -196,7 +196,7 @@
               <option value="Otra">Otra</option>
             </select>
           </label>
-          <label>
+          <label class="portal-third-party-filter-resource">
             Recurso / proveedor
             <input id="portalThirdPartyFilterResource" type="text" maxlength="140">
           </label>
@@ -230,7 +230,7 @@
               <option value="">Todos</option>
             </select>
           </label>
-          <label class="portal-filter-small">
+          <label class="portal-filter-small portal-third-party-filter-available">
             Disp.
             <select id="portalThirdPartyFilterAvailable">
               <option value="true" selected>SI</option>
@@ -238,10 +238,14 @@
               <option value="">Todos</option>
             </select>
           </label>
-          <button type="button" id="portalThirdPartyListar" class="secondary">Listar</button>
+          <button type="button" id="portalThirdPartyListar" class="portal-third-party-list-button">Listar</button>
         </div>
         <form id="portalThirdPartyForm" class="portal-student-form portal-third-party-form hidden" data-portal-managed="true">
           <input type="hidden" id="portalThirdPartyId">
+          <div class="portal-third-party-reference">
+            <strong>Referencia rápida</strong>
+            <span>Estado publicada, Activo SI y Disponible SI permiten usar la actividad. Visible desde/hasta acota por fecha; vacío significa sin límite. En Línea requiere URL. Recurso/Proveedor identifica el material externo.</span>
+          </div>
           <label class="portal-third-party-field-title">
             Título
             <input id="portalThirdPartyTitle" type="text" maxlength="180" required>
@@ -281,7 +285,7 @@
               <option value="OTRA">Otra</option>
             </select>
           </label>
-          <label class="portal-third-party-field-small">
+          <label class="portal-third-party-field-small portal-third-party-field-state">
             Estado
             <select id="portalThirdPartyState">
               <option value="publicada" selected>publicada</option>
@@ -671,7 +675,7 @@
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="portal-docente.js?v=portal-20260725-01"></script>
+  <script src="portal-docente.js?v=portal-20260725-04"></script>
   <script src="portal-docente-fixes.js?v=admin-20260720-03"></script>
   <script src="aie-login-redirect.js"></script>
 </body>

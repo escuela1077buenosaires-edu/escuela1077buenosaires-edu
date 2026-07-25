@@ -1025,6 +1025,19 @@
     return clean(activity && activity.modalidad) === 'en_linea' ? 'En Línea' : 'Local';
   }
 
+  function thirdPartyAreaText(activity) {
+    var area = clean(activity && activity.area);
+    if (area === 'Matematica') return 'Matemática';
+    if (area === 'Formacion Etica y Ciudadana') return 'Formación Ética y Ciudadana';
+    if (area === 'Tecnologia') return 'Tecnología';
+    return area;
+  }
+
+  function thirdPartyTypeText(activity) {
+    var type = clean(activity && activity.tipo).toUpperCase();
+    return type === 'OTRA' ? 'Otra' : type;
+  }
+
   function thirdPartyCanManage(state) {
     return state && state.autorizado && permission(state, 'puede_gestionar_actividades_terceros');
   }
@@ -1219,15 +1232,18 @@
   function thirdPartyTableRow(activity, canManage) {
     var row = document.createElement('div');
     row.className = 'portal-table-row portal-third-party-row';
+    row.appendChild(cell('portal-cell-compact', valueOrDash(activity.numero)));
     row.appendChild(cell('portal-cell-title', valueOrDash(thirdPartyActivityTitle(activity))));
-    row.appendChild(cell('', valueOrDash(activity.area)));
+    row.appendChild(cell('', valueOrDash(thirdPartyAreaText(activity))));
     row.appendChild(cell('portal-cell-compact', valueOrDash(activity.grado)));
-    row.appendChild(cell('portal-cell-compact', valueOrDash(activity.tipo)));
+    row.appendChild(cell('portal-cell-compact', valueOrDash(thirdPartyTypeText(activity))));
+    row.appendChild(cell('portal-cell-compact', valueOrDash(activity.estado)));
     row.appendChild(cell('portal-cell-compact', thirdPartyModeText(activity)));
-    row.appendChild(cell('', valueOrDash(activity.proveedor)));
-    row.appendChild(cell('portal-cell-file', valueOrDash(activity.recursoNombre)));
     row.appendChild(cell('portal-cell-compact', activity.activo ? 'SI' : 'NO'));
     row.appendChild(cell('portal-cell-compact', activity.disponible ? 'SI' : 'NO'));
+    row.appendChild(cell('portal-cell-compact', valueOrDash(activity.cantidadEjercicios)));
+    row.appendChild(cell('portal-cell-file', valueOrDash(activity.recursoNombre)));
+    row.appendChild(cell('', valueOrDash(activity.proveedor)));
     row.appendChild(cell('portal-cell-date', portalDate(activity.visibleDesde) || '-'));
     row.appendChild(cell('portal-cell-date', portalDate(activity.visibleHasta) || '-'));
     var actions = document.createElement('div');
@@ -1284,15 +1300,18 @@
     var table = document.createElement('div');
     table.className = 'portal-table portal-third-party-table';
     [
+      { text: 'N°', title: 'Número' },
       { text: 'Título' },
       { text: 'Área' },
       { text: 'G', title: 'Grado' },
       { text: 'T', title: 'Tipo' },
+      { text: 'Est.', title: 'Estado' },
       { text: 'Mod.', title: 'Local / En Línea' },
-      { text: 'Proveedor' },
-      { text: 'Recurso' },
       { text: 'Act.', title: 'Activo' },
       { text: 'Disp.', title: 'Disponible' },
+      { text: 'Cant. Ej.', title: 'Cantidad de Ejercicios' },
+      { text: 'Recurso' },
+      { text: 'Proveedor' },
       { text: 'V. Desde', title: 'Visible desde' },
       { text: 'V. Hasta', title: 'Visible hasta' },
       { text: 'Acc.', title: 'Acciones' }

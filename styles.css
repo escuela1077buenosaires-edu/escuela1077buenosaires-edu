@@ -1048,7 +1048,7 @@ body {
 }
 
 .admin-third-party-activity-filters {
-  grid-template-columns: minmax(180px, 1.6fr) minmax(150px, 1.1fr) 76px 78px 96px 110px minmax(180px, 1.4fr) 100px;
+  grid-template-columns: minmax(170px, 1.4fr) minmax(120px, 0.8fr) 72px 72px 82px 86px minmax(240px, 1.8fr) 92px;
 }
 
 .admin-grid.admin-third-party-mode .admin-rows-panel {
@@ -1060,17 +1060,17 @@ body {
 }
 
 .admin-grid.admin-third-party-mode .admin-cell-field-numero {
-  max-width: 58px;
+  max-width: 50px;
   text-align: center;
   white-space: nowrap;
 }
 
 .admin-grid.admin-third-party-mode .admin-cell-field-titulo {
-  min-width: 190px;
+  min-width: 180px;
 }
 
 .admin-grid.admin-third-party-mode .admin-cell-field-area {
-  max-width: 130px;
+  max-width: 112px;
 }
 
 .admin-grid.admin-third-party-mode .admin-cell-field-grado,
@@ -1085,14 +1085,14 @@ body {
 .admin-grid.admin-third-party-mode .admin-cell-field-disponible,
 .admin-grid.admin-third-party-mode .admin-cell-field-activo,
 .admin-grid.admin-third-party-mode .admin-cell-field-cantidad_ejercicios {
-  max-width: 86px;
+  max-width: 78px;
   text-align: center;
   white-space: nowrap;
 }
 
 .admin-grid.admin-third-party-mode .admin-cell-field-recurso_nombre,
 .admin-grid.admin-third-party-mode .admin-cell-field-proveedor {
-  min-width: 150px;
+  min-width: 170px;
 }
 
 .admin-grid.admin-third-party-mode .admin-cell-field-visible_desde,
@@ -1288,7 +1288,11 @@ body {
 }
 
 .admin-grid.admin-third-party-mode .admin-activity-form .admin-field-area {
-  grid-column: span 3;
+  grid-column: span 2;
+}
+
+.admin-grid.admin-third-party-mode .admin-activity-form .admin-field-estado {
+  grid-column: span 2;
 }
 
 .admin-grid.admin-third-party-mode .admin-activity-form .admin-field-proveedor,
@@ -1316,6 +1320,23 @@ body {
 .admin-grid.admin-third-party-mode .admin-activity-form .admin-field-activo,
 .admin-grid.admin-third-party-mode .admin-activity-form .admin-field-disponible {
   grid-column: span 1;
+}
+
+.third-party-reference-block {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 2px solid #0f766e;
+  border-radius: 9px;
+  background: #ecfdf5;
+  color: #164e63;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.third-party-reference-block strong {
+  color: #0f172a;
 }
 
 .admin-activity-form textarea {
@@ -2089,6 +2110,31 @@ body {
   min-width: 0;
 }
 
+#portalThirdPartyFilters {
+  grid-template-columns: minmax(150px, 1.15fr) minmax(108px, 0.7fr) minmax(280px, 1.8fr) 72px 72px 82px 72px 92px;
+}
+
+#portalThirdPartyFilters .portal-third-party-filter-area select,
+#portalThirdPartyFilters .portal-third-party-filter-available select {
+  min-width: 0;
+}
+
+#portalThirdPartyFilters .portal-third-party-filter-resource {
+  min-width: 240px;
+}
+
+.portal-third-party-list-button {
+  min-height: 36px;
+  border: 1px solid #0f766e;
+  background: #147a80;
+  color: #fff;
+  font-weight: 800;
+}
+
+.portal-third-party-list-button:hover:not(:disabled) {
+  background: #0f666b;
+}
+
 .portal-filter-id {
   max-width: 150px;
 }
@@ -2365,8 +2411,8 @@ body {
 }
 
 .portal-third-party-table {
-  grid-template-columns: minmax(190px, 1.2fr) 120px 42px 44px 82px 130px minmax(170px, 1fr) 58px 62px 132px 132px 104px;
-  min-width: 1320px;
+  grid-template-columns: 46px minmax(170px, 1.2fr) 108px 40px 40px 70px 82px 54px 58px 72px minmax(190px, 1.2fr) minmax(170px, 1fr) 128px 128px 92px;
+  min-width: 1520px;
 }
 
 .portal-third-party-table .portal-table-header {
@@ -2428,12 +2474,33 @@ body {
   grid-template-columns: repeat(12, minmax(0, 1fr));
 }
 
+.portal-third-party-reference {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 2px solid #0f766e;
+  border-radius: 9px;
+  background: #ecfdf5;
+  color: #164e63;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.portal-third-party-reference strong {
+  color: #0f172a;
+}
+
 .portal-third-party-form .portal-third-party-field-title {
   grid-column: span 4;
 }
 
 .portal-third-party-form .portal-third-party-field-area {
-  grid-column: span 3;
+  grid-column: span 2;
+}
+
+.portal-third-party-form .portal-third-party-field-state {
+  grid-column: span 2;
 }
 
 .portal-third-party-form .portal-third-party-field-small {
