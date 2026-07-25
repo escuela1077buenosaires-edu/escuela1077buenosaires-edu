@@ -240,13 +240,13 @@
           </label>
           <button type="button" id="portalThirdPartyListar" class="secondary">Listar</button>
         </div>
-        <form id="portalThirdPartyForm" class="portal-student-form hidden" data-portal-managed="true">
+        <form id="portalThirdPartyForm" class="portal-student-form portal-third-party-form hidden" data-portal-managed="true">
           <input type="hidden" id="portalThirdPartyId">
-          <label>
+          <label class="portal-third-party-field-title">
             Título
             <input id="portalThirdPartyTitle" type="text" maxlength="180" required>
           </label>
-          <label>
+          <label class="portal-third-party-field-area">
             Área
             <select id="portalThirdPartyArea" required>
               <option value="">Seleccionar</option>
@@ -259,7 +259,7 @@
               <option value="Otra">Otra</option>
             </select>
           </label>
-          <label>
+          <label class="portal-third-party-field-small">
             Grado
             <select id="portalThirdPartyGrade" required>
               <option value="">Seleccionar</option>
@@ -272,7 +272,7 @@
               <option value="7">7</option>
             </select>
           </label>
-          <label>
+          <label class="portal-third-party-field-small">
             Tipo
             <select id="portalThirdPartyType" required>
               <option value="">Seleccionar</option>
@@ -281,21 +281,66 @@
               <option value="OTRA">Otra</option>
             </select>
           </label>
-          <label>
+          <label class="portal-third-party-field-small">
+            Estado
+            <select id="portalThirdPartyState">
+              <option value="publicada" selected>publicada</option>
+              <option value="borrador">borrador</option>
+              <option value="archivada">archivada</option>
+            </select>
+            <span class="portal-field-help">Publicada: puede usarse.</span>
+          </label>
+          <label class="portal-third-party-field-count">
+            Cantidad de Ejercicios
+            <input id="portalThirdPartyExerciseCount" type="number" min="1" max="200" step="1">
+          </label>
+          <label class="portal-third-party-field-provider">
             Proveedor
             <input id="portalThirdPartyProvider" type="text" maxlength="140">
           </label>
-          <label>
+          <label class="portal-third-party-field-resource">
             Recurso
             <input id="portalThirdPartyResource" type="text" maxlength="180">
+            <span class="portal-field-help">Software, sitio, libro, plataforma o material usado.</span>
           </label>
-          <label class="portal-check-row">
-            <input id="portalThirdPartyActive" type="checkbox" checked>
-            Activa
+          <label class="portal-third-party-field-mode">
+            Local / En Línea
+            <select id="portalThirdPartyMode">
+              <option value="local" selected>Local</option>
+              <option value="en_linea">En Línea</option>
+            </select>
+            <span class="portal-field-help">Local: se usa sin URL. En Línea: requiere URL.</span>
           </label>
-          <label class="portal-check-row">
-            <input id="portalThirdPartyAvailable" type="checkbox" checked>
+          <label class="portal-third-party-field-small">
+            Activo
+            <select id="portalThirdPartyActive">
+              <option value="true" selected>SI</option>
+              <option value="false">NO</option>
+            </select>
+            <span class="portal-field-help">NO = baja lógica.</span>
+          </label>
+          <label class="portal-third-party-field-small">
             Disponible
+            <select id="portalThirdPartyAvailable">
+              <option value="true" selected>SI</option>
+              <option value="false">NO</option>
+            </select>
+            <span class="portal-field-help">NO = no aparece para usar.</span>
+          </label>
+          <label class="portal-third-party-field-url">
+            URL de referencia
+            <input id="portalThirdPartyReferenceUrl" type="url" maxlength="500">
+            <span class="portal-field-help">Obligatoria solo si la actividad es En Línea.</span>
+          </label>
+          <label class="portal-third-party-field-date">
+            Visible desde
+            <input id="portalThirdPartyVisibleFrom" type="datetime-local">
+            <span class="portal-field-help">Vacío = sin límite de inicio.</span>
+          </label>
+          <label class="portal-third-party-field-date">
+            Visible hasta
+            <input id="portalThirdPartyVisibleTo" type="datetime-local">
+            <span class="portal-field-help">Vacío = sin vencimiento.</span>
           </label>
           <label class="portal-student-notes">
             Descripción
@@ -626,7 +671,7 @@
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="portal-docente.js?v=admin-20260721-02"></script>
+  <script src="portal-docente.js?v=portal-20260725-01"></script>
   <script src="portal-docente-fixes.js?v=admin-20260720-03"></script>
   <script src="aie-login-redirect.js"></script>
 </body>

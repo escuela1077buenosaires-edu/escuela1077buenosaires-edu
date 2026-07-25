@@ -1021,6 +1021,10 @@
     ].map(clean).filter(Boolean).join(' ');
   }
 
+  function thirdPartyModeText(activity) {
+    return clean(activity && activity.modalidad) === 'en_linea' ? 'En Línea' : 'Local';
+  }
+
   function thirdPartyCanManage(state) {
     return state && state.autorizado && permission(state, 'puede_gestionar_actividades_terceros');
   }
@@ -1055,10 +1059,16 @@
       $('portalThirdPartyArea'),
       $('portalThirdPartyGrade'),
       $('portalThirdPartyType'),
+      $('portalThirdPartyState'),
+      $('portalThirdPartyExerciseCount'),
       $('portalThirdPartyProvider'),
       $('portalThirdPartyResource'),
+      $('portalThirdPartyMode'),
       $('portalThirdPartyActive'),
       $('portalThirdPartyAvailable'),
+      $('portalThirdPartyReferenceUrl'),
+      $('portalThirdPartyVisibleFrom'),
+      $('portalThirdPartyVisibleTo'),
       $('portalThirdPartyDescription'),
       $('portalThirdPartySave'),
       $('portalThirdPartyCancel')
@@ -1077,11 +1087,18 @@
     if ($('portalThirdPartyArea')) $('portalThirdPartyArea').value = '';
     if ($('portalThirdPartyGrade')) $('portalThirdPartyGrade').value = '';
     if ($('portalThirdPartyType')) $('portalThirdPartyType').value = '';
+    if ($('portalThirdPartyState')) $('portalThirdPartyState').value = 'publicada';
+    if ($('portalThirdPartyExerciseCount')) $('portalThirdPartyExerciseCount').value = '';
     if ($('portalThirdPartyProvider')) $('portalThirdPartyProvider').value = '';
     if ($('portalThirdPartyResource')) $('portalThirdPartyResource').value = '';
-    if ($('portalThirdPartyActive')) $('portalThirdPartyActive').checked = true;
-    if ($('portalThirdPartyAvailable')) $('portalThirdPartyAvailable').checked = true;
+    if ($('portalThirdPartyMode')) $('portalThirdPartyMode').value = 'local';
+    if ($('portalThirdPartyActive')) $('portalThirdPartyActive').value = 'true';
+    if ($('portalThirdPartyAvailable')) $('portalThirdPartyAvailable').value = 'true';
+    if ($('portalThirdPartyReferenceUrl')) $('portalThirdPartyReferenceUrl').value = '';
+    if ($('portalThirdPartyVisibleFrom')) $('portalThirdPartyVisibleFrom').value = '';
+    if ($('portalThirdPartyVisibleTo')) $('portalThirdPartyVisibleTo').value = '';
     if ($('portalThirdPartyDescription')) $('portalThirdPartyDescription').value = '';
+    updateThirdPartyReferenceUrlRequirement();
   }
 
   function fillThirdPartyForm(activity) {
@@ -1094,23 +1111,59 @@
     if ($('portalThirdPartyArea')) $('portalThirdPartyArea').value = activity.area || '';
     if ($('portalThirdPartyGrade')) $('portalThirdPartyGrade').value = activity.grado || '';
     if ($('portalThirdPartyType')) $('portalThirdPartyType').value = activity.tipo || '';
+    if ($('portalThirdPartyState')) $('portalThirdPartyState').value = activity.estado || 'publicada';
+    if ($('portalThirdPartyExerciseCount')) $('portalThirdPartyExerciseCount').value = activity.cantidadEjercicios || '';
     if ($('portalThirdPartyProvider')) $('portalThirdPartyProvider').value = activity.proveedor || '';
     if ($('portalThirdPartyResource')) $('portalThirdPartyResource').value = activity.recursoNombre || '';
-    if ($('portalThirdPartyActive')) $('portalThirdPartyActive').checked = activity.activo === true;
-    if ($('portalThirdPartyAvailable')) $('portalThirdPartyAvailable').checked = activity.disponible === true;
+    if ($('portalThirdPartyMode')) $('portalThirdPartyMode').value = activity.modalidad || 'local';
+    if ($('portalThirdPartyActive')) $('portalThirdPartyActive').value = activity.activo === true ? 'true' : 'false';
+    if ($('portalThirdPartyAvailable')) $('portalThirdPartyAvailable').value = activity.disponible === true ? 'true' : 'false';
+    if ($('portalThirdPartyReferenceUrl')) $('portalThirdPartyReferenceUrl').value = activity.urlReferencia || '';
+    if ($('portalThirdPartyVisibleFrom')) $('portalThirdPartyVisibleFrom').value = dateInputValue(activity.visibleDesde);
+    if ($('portalThirdPartyVisibleTo')) $('portalThirdPartyVisibleTo').value = dateInputValue(activity.visibleHasta);
     if ($('portalThirdPartyDescription')) $('portalThirdPartyDescription').value = activity.descripcion || '';
+    updateThirdPartyReferenceUrlRequirement();
+  }
+
+  function updateThirdPartyReferenceUrlRequirement() {
+    var mode = $('portalThirdPartyMode');
+    var url = $('portalThirdPartyReferenceUrl');
+    if (!mode || !url) return;
+    var online = mode.value === 'en_linea';
+    url.required = online;
+    url.placeholder = online ? 'https://...' : '';
+  }
+
+  function thirdPartyBoolValue(id, fallback) {
+    var control = $(id);
+    if (!control) return fallback;
+    return control.value !== 'false';
   }
 
   function thirdPartyPayload() {
+    var mode = $('portalThirdPartyMode') ? clean($('portalThirdPartyMode').value) : 'local';
+    var referenceUrl = $('portalThirdPartyReferenceUrl') ? clean($('portalThirdPartyReferenceUrl').value) : '';
+    if (mode === 'en_linea' && !referenceUrl) {
+      throw new Error('URL de referencia es obligatoria cuando Local / En Línea es En Línea.');
+    }
+    if (referenceUrl && !/^https?:\/\/.+/i.test(referenceUrl)) {
+      throw new Error('URL de referencia debe comenzar con http:// o https://.');
+    }
     return {
       titulo: $('portalThirdPartyTitle') ? clean($('portalThirdPartyTitle').value) : '',
       area: $('portalThirdPartyArea') ? clean($('portalThirdPartyArea').value) : '',
       grado: $('portalThirdPartyGrade') ? clean($('portalThirdPartyGrade').value) : '',
       tipo_actividad: $('portalThirdPartyType') ? clean($('portalThirdPartyType').value).toUpperCase() : '',
+      estado: $('portalThirdPartyState') ? clean($('portalThirdPartyState').value) : 'publicada',
+      cantidad_ejercicios: $('portalThirdPartyExerciseCount') ? clean($('portalThirdPartyExerciseCount').value) : '',
       proveedor: $('portalThirdPartyProvider') ? clean($('portalThirdPartyProvider').value) : '',
       recurso_nombre: $('portalThirdPartyResource') ? clean($('portalThirdPartyResource').value) : '',
-      activo: $('portalThirdPartyActive') ? $('portalThirdPartyActive').checked : true,
-      disponible: $('portalThirdPartyAvailable') ? $('portalThirdPartyAvailable').checked : true,
+      modalidad: mode || 'local',
+      activo: thirdPartyBoolValue('portalThirdPartyActive', true),
+      disponible: thirdPartyBoolValue('portalThirdPartyAvailable', true),
+      url_referencia: referenceUrl,
+      visible_desde: timestampForRpc($('portalThirdPartyVisibleFrom') ? $('portalThirdPartyVisibleFrom').value : ''),
+      visible_hasta: timestampForRpc($('portalThirdPartyVisibleTo') ? $('portalThirdPartyVisibleTo').value : ''),
       descripcion: $('portalThirdPartyDescription') ? clean($('portalThirdPartyDescription').value) : ''
     };
   }
@@ -1170,10 +1223,13 @@
     row.appendChild(cell('', valueOrDash(activity.area)));
     row.appendChild(cell('portal-cell-compact', valueOrDash(activity.grado)));
     row.appendChild(cell('portal-cell-compact', valueOrDash(activity.tipo)));
+    row.appendChild(cell('portal-cell-compact', thirdPartyModeText(activity)));
     row.appendChild(cell('', valueOrDash(activity.proveedor)));
     row.appendChild(cell('portal-cell-file', valueOrDash(activity.recursoNombre)));
     row.appendChild(cell('portal-cell-compact', activity.activo ? 'SI' : 'NO'));
     row.appendChild(cell('portal-cell-compact', activity.disponible ? 'SI' : 'NO'));
+    row.appendChild(cell('portal-cell-date', portalDate(activity.visibleDesde) || '-'));
+    row.appendChild(cell('portal-cell-date', portalDate(activity.visibleHasta) || '-'));
     var actions = document.createElement('div');
     actions.className = 'portal-row-actions';
     if (canManage) {
@@ -1227,8 +1283,21 @@
     }
     var table = document.createElement('div');
     table.className = 'portal-table portal-third-party-table';
-    ['Título', 'Área', 'G', 'T', 'Proveedor', 'Recurso', 'Activo', 'Disp.', 'Acc.'].forEach(function (title) {
-      table.appendChild(headerCell(title));
+    [
+      { text: 'Título' },
+      { text: 'Área' },
+      { text: 'G', title: 'Grado' },
+      { text: 'T', title: 'Tipo' },
+      { text: 'Mod.', title: 'Local / En Línea' },
+      { text: 'Proveedor' },
+      { text: 'Recurso' },
+      { text: 'Act.', title: 'Activo' },
+      { text: 'Disp.', title: 'Disponible' },
+      { text: 'V. Desde', title: 'Visible desde' },
+      { text: 'V. Hasta', title: 'Visible hasta' },
+      { text: 'Acc.', title: 'Acciones' }
+    ].forEach(function (header) {
+      table.appendChild(headerCell(header.text, header.title));
     });
     list.forEach(function (activity) {
       table.appendChild(thirdPartyTableRow(activity, canManage));
@@ -2034,8 +2103,15 @@
     var id = $('portalThirdPartyId') ? $('portalThirdPartyId').value : '';
     var method = id ? 'PATCH' : 'POST';
     var path = '/api/portal-docente/actividades-terceros' + (id ? '/' + encodeURIComponent(id) : '');
+    var payload;
+    try {
+      payload = thirdPartyPayload();
+    } catch (err) {
+      setThirdPartyStatus(err.message || 'Revise los datos de la actividad de terceros.', true);
+      return;
+    }
     setStatus('Guardando actividad de terceros');
-    api(method, path, thirdPartyPayload(), function (err) {
+    api(method, path, payload, function (err) {
       if (err) {
         setThirdPartyStatus(err.error || 'No se pudo guardar la actividad de terceros.', true);
         return;
@@ -2732,6 +2808,9 @@
         renderThirdPartyActivities(portal.state || {}, []);
         setThirdPartyStatus('Operación cancelada.');
       };
+    }
+    if ($('portalThirdPartyMode')) {
+      $('portalThirdPartyMode').onchange = updateThirdPartyReferenceUrlRequirement;
     }
   }
 

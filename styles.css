@@ -818,6 +818,10 @@ body {
   background: #f8fafc;
 }
 
+.admin-third-party-menu {
+  border: 3px solid #111827;
+}
+
 .admin-activity-menu h2 {
   margin: 0;
   font-size: 20px;
@@ -1043,6 +1047,62 @@ body {
   min-height: 34px;
 }
 
+.admin-third-party-activity-filters {
+  grid-template-columns: minmax(180px, 1.6fr) minmax(150px, 1.1fr) 76px 78px 96px 110px minmax(180px, 1.4fr) 100px;
+}
+
+.admin-grid.admin-third-party-mode .admin-rows-panel {
+  border: 3px solid #111827;
+}
+
+.admin-grid.admin-third-party-mode .admin-editor-panel {
+  border: 3px solid #7f1d1d;
+}
+
+.admin-grid.admin-third-party-mode .admin-cell-field-numero {
+  max-width: 58px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.admin-grid.admin-third-party-mode .admin-cell-field-titulo {
+  min-width: 190px;
+}
+
+.admin-grid.admin-third-party-mode .admin-cell-field-area {
+  max-width: 130px;
+}
+
+.admin-grid.admin-third-party-mode .admin-cell-field-grado,
+.admin-grid.admin-third-party-mode .admin-cell-field-tipo_actividad {
+  max-width: 58px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.admin-grid.admin-third-party-mode .admin-cell-field-estado,
+.admin-grid.admin-third-party-mode .admin-cell-field-modalidad,
+.admin-grid.admin-third-party-mode .admin-cell-field-disponible,
+.admin-grid.admin-third-party-mode .admin-cell-field-activo,
+.admin-grid.admin-third-party-mode .admin-cell-field-cantidad_ejercicios {
+  max-width: 86px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.admin-grid.admin-third-party-mode .admin-cell-field-recurso_nombre,
+.admin-grid.admin-third-party-mode .admin-cell-field-proveedor {
+  min-width: 150px;
+}
+
+.admin-grid.admin-third-party-mode .admin-cell-field-visible_desde,
+.admin-grid.admin-third-party-mode .admin-cell-field-visible_hasta,
+.admin-grid.admin-third-party-mode .admin-cell-field-actualizada_en {
+  min-width: 132px;
+  max-width: 148px;
+  white-space: nowrap;
+}
+
 .admin-activity-filter-small {
   min-width: 0;
 }
@@ -1221,6 +1281,41 @@ body {
 
 .admin-activity-form .admin-field-descripcion {
   grid-column: 1 / -1;
+}
+
+.admin-grid.admin-third-party-mode .admin-activity-form .admin-field-titulo {
+  grid-column: span 4;
+}
+
+.admin-grid.admin-third-party-mode .admin-activity-form .admin-field-area {
+  grid-column: span 3;
+}
+
+.admin-grid.admin-third-party-mode .admin-activity-form .admin-field-proveedor,
+.admin-grid.admin-third-party-mode .admin-activity-form .admin-field-recurso_nombre {
+  grid-column: span 4;
+}
+
+.admin-grid.admin-third-party-mode .admin-activity-form .admin-field-url_referencia {
+  grid-column: span 8;
+}
+
+.admin-grid.admin-third-party-mode .admin-activity-form .admin-field-cantidad_ejercicios {
+  grid-column: span 2;
+}
+
+.admin-grid.admin-third-party-mode .admin-activity-form .admin-field-modalidad {
+  grid-column: span 2;
+}
+
+.admin-grid.admin-third-party-mode .admin-activity-form .admin-field-visible_desde,
+.admin-grid.admin-third-party-mode .admin-activity-form .admin-field-visible_hasta {
+  grid-column: span 2;
+}
+
+.admin-grid.admin-third-party-mode .admin-activity-form .admin-field-activo,
+.admin-grid.admin-third-party-mode .admin-activity-form .admin-field-disponible {
+  grid-column: span 1;
 }
 
 .admin-activity-form textarea {
@@ -2270,8 +2365,8 @@ body {
 }
 
 .portal-third-party-table {
-  grid-template-columns: minmax(190px, 1.2fr) 130px 42px 52px 150px minmax(190px, 1.2fr) 70px 70px 104px;
-  min-width: 1080px;
+  grid-template-columns: minmax(190px, 1.2fr) 120px 42px 44px 82px 130px minmax(170px, 1fr) 58px 62px 132px 132px 104px;
+  min-width: 1320px;
 }
 
 .portal-third-party-table .portal-table-header {
@@ -2327,6 +2422,51 @@ body {
 .portal-student-form select,
 .portal-student-form textarea {
   width: 100%;
+}
+
+.portal-third-party-form {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.portal-third-party-form .portal-third-party-field-title {
+  grid-column: span 4;
+}
+
+.portal-third-party-form .portal-third-party-field-area {
+  grid-column: span 3;
+}
+
+.portal-third-party-form .portal-third-party-field-small {
+  grid-column: span 1;
+}
+
+.portal-third-party-form .portal-third-party-field-count,
+.portal-third-party-form .portal-third-party-field-mode {
+  grid-column: span 2;
+}
+
+.portal-third-party-form .portal-third-party-field-provider,
+.portal-third-party-form .portal-third-party-field-resource {
+  grid-column: span 4;
+}
+
+.portal-third-party-form .portal-third-party-field-url {
+  grid-column: span 8;
+}
+
+.portal-third-party-form .portal-third-party-field-date {
+  grid-column: span 2;
+}
+
+.portal-third-party-form .portal-student-notes {
+  grid-column: 1 / -1;
+}
+
+.portal-field-help {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 .portal-results-controls {
@@ -3459,6 +3599,19 @@ button:disabled {
 
   .portal-student-form {
     grid-template-columns: 1fr;
+  }
+
+  .portal-third-party-form .portal-third-party-field-title,
+  .portal-third-party-form .portal-third-party-field-area,
+  .portal-third-party-form .portal-third-party-field-small,
+  .portal-third-party-form .portal-third-party-field-count,
+  .portal-third-party-form .portal-third-party-field-mode,
+  .portal-third-party-form .portal-third-party-field-provider,
+  .portal-third-party-form .portal-third-party-field-resource,
+  .portal-third-party-form .portal-third-party-field-url,
+  .portal-third-party-form .portal-third-party-field-date,
+  .portal-third-party-form .portal-student-notes {
+    grid-column: 1 / -1;
   }
 
   .portal-results-controls {
