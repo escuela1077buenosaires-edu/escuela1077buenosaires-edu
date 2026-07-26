@@ -819,7 +819,8 @@ body {
 }
 
 .admin-third-party-menu {
-  border: 3px solid #111827;
+  border: 4px solid #111827;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
 }
 
 .admin-activity-menu h2 {
@@ -1052,11 +1053,13 @@ body {
 }
 
 .admin-grid.admin-third-party-mode .admin-rows-panel {
-  border: 3px solid #111827;
+  border: 4px solid #111827;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
 .admin-grid.admin-third-party-mode .admin-editor-panel {
-  border: 3px solid #7f1d1d;
+  border: 4px solid #7f1d1d;
+  box-shadow: 0 1px 3px rgba(127, 29, 29, 0.1);
 }
 
 .admin-grid.admin-third-party-mode .admin-cell-field-numero {
@@ -2413,10 +2416,23 @@ body {
 .portal-third-party-table {
   grid-template-columns: 46px minmax(170px, 1.2fr) 108px 40px 40px 70px 82px 54px 58px 72px minmax(190px, 1.2fr) minmax(170px, 1fr) 128px 128px 92px;
   min-width: 1520px;
+  border-color: #d5dee6;
+  box-shadow: inset 0 0 0 1px rgba(84, 98, 109, 0.06);
 }
 
 .portal-third-party-table .portal-table-header {
   white-space: nowrap;
+  border-color: #d5dee6;
+  background: #eef2f5;
+  color: #4d5d68;
+}
+
+.portal-third-party-table .portal-table-row > div {
+  border-color: #dbe3ea;
+}
+
+.portal-third-party-table .portal-table-row:nth-child(even) > div {
+  background: #fafcfd;
 }
 
 .portal-cell-title,
