@@ -1,14 +1,15 @@
 {
   "escuelaId": "1077",
-  "generadoEn": "2026-07-26T00:31:39.259Z",
+  "generadoEn": "2026-07-26T13:54:26.202Z",
   "githubPagesBasePath": "/escuela1077buenosaires-edu/",
   "backendBaseUrlConfigurado": false,
   "supabasePublicConfigConfigurada": true,
+  "solicitudCreacionUrlConfigurada": false,
   "archivos": [
     {
       "nombre": "README-PUBLICACION.txt",
-      "bytes": 1280,
-      "sha256": "983c3aecba0f185180eb087e09277cd5b61a782241a34012ce360bf132e019b5"
+      "bytes": 1392,
+      "sha256": "e5be6e3ebb9f04e60e8286911bee5724f25d41d2c78eada8ea8768015b36f302"
     },
     {
       "nombre": "aie-hub-sw.js",
@@ -27,8 +28,8 @@
     },
     {
       "nombre": "aie-public-config.js",
-      "bytes": 418,
-      "sha256": "848cc8ca974ca356981b06857ee1feb4329bf7345ae13e1718d3e96619ce38cd"
+      "bytes": 446,
+      "sha256": "dce9857e98b54456ca06c940a89f9682f3b5aa541028a4b54a1b1c0733720759"
     },
     {
       "nombre": "aie-runtime.js",
@@ -47,8 +48,8 @@
     },
     {
       "nombre": "index.html",
-      "bytes": 5969,
-      "sha256": "6f0a6664aef60d05d8ed8d4ea51c03094e64f79a3e68d35df7ab3eccb70fcffd"
+      "bytes": 6622,
+      "sha256": "34c3b38811bc7dcbb058818702977238b7bca9d4802d29ac7a3bf0075ca74176"
     },
     {
       "nombre": "lector-qr-icon.svg",
@@ -78,7 +79,7 @@
     {
       "nombre": "manifest-publicacion.json",
       "bytes": 3148,
-      "sha256": "6ade89c433827d5205c572a65016bd0bd50817f195b7f2c27d71ea531b18305e"
+      "sha256": "751c7b969cf8dc7de7ac1ef9d45eec51d54b0281a9fb559bf5eb3391355ffd7e"
     },
     {
       "nombre": "portal-docente-fixes.js",
