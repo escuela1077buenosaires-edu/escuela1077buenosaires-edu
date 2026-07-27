@@ -819,8 +819,9 @@ body {
 }
 
 .admin-third-party-menu {
-  border: 4px solid #111827;
-  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+  border: 4px solid #7f1d1d;
+  box-shadow: inset 0 0 0 1px rgba(127, 29, 29, 0.08);
+  background: #fff7f7;
 }
 
 .admin-activity-menu h2 {
@@ -1053,8 +1054,8 @@ body {
 }
 
 .admin-grid.admin-third-party-mode .admin-rows-panel {
-  border: 4px solid #111827;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  border: 4px solid #7f1d1d;
+  box-shadow: 0 1px 3px rgba(127, 29, 29, 0.1);
 }
 
 .admin-grid.admin-third-party-mode .admin-editor-panel {
@@ -1923,6 +1924,15 @@ body {
 }
 
 #portalStudentsCard .panel-head {
+  border-bottom: 2px solid #7f1d1d;
+  background: #fff7f7;
+}
+
+#portalThirdPartyActivitiesCard {
+  border: 3px solid #7f1d1d;
+}
+
+#portalThirdPartyActivitiesCard .panel-head {
   border-bottom: 2px solid #7f1d1d;
   background: #fff7f7;
 }
