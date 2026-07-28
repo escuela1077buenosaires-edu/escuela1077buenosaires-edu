@@ -1,11 +1,12 @@
-var CACHE_NAME = 'lector-qr-1077-v2-20260728';
+var CACHE_NAME = 'lector-qr-1077-v3-20260728';
 var STATIC_FILES = [
   './lector-qr.html',
   './lector-qr.js',
   './lector-qr.webmanifest',
   './lector-qr-icon.svg',
   './styles.css',
-  './aie-runtime.js'
+  './aie-runtime.js',
+  './aie-login-redirect.js'
 ];
 
 self.addEventListener('install', function (event) {

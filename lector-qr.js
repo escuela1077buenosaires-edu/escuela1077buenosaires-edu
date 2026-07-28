@@ -10,6 +10,7 @@
   var scanning = false;
   var detector = null;
   var deferredInstallPrompt = null;
+  var pendingQrData = null;
 
   function $(id) {
     return document.getElementById(id);
@@ -453,21 +454,34 @@
     return '';
   }
 
-  function resultPayloadFromQr(qr) {
+  function basePayloadFromQr(qr) {
     if (!canUseQr()) throw new Error('Su perfil no tiene permiso para usar el lector QR.');
-    var activity = selectedActivity();
-    if (!activity) throw new Error('Seleccione una actividad antes de leer el QR.');
-    return Object.assign(selectedActivityPayload(activity), {
-      intento_id: randomUuid(),
+    return {
       id_alumno: studentField(qr),
-      tipo_actividad: qr.tipo || activity.tipo || '',
-      titulo: qr.tit || qr.titulo || activity.titulo || '',
-      correctos: numberField(qr, ['pts', 'correctos', 'correctas', 'puntaje'], 'correctos'),
-      incorrectos: numberField(qr, ['err', 'incorrectos', 'incorrectas'], 'incorrectos'),
-      cantidad_ejercicios: numberField(qr, ['ej', 'cantidad_ejercicios', 'total'], 'cantidad de ejercicios'),
-      nota: numberField(qr, ['nota', 'n'], 'nota'),
-      tiempo_minutos: numberField(qr, ['m', 'tiempo_minutos', 'tiempoMinutos'], 'tiempo en minutos')
+      tipo_actividad: qr.tipo || qr.tipo_actividad || '',
+      titulo: qr.tit || qr.titulo || '',
+      correctos: numberField(qr, ['pts', 'correctos', 'correctas', 'puntaje', 'ok', 'aciertos'], 'correctos'),
+      incorrectos: numberField(qr, ['err', 'incorrectos', 'incorrectas', 'errores'], 'incorrectos'),
+      cantidad_ejercicios: numberField(qr, ['ej', 'cantidad_ejercicios', 'total', 'cantidad', 'cant', 'ejercicios'], 'cantidad de ejercicios'),
+      nota: numberField(qr, ['nota', 'n', 'calificacion'], 'nota'),
+      tiempo_minutos: numberField(qr, ['m', 'tiempo_minutos', 'tiempoMinutos', 'minutos', 'tiempo', 'tm'], 'tiempo en minutos')
+    };
+  }
+
+  function attachSelectedActivityPayload(base) {
+    var activity = selectedActivity();
+    if (!activity) {
+      throw new Error('QR leido. Seleccione una actividad registrada antes de validar o enviar el resultado.');
+    }
+    return Object.assign(selectedActivityPayload(activity), base, {
+      intento_id: randomUuid(),
+      tipo_actividad: base.tipo_actividad || activity.tipo || '',
+      titulo: base.titulo || activity.titulo || ''
     });
+  }
+
+  function resultPayloadFromQr(qr) {
+    return attachSelectedActivityPayload(basePayloadFromQr(qr));
   }
 
   function validateNumber(value, label, min, max, integer) {
@@ -591,7 +605,7 @@
     var headers = ['ID', 'Actividad', 'Cant.', 'OK', 'Err.', 'Nota', 'T/m'];
     var values = [
       payload.id_alumno,
-      (selectedActivity() && selectedActivity().titulo) || payload.actividad_id,
+      payload.titulo || (selectedActivity() && selectedActivity().titulo) || payload.actividad_id || payload.actividad_tercero_id,
       payload.cantidad_ejercicios,
       payload.correctos,
       payload.incorrectos,
@@ -621,10 +635,20 @@
   function handleQrText(text) {
     var payload;
     try {
-      payload = resultPayloadFromQr(parseQrText(text));
+      pendingQrData = parseQrText(text);
+      payload = attachSelectedActivityPayload(basePayloadFromQr(pendingQrData));
     } catch (err) {
       selectedPayload = null;
-      renderResult(null);
+      if (pendingQrData) {
+        try {
+          renderResult(basePayloadFromQr(pendingQrData), false);
+          stopCamera();
+        } catch (renderErr) {
+          renderResult(null);
+        }
+      } else {
+        renderResult(null);
+      }
       setStatus(err.message, true);
       return;
     }
@@ -636,6 +660,7 @@
         return;
       }
       selectedPayload = payload;
+      pendingQrData = null;
       renderResult(payload, true);
       setStatus('QR leído y validado. Para guardarlo, presione Enviar Resultado a base de datos.');
       stopCamera();
@@ -671,10 +696,6 @@
       setStatus('Su perfil no tiene permiso para usar el lector QR.', true);
       return;
     }
-    if (!selectedActivity()) {
-      setStatus('Seleccione una actividad antes de iniciar la cámara.', true);
-      return;
-    }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       showCameraWarning('Este navegador no permite acceso a cámara desde esta página. Use modo manual.');
       return;
@@ -702,11 +723,12 @@
       scanning = !!activeDetector;
       setStatus(activeDetector
         ? 'Cámara activa. Apunte al QR del resumen final.'
-        : 'Cámara activa. Este navegador no decodifica QR automáticamente; use el modo avanzado/manual para registrar el resultado.',
+        : 'Cámara activa, pero este navegador no decodifica QR automáticamente. Use modo manual o Chrome/Edge Android.',
         !activeDetector);
       if (activeDetector) scanLoop();
     }).catch(function (err) {
       showCameraWarning('No se pudo abrir la cámara: ' + (err && err.message || 'permiso denegado') + '.');
+      setStatus('No se pudo abrir la cámara. Revise permisos del navegador o use modo manual.', true);
     });
   }
 
@@ -808,7 +830,7 @@
 
   function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('aie-hub-sw.js', { scope: './' }).catch(function () {});
+      navigator.serviceWorker.register('lector-qr-sw.js', { scope: './' }).catch(function () {});
     }
   }
 
@@ -868,6 +890,7 @@
       clearToken();
       stopCamera();
       selectedPayload = null;
+      pendingQrData = null;
       renderResult(null);
       loadConfig();
     };
@@ -882,6 +905,7 @@
         selectedPayload = null;
         renderResult(null);
         setSourceAvailability();
+        if (pendingQrData) handleQrText(JSON.stringify(pendingQrData));
       };
     });
     $('qrActivitySelect').onchange = function () {
@@ -892,6 +916,7 @@
       setSourceAvailability();
       selectedPayload = null;
       renderResult(null);
+      if (pendingQrData) handleQrText(JSON.stringify(pendingQrData));
     };
     $('qrThirdPartyActivitySelect').onchange = function () {
       var ownSelect = $('qrActivitySelect');
@@ -901,6 +926,7 @@
       setSourceAvailability();
       selectedPayload = null;
       renderResult(null);
+      if (pendingQrData) handleQrText(JSON.stringify(pendingQrData));
     };
     $('qrReadManual').onclick = function () {
       handleQrText($('qrManualText').value);
@@ -913,6 +939,7 @@
     $('qrSendResult').onclick = sendResult;
     $('qrClearResult').onclick = function () {
       selectedPayload = null;
+      pendingQrData = null;
       renderResult(null);
       setStatus('Resultado limpiado.');
     };
