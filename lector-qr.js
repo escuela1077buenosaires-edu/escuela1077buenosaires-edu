@@ -9,6 +9,7 @@
   var stream = null;
   var scanning = false;
   var detector = null;
+  var deferredInstallPrompt = null;
 
   function $(id) {
     return document.getElementById(id);
@@ -798,6 +799,49 @@
     }
   }
 
+  function lectorUrl() {
+    return window.location.origin + window.location.pathname + '?login=1';
+  }
+
+  function setInstallButtonState() {
+    var button = $('qrInstallPwa');
+    if (!button) return;
+    button.disabled = !deferredInstallPrompt;
+  }
+
+  function installPwaShortcut() {
+    if (!deferredInstallPrompt) {
+      setStatus('Si el botón Instalar no está disponible, use el menú del navegador y Agregar a pantalla principal.');
+      return;
+    }
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.finally(function () {
+      deferredInstallPrompt = null;
+      setInstallButtonState();
+    });
+  }
+
+  function shareLectorLink() {
+    var url = lectorUrl();
+    if (navigator.share) {
+      navigator.share({
+        title: 'Lector QR Escuela 1077',
+        text: 'Acceso al lector QR de resultados.',
+        url: url
+      }).catch(function () {});
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () {
+        setStatus('Enlace del lector copiado.');
+      }).catch(function () {
+        setStatus(url);
+      });
+      return;
+    }
+    setStatus(url);
+  }
+
   function bind() {
     $('qrLoginGoogle').onclick = function () {
       var url = loginUrl();
@@ -814,6 +858,8 @@
       renderResult(null);
       loadConfig();
     };
+    if ($('qrInstallPwa')) $('qrInstallPwa').onclick = installPwaShortcut;
+    if ($('qrShareLink')) $('qrShareLink').onclick = shareLectorLink;
     $('qrStartCamera').onclick = startCamera;
     $('qrStopCamera').onclick = stopCamera;
     ['qrSourceOwn', 'qrSourceThird'].forEach(function (id) {
@@ -858,6 +904,16 @@
       setStatus('Resultado limpiado.');
     };
     window.addEventListener('beforeunload', stopCamera);
+    window.addEventListener('beforeinstallprompt', function (event) {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      setInstallButtonState();
+    });
+    window.addEventListener('appinstalled', function () {
+      deferredInstallPrompt = null;
+      setInstallButtonState();
+      setStatus('Acceso instalado en el teléfono.');
+    });
   }
 
   bind();
