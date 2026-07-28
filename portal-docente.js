@@ -1650,12 +1650,148 @@
     return card;
   }
 
-  function analyticsTable(title, headers, rows, mapper) {
+  function analyticsMetricBlock(label, value, suffix, description) {
+    var block = document.createElement('div');
+    block.className = 'portal-analytics-metric';
+    var help = document.createElement('div');
+    help.className = 'portal-analytics-help-card';
+    help.textContent = description;
+    block.appendChild(help);
+    block.appendChild(analyticsCard(label, value, suffix));
+    return block;
+  }
+
+  function analyticsReportPanel(data) {
+    var resumen = data && data.resumen || {};
+    var ejecuciones = Number(resumen.ejecuciones || 0);
+    var alumnos = Number(resumen.alumnos || 0);
+    var actividades = Number(resumen.actividades || 0);
+    var promedioNota = Number(resumen.promedioNota || 0);
+    var promedioTiempo = Number(resumen.promedioTiempo || 0);
+    var promedioCorrectos = Number(resumen.promedioCorrectos || 0);
+    var promedioIncorrectos = Number(resumen.promedioIncorrectos || 0);
+    var panel = document.createElement('section');
+    panel.className = 'portal-analytics-report';
+    var title = document.createElement('h3');
+    var text = document.createElement('p');
+    title.textContent = 'Informe';
+    if (!ejecuciones) {
+      text.textContent = 'No hay ejecuciones registradas para los filtros aplicados.';
+    } else {
+      var rendimiento = promedioNota >= 8
+        ? 'El rendimiento general es alto.'
+        : promedioNota >= 6
+          ? 'El rendimiento general es aceptable, con aspectos para seguir observando.'
+          : 'El rendimiento general requiere atencion pedagogica prioritaria.';
+      text.textContent = 'Con los filtros actuales se analizaron ' + ejecuciones +
+        ' ejecucion(es), realizadas por ' + alumnos +
+        ' alumno(s), sobre ' + actividades +
+        ' actividad(es). La nota promedio es ' + formatMetric(promedioNota) +
+        ' y el tiempo promedio es ' + formatMetric(promedioTiempo, 'min') +
+        '. En promedio se registran ' + formatMetric(promedioCorrectos) +
+        ' respuestas correctas y ' + formatMetric(promedioIncorrectos) +
+        ' errores por ejecucion. ' + rendimiento;
+    }
+    panel.appendChild(title);
+    panel.appendChild(text);
+    return panel;
+  }
+
+  function analyticsTableConfig(title) {
+    if (title === 'Actividades con menor rendimiento') {
+      return {
+        className: 'portal-analytics-table-activities',
+        description: 'Muestra que actividades tienen menor promedio de nota. Sirve para detectar contenidos que conviene revisar, reforzar o volver a trabajar.',
+        gradeIndexes: [3],
+        headers: [
+          { label: 'Actividad' },
+          { label: 'Archivo' },
+          { label: 'Area' },
+          { label: 'G', title: 'Grado' },
+          { label: 'T', title: 'Tipo' },
+          { label: 'Cant. ejec.', title: 'Cantidad de ejecuciones de esta actividad' },
+          { label: 'Cant. alum.', title: 'Cantidad de alumnos que ejecutaron esta actividad' },
+          { label: 'Prom. nota', title: 'Promedio de nota de esta actividad' },
+          { label: 'T/min', title: 'Tiempo promedio en minutos' }
+        ]
+      };
+    }
+    if (title === 'Alumnos con menor rendimiento') {
+      return {
+        className: 'portal-analytics-table-students',
+        description: 'Ordena los alumnos con menor promedio para facilitar el seguimiento individual y priorizar acompanamiento.',
+        gradeIndexes: [2],
+        headers: [
+          { label: 'ID' },
+          { label: 'Apellido y Nombres' },
+          { label: 'G', title: 'Grado' },
+          { label: 'Turno' },
+          { label: 'Div.' },
+          { label: 'Cant. ejec.', title: 'Cantidad de ejecuciones del alumno' },
+          { label: 'Act. dist.', title: 'Actividades distintas realizadas por el alumno' },
+          { label: 'Prom. nota', title: 'Promedio de nota del alumno' },
+          { label: 'T/min', title: 'Tiempo promedio en minutos' }
+        ]
+      };
+    }
+    if (title.indexOf('Resumen por') === 0 && title.toLowerCase().indexOf('rea') >= 0) {
+      return {
+        className: 'portal-analytics-table-area',
+        description: 'Agrupa los resultados por area para comparar rapidamente donde el grupo muestra mejores o peores desempenos.',
+        headers: [
+          { label: 'Area' },
+          { label: 'Cant. ejec.', title: 'Cantidad de ejecuciones del area' },
+          { label: 'Cant. alum.', title: 'Cantidad de alumnos del area' },
+          { label: 'Prom. nota', title: 'Promedio de nota del area' },
+          { label: 'T/min', title: 'Tiempo promedio en minutos' }
+        ]
+      };
+    }
+    if (title === 'Resumen por grado') {
+      return {
+        className: 'portal-analytics-table-grade',
+        description: 'Resume el desempeno por grado para detectar diferencias entre grupos escolares.',
+        gradeIndexes: [0],
+        headers: [
+          { label: 'G', title: 'Grado' },
+          { label: 'Cant. ejec.', title: 'Cantidad de ejecuciones del grado' },
+          { label: 'Cant. alum.', title: 'Cantidad de alumnos del grado' },
+          { label: 'Prom. nota', title: 'Promedio de nota del grado' },
+          { label: 'T/min', title: 'Tiempo promedio en minutos' }
+        ]
+      };
+    }
+    if (title === 'Tendencia mensual') {
+      return {
+        className: 'portal-analytics-table-month',
+        description: 'Muestra como evoluciona el rendimiento mes a mes segun los filtros aplicados. Ayuda a ver avances, retrocesos o falta de registros.',
+        headers: [
+          { label: 'Mes' },
+          { label: 'Cant. ejec.', title: 'Cantidad de ejecuciones del mes' },
+          { label: 'Prom. nota', title: 'Promedio de nota del mes' },
+          { label: 'T/min', title: 'Tiempo promedio en minutos' }
+        ]
+      };
+    }
+    return {};
+  }
+
+  function analyticsTable(title, headers, rows, mapper, description, tableClassName) {
+    var config = analyticsTableConfig(title);
+    headers = config.headers || headers;
+    description = description || config.description || '';
+    tableClassName = tableClassName || config.className || '';
     var panel = document.createElement('section');
     panel.className = 'portal-analytics-table-panel';
     var h = document.createElement('h3');
     h.textContent = title;
     panel.appendChild(h);
+    if (description) {
+      var help = document.createElement('div');
+      help.className = 'portal-analytics-block-help';
+      help.textContent = description;
+      panel.appendChild(help);
+    }
     if (!(rows || []).length) {
       var empty = document.createElement('div');
       empty.className = 'portal-muted';
@@ -1664,13 +1800,17 @@
       return panel;
     }
     var table = document.createElement('div');
-    table.className = 'portal-table portal-analytics-table';
+    table.className = 'portal-table portal-analytics-table ' + (tableClassName || '');
     headers.forEach(function (header) {
       table.appendChild(headerCell(header.label, header.title || header.label));
     });
     rows.forEach(function (row) {
-      mapper(row).forEach(function (item) {
-        table.appendChild(cell(item.className || '', item.value, item.title || item.value));
+      mapper(row).forEach(function (item, index) {
+        var className = item.className || '';
+        if ((config.gradeIndexes || []).indexOf(index) >= 0) {
+          className += (className ? ' ' : '') + 'portal-cell-grade';
+        }
+        table.appendChild(cell(className, item.value, item.title || item.value));
       });
     });
     panel.appendChild(table);
@@ -1701,16 +1841,18 @@
     var resumen = data.resumen || {};
     setAnalyticsStatus('Estadísticas calculadas - Registros base: ' + (data.totalFilasBase || resumen.ejecuciones || 0) + '.');
     [
-      ['Ejecuciones', resumen.ejecuciones],
-      ['Alumnos', resumen.alumnos],
-      ['Actividades', resumen.actividades],
-      ['Prom. nota', resumen.promedioNota],
-      ['Prom. tiempo', resumen.promedioTiempo, 'min'],
-      ['Prom. OK', resumen.promedioCorrectos],
-      ['Prom. errores', resumen.promedioIncorrectos]
+      ['Ejecuciones', resumen.ejecuciones, '', 'Cantidad de resultados registrados por alumnos. Cada finalizacion cuenta una vez.'],
+      ['Alumnos', resumen.alumnos, '', 'Cantidad de alumnos distintos incluidos en el calculo actual.'],
+      ['Actividades', resumen.actividades, '', 'Cantidad de actividades distintas ejecutadas al menos una vez.'],
+      ['Prom. nota', resumen.promedioNota, '', 'Promedio simple de las notas registradas en las ejecuciones filtradas.'],
+      ['Prom. tiempo', resumen.promedioTiempo, 'min', 'Tiempo promedio que tardaron los alumnos en finalizar las actividades.'],
+      ['Prom. OK', resumen.promedioCorrectos, '', 'Promedio de respuestas correctas por ejecucion registrada.'],
+      ['Prom. errores', resumen.promedioIncorrectos, '', 'Promedio de respuestas incorrectas por ejecucion registrada.']
     ].forEach(function (item) {
-      summaryBox.appendChild(analyticsCard(item[0], item[1], item[2]));
+      summaryBox.appendChild(analyticsMetricBlock(item[0], item[1], item[2], item[3]));
     });
+
+    listsBox.appendChild(analyticsReportPanel(data));
 
     listsBox.appendChild(analyticsTable('Actividades con menor rendimiento', [
       { label: 'Actividad' }, { label: 'Archivo' }, { label: 'Área' }, { label: 'G' }, { label: 'T' }, { label: 'Cant.' }, { label: 'Alum.' }, { label: 'Prom.' }, { label: 'T/m' }

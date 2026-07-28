@@ -2622,6 +2622,25 @@ body {
   border-bottom: 1px solid var(--line);
 }
 
+.portal-analytics-metric {
+  display: grid;
+  gap: 8px;
+}
+
+.portal-analytics-help-card {
+  min-height: 74px;
+  display: flex;
+  align-items: center;
+  padding: 10px 11px;
+  border: 1px solid #d6e0e7;
+  border-radius: 10px;
+  background: #f9fbfc;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
 .portal-analytics-card {
   display: grid;
   gap: 4px;
@@ -2650,6 +2669,43 @@ body {
   padding: 14px;
 }
 
+.portal-analytics-report,
+.portal-analytics-block-help {
+  border: 1px solid #d7e3e8;
+  border-radius: 10px;
+  background: #f8fbfc;
+  color: #334155;
+  line-height: 1.35;
+}
+
+.portal-analytics-report {
+  display: grid;
+  gap: 5px;
+  padding: 12px 14px;
+  border-left: 5px solid #0f766e;
+}
+
+.portal-analytics-report h3,
+.portal-analytics-report p {
+  margin: 0;
+}
+
+.portal-analytics-report h3 {
+  color: #111827;
+  font-size: 16px;
+}
+
+.portal-analytics-report p {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.portal-analytics-block-help {
+  padding: 9px 11px;
+  font-size: 12px;
+  font-weight: 750;
+}
+
 .portal-analytics-table-panel {
   display: grid;
   gap: 8px;
@@ -2666,20 +2722,47 @@ body {
   min-width: 980px;
 }
 
-.portal-analytics-table-panel:nth-child(3) .portal-analytics-table,
-.portal-analytics-table-panel:nth-child(4) .portal-analytics-table {
-  grid-template-columns: minmax(150px, 1fr) 70px 70px 70px 58px;
-  min-width: 520px;
+.portal-analytics-table .portal-cell-compact,
+.portal-analytics-table .portal-cell-ok,
+.portal-analytics-table .portal-cell-bad {
+  justify-content: flex-start;
+  text-align: left;
 }
 
-.portal-analytics-table-panel:nth-child(2) .portal-analytics-table {
-  grid-template-columns: 70px minmax(220px, 1.3fr) 40px 76px 52px 60px 60px 60px 52px;
+.portal-analytics-table .portal-cell-grade {
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.portal-analytics-table .portal-table-header {
+  white-space: normal;
+  line-height: 1.15;
+}
+
+.portal-analytics-table-activities {
+  grid-template-columns: minmax(145px, 1fr) minmax(115px, 0.8fr) 86px 38px 52px 102px 102px 92px 72px;
+  min-width: 900px;
+}
+
+.portal-analytics-table-students {
+  grid-template-columns: 68px minmax(185px, 1fr) 38px 74px 52px 102px 88px 92px 72px;
   min-width: 760px;
 }
 
-.portal-analytics-table-panel:nth-child(5) .portal-analytics-table {
-  grid-template-columns: 90px 70px 70px 58px;
-  min-width: 360px;
+.portal-analytics-table-area {
+  grid-template-columns: minmax(110px, 0.8fr) 106px 96px 92px 72px;
+  min-width: 520px;
+}
+
+.portal-analytics-table-grade {
+  grid-template-columns: 50px 106px 96px 92px 72px;
+  min-width: 430px;
+}
+
+.portal-analytics-table-month {
+  grid-template-columns: 90px 106px 92px 72px;
+  min-width: 390px;
 }
 
 .portal-interface-grid {
