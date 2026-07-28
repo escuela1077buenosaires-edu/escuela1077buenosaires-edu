@@ -2,6 +2,7 @@
   var sessionKey = 'aiePortal1077AccessToken';
   var roleContextKey = 'aiePortal1077RoleContext';
   var DEFAULT_INDEX_MINUTES = 90;
+  var LOW_PERFORMANCE_THRESHOLD = 7;
   var portal = {
     config: null,
     state: null,
@@ -1638,6 +1639,20 @@
     return suffix ? text + ' ' + suffix : text;
   }
 
+  function formatMonthYear(value) {
+    var text = clean(value);
+    var match = text.match(/^(\d{4})-(\d{2})$/);
+    if (match) return match[2] + '-' + match[1];
+    match = text.match(/^(\d{4})-(\d{2})-\d{2}/);
+    if (match) return match[2] + '-' + match[1];
+    return text || '-';
+  }
+
+  function isLowPerformanceStudent(row) {
+    var promedio = Number(row && row.promedioNota);
+    return Number.isFinite(promedio) && promedio < LOW_PERFORMANCE_THRESHOLD;
+  }
+
   function analyticsCard(label, value, suffix) {
     var card = document.createElement('div');
     card.className = 'portal-analytics-card';
@@ -1724,7 +1739,7 @@
     if (title === 'Alumnos con menor rendimiento') {
       return {
         className: 'portal-analytics-table-students',
-        description: 'Ordena los alumnos con menor promedio para facilitar el seguimiento individual y priorizar acompañamiento.',
+        description: 'Muestra solo alumnos con promedio menor a 7 en los resultados que cumplen los filtros actuales. El rendimiento se calcula en forma general sobre ese recorte: si no filtra por área, actividad o fecha, contempla todas las áreas y actividades registradas; si filtra, mide únicamente ese conjunto. Sirve para priorizar acompañamiento individual sin mezclar alumnos con desempeño alto.',
         gradeIndexes: [2, 3, 4],
         headers: [
           { label: 'ID' },
@@ -1769,7 +1784,7 @@
     if (title === 'Tendencia mensual') {
       return {
         className: 'portal-analytics-table-month',
-        description: 'Muestra cómo evoluciona el rendimiento mes a mes según los filtros aplicados. Ayuda a ver avances, retrocesos o falta de registros.',
+        description: 'Muestra cómo evoluciona el rendimiento mes a mes, en formato mes-año, según los filtros aplicados. Ayuda a ver avances, retrocesos o falta de registros.',
         gradeIndexes: [0],
         headers: [
           { label: 'Mes' },
@@ -1845,6 +1860,7 @@
       return;
     }
     var resumen = data.resumen || {};
+    var alumnosBajoRendimiento = (data.alumnosBajoRendimiento || []).filter(isLowPerformanceStudent);
     setAnalyticsStatus('Estadísticas calculadas - Registros base: ' + (data.totalFilasBase || resumen.ejecuciones || 0) + '.');
     [
       ['Ejecuciones', resumen.ejecuciones, '', 'Cantidad de resultados registrados por alumnos. Cada finalización cuenta una vez.', 'Importa porque indica si hay datos suficientes para interpretar el informe.'],
@@ -1877,7 +1893,7 @@
     }));
     listsBox.appendChild(analyticsTable('Alumnos con menor rendimiento', [
       { label: 'ID' }, { label: 'Apellido y Nombres' }, { label: 'G' }, { label: 'Turno' }, { label: 'Div.' }, { label: 'Cant.' }, { label: 'Act.' }, { label: 'Prom.' }, { label: 'T/m' }
-    ], data.alumnosBajoRendimiento || [], function (row) {
+    ], alumnosBajoRendimiento, function (row) {
       return [
         { className: 'portal-cell-student', value: row.alumnoId || '-' },
         { className: 'portal-cell-student-name', value: row.alumno || '-' },
@@ -1916,7 +1932,7 @@
       { label: 'Mes' }, { label: 'Cant.' }, { label: 'Prom.' }, { label: 'T/m' }
     ], data.tendenciaMensual || [], function (row) {
       return [
-        { className: 'portal-cell-compact', value: row.mes || '-' },
+        { className: 'portal-cell-compact', value: formatMonthYear(row.mes) },
         { className: 'portal-cell-compact', value: row.ejecuciones },
         { className: 'portal-cell-compact', value: formatMetric(row.promedioNota) },
         { className: 'portal-cell-compact', value: formatMetric(row.promedioTiempo) }
