@@ -2077,8 +2077,12 @@
   }
 
   function studentPayload() {
+    var idAlumno = $('portalStudentCode') ? clean($('portalStudentCode').value) : '';
+    if (!/^\d{1,2}$/.test(idAlumno)) {
+      throw new Error('ID alumno debe tener 1 o 2 digitos.');
+    }
     return {
-      id_alumno: $('portalStudentCode') ? clean($('portalStudentCode').value) : '',
+      id_alumno: idAlumno,
       nombre: $('portalStudentName') ? clean($('portalStudentName').value) : '',
       apellido: $('portalStudentLastName') ? clean($('portalStudentLastName').value) : '',
       grado: $('portalStudentGrade') ? $('portalStudentGrade').value : '',
@@ -2782,10 +2786,17 @@
       setStudentsStatus('Su perfil no tiene permiso para guardar alumnos.', true);
       return;
     }
+    var payload;
+    try {
+      payload = studentPayload();
+    } catch (err) {
+      setStudentsStatus(err.message || 'Revise los datos del alumno.', true);
+      return;
+    }
     var method = id ? 'PATCH' : 'POST';
     var path = '/api/portal-docente/alumnos-apoyo' + (id ? '/' + encodeURIComponent(id) : '');
     setStatus('Guardando alumno');
-    api(method, path, studentPayload(), function (err) {
+    api(method, path, payload, function (err) {
       if (err) {
         setStudentsStatus(err.error || 'No se pudo guardar el alumno.', true);
         return;

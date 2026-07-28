@@ -442,7 +442,7 @@
 
   function studentField(payload) {
     var id = clean(payload.id || payload.id_alumno || payload.alumno || payload.alumno_id);
-    if (!id) throw new Error('Falta ID de alumno en el QR.');
+    if (!/^\d{1,2}$/.test(id)) throw new Error('ID de alumno debe tener 1 o 2 digitos.');
     return id;
   }
 
@@ -516,7 +516,7 @@
     if (!activity) throw new Error('Seleccione una actividad antes de cargar el resultado.');
     syncManualGrade();
     var idAlumno = clean($('qrManualStudent') && $('qrManualStudent').value);
-    if (!idAlumno) throw new Error('Falta ID de alumno.');
+    if (!/^\d{1,2}$/.test(idAlumno)) throw new Error('ID de alumno debe tener 1 o 2 digitos.');
     var correctos = validateNumber(manualInputNumber('qrManualCorrect'), 'correctos', 0, 200, true);
     var incorrectos = validateNumber(manualInputNumber('qrManualIncorrect'), 'incorrectos', 0, 200, true);
     var total = validateNumber(manualInputNumber('qrManualTotal'), 'cantidad_ejercicios', 1, 200, true);
@@ -548,7 +548,7 @@
       throw new Error('Seleccione una actividad propia o una actividad de terceros valida.');
     }
     var studentId = clean(payload.id_alumno);
-    if (!studentId) throw new Error('Falta ID de alumno.');
+    if (!/^\d{1,2}$/.test(studentId)) throw new Error('ID de alumno debe tener 1 o 2 digitos.');
     var total = validateNumber(payload.cantidad_ejercicios, 'cantidad_ejercicios', 1, 200, true);
     var correctos = validateNumber(payload.correctos, 'correctos', 0, 200, true);
     var incorrectos = validateNumber(payload.incorrectos, 'incorrectos', 0, 200, true);
