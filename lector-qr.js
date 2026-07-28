@@ -613,7 +613,7 @@
     if (validated) {
       var ok = document.createElement('div');
       ok.className = 'result-ok';
-      ok.textContent = 'Resultado validado localmente. Listo para enviar.';
+      ok.textContent = 'Resultado validado localmente. Para guardarlo, presione Enviar Resultado a base de datos.';
       box.appendChild(ok);
     }
   }
@@ -637,7 +637,7 @@
       }
       selectedPayload = payload;
       renderResult(payload, true);
-      setStatus('QR leído y validado.');
+      setStatus('QR leído y validado. Para guardarlo, presione Enviar Resultado a base de datos.');
       stopCamera();
     });
   }
@@ -661,7 +661,7 @@
       }
       selectedPayload = payload;
       renderResult(payload, true);
-      setStatus('Resultado manual validado. Listo para enviar.');
+      setStatus('Resultado manual validado. Para guardarlo, presione Enviar Resultado a base de datos.');
       stopCamera();
     });
   }
