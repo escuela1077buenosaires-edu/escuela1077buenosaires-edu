@@ -1634,7 +1634,7 @@
     if (value === null || value === undefined || value === '') return '-';
     var number = Number(value);
     if (!Number.isFinite(number)) return String(value);
-    var text = number.toFixed(2).replace(/\.?0+$/, '');
+    var text = number.toFixed(2).replace(/\.?0+$/, '').replace('.', ',');
     return suffix ? text + ' ' + suffix : text;
   }
 
@@ -1650,14 +1650,18 @@
     return card;
   }
 
-  function analyticsMetricBlock(label, value, suffix, description) {
+  function analyticsMetricBlock(label, value, suffix, description, importance) {
     var block = document.createElement('div');
     block.className = 'portal-analytics-metric';
     var help = document.createElement('div');
     help.className = 'portal-analytics-help-card';
     help.textContent = description;
+    var why = document.createElement('div');
+    why.className = 'portal-analytics-why-card';
+    why.textContent = importance || '';
     block.appendChild(help);
     block.appendChild(analyticsCard(label, value, suffix));
+    block.appendChild(why);
     return block;
   }
 
@@ -1682,15 +1686,16 @@
         ? 'El rendimiento general es alto.'
         : promedioNota >= 6
           ? 'El rendimiento general es aceptable, con aspectos para seguir observando.'
-          : 'El rendimiento general requiere atencion pedagogica prioritaria.';
+          : 'El rendimiento general requiere atención pedagógica prioritaria.';
       text.textContent = 'Con los filtros actuales se analizaron ' + ejecuciones +
-        ' ejecucion(es), realizadas por ' + alumnos +
+        ' ejecuciones, realizadas por ' + alumnos +
         ' alumno(s), sobre ' + actividades +
         ' actividad(es). La nota promedio es ' + formatMetric(promedioNota) +
         ' y el tiempo promedio es ' + formatMetric(promedioTiempo, 'min') +
         '. En promedio se registran ' + formatMetric(promedioCorrectos) +
         ' respuestas correctas y ' + formatMetric(promedioIncorrectos) +
-        ' errores por ejecucion. ' + rendimiento;
+        ' errores por ejecución. ' + rendimiento +
+        ' Use las tablas inferiores para identificar actividades que necesitan revisión y alumnos que requieren seguimiento más cercano.';
     }
     panel.appendChild(title);
     panel.appendChild(text);
@@ -1702,11 +1707,11 @@
       return {
         className: 'portal-analytics-table-activities',
         description: 'Muestra que actividades tienen menor promedio de nota. Sirve para detectar contenidos que conviene revisar, reforzar o volver a trabajar.',
-        gradeIndexes: [3],
+        gradeIndexes: [3, 4],
         headers: [
           { label: 'Actividad' },
           { label: 'Archivo' },
-          { label: 'Area' },
+          { label: 'Área' },
           { label: 'G', title: 'Grado' },
           { label: 'T', title: 'Tipo' },
           { label: 'Cant. ejec.', title: 'Cantidad de ejecuciones de esta actividad' },
@@ -1719,8 +1724,8 @@
     if (title === 'Alumnos con menor rendimiento') {
       return {
         className: 'portal-analytics-table-students',
-        description: 'Ordena los alumnos con menor promedio para facilitar el seguimiento individual y priorizar acompanamiento.',
-        gradeIndexes: [2],
+        description: 'Ordena los alumnos con menor promedio para facilitar el seguimiento individual y priorizar acompañamiento.',
+        gradeIndexes: [2, 3, 4],
         headers: [
           { label: 'ID' },
           { label: 'Apellido y Nombres' },
@@ -1737,12 +1742,12 @@
     if (title.indexOf('Resumen por') === 0 && title.toLowerCase().indexOf('rea') >= 0) {
       return {
         className: 'portal-analytics-table-area',
-        description: 'Agrupa los resultados por area para comparar rapidamente donde el grupo muestra mejores o peores desempenos.',
+        description: 'Agrupa los resultados por área para comparar rápidamente dónde el grupo muestra mejores o peores desempeños.',
         headers: [
-          { label: 'Area' },
-          { label: 'Cant. ejec.', title: 'Cantidad de ejecuciones del area' },
-          { label: 'Cant. alum.', title: 'Cantidad de alumnos del area' },
-          { label: 'Prom. nota', title: 'Promedio de nota del area' },
+          { label: 'Área' },
+          { label: 'Cant. ejec.', title: 'Cantidad de ejecuciones del área' },
+          { label: 'Cant. alum.', title: 'Cantidad de alumnos del área' },
+          { label: 'Prom. nota', title: 'Promedio de nota del área' },
           { label: 'T/min', title: 'Tiempo promedio en minutos' }
         ]
       };
@@ -1750,7 +1755,7 @@
     if (title === 'Resumen por grado') {
       return {
         className: 'portal-analytics-table-grade',
-        description: 'Resume el desempeno por grado para detectar diferencias entre grupos escolares.',
+        description: 'Resume el desempeño por grado para detectar diferencias entre grupos escolares.',
         gradeIndexes: [0],
         headers: [
           { label: 'G', title: 'Grado' },
@@ -1764,7 +1769,8 @@
     if (title === 'Tendencia mensual') {
       return {
         className: 'portal-analytics-table-month',
-        description: 'Muestra como evoluciona el rendimiento mes a mes segun los filtros aplicados. Ayuda a ver avances, retrocesos o falta de registros.',
+        description: 'Muestra cómo evoluciona el rendimiento mes a mes según los filtros aplicados. Ayuda a ver avances, retrocesos o falta de registros.',
+        gradeIndexes: [0],
         headers: [
           { label: 'Mes' },
           { label: 'Cant. ejec.', title: 'Cantidad de ejecuciones del mes' },
@@ -1841,15 +1847,15 @@
     var resumen = data.resumen || {};
     setAnalyticsStatus('Estadísticas calculadas - Registros base: ' + (data.totalFilasBase || resumen.ejecuciones || 0) + '.');
     [
-      ['Ejecuciones', resumen.ejecuciones, '', 'Cantidad de resultados registrados por alumnos. Cada finalizacion cuenta una vez.'],
-      ['Alumnos', resumen.alumnos, '', 'Cantidad de alumnos distintos incluidos en el calculo actual.'],
-      ['Actividades', resumen.actividades, '', 'Cantidad de actividades distintas ejecutadas al menos una vez.'],
-      ['Prom. nota', resumen.promedioNota, '', 'Promedio simple de las notas registradas en las ejecuciones filtradas.'],
-      ['Prom. tiempo', resumen.promedioTiempo, 'min', 'Tiempo promedio que tardaron los alumnos en finalizar las actividades.'],
-      ['Prom. OK', resumen.promedioCorrectos, '', 'Promedio de respuestas correctas por ejecucion registrada.'],
-      ['Prom. errores', resumen.promedioIncorrectos, '', 'Promedio de respuestas incorrectas por ejecucion registrada.']
+      ['Ejecuciones', resumen.ejecuciones, '', 'Cantidad de resultados registrados por alumnos. Cada finalización cuenta una vez.', 'Importa porque indica si hay datos suficientes para interpretar el informe.'],
+      ['Alumnos', resumen.alumnos, '', 'Cantidad de alumnos distintos incluidos en el cálculo actual.', 'Importa porque muestra el alcance real del seguimiento.'],
+      ['Actividades', resumen.actividades, '', 'Cantidad de actividades distintas ejecutadas al menos una vez.', 'Importa porque evita sacar conclusiones desde una sola actividad aislada.'],
+      ['Prom. nota', resumen.promedioNota, '', 'Promedio simple de las notas registradas en las ejecuciones filtradas.', 'Importa porque resume rápidamente el desempeño general.'],
+      ['Prom. tiempo', resumen.promedioTiempo, 'min', 'Tiempo promedio que tardaron los alumnos en finalizar las actividades.', 'Importa porque ayuda a detectar lentitud, dificultad o resolución demasiado rápida.'],
+      ['Prom. OK', resumen.promedioCorrectos, '', 'Promedio de respuestas correctas por ejecución registrada.', 'Importa porque muestra el nivel de logro en términos concretos.'],
+      ['Prom. errores', resumen.promedioIncorrectos, '', 'Promedio de respuestas incorrectas por ejecución registrada.', 'Importa porque orienta dónde conviene reforzar contenidos.']
     ].forEach(function (item) {
-      summaryBox.appendChild(analyticsMetricBlock(item[0], item[1], item[2], item[3]));
+      summaryBox.appendChild(analyticsMetricBlock(item[0], item[1], item[2], item[3], item[4]));
     });
 
     listsBox.appendChild(analyticsReportPanel(data));

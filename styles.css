@@ -2627,7 +2627,8 @@ body {
   gap: 8px;
 }
 
-.portal-analytics-help-card {
+.portal-analytics-help-card,
+.portal-analytics-why-card {
   min-height: 74px;
   display: flex;
   align-items: center;
@@ -2639,6 +2640,13 @@ body {
   font-size: 11px;
   font-weight: 800;
   line-height: 1.25;
+}
+
+.portal-analytics-why-card {
+  min-height: 66px;
+  border-color: #e7d6c8;
+  background: #fffaf3;
+  color: #6f3f00;
 }
 
 .portal-analytics-card {
@@ -2725,13 +2733,13 @@ body {
 .portal-analytics-table .portal-cell-compact,
 .portal-analytics-table .portal-cell-ok,
 .portal-analytics-table .portal-cell-bad {
-  justify-content: flex-start;
-  text-align: left;
+  justify-content: flex-end;
+  text-align: right;
 }
 
 .portal-analytics-table .portal-cell-grade {
-  justify-content: center;
-  text-align: center;
+  justify-content: flex-start;
+  text-align: left;
   white-space: nowrap;
 }
 
