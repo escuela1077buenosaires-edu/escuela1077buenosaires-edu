@@ -410,6 +410,16 @@
     box.className = text ? 'portal-warning' : 'portal-warning hidden';
   }
 
+  function createQrDetector() {
+    if (!('BarcodeDetector' in window)) return null;
+    try {
+      detector = detector || new BarcodeDetector({ formats: ['qr_code'] });
+      return detector;
+    } catch (err) {
+      return null;
+    }
+  }
+
   function parseQrText(text) {
     var raw = clean(text);
     if (!raw) throw new Error('QR vacio.');
@@ -662,23 +672,23 @@
       return;
     }
     if (!selectedActivity()) {
-      setStatus('Seleccione una actividad antes de iniciar la camara.', true);
+      setStatus('Seleccione una actividad antes de iniciar la cámara.', true);
       return;
-    }
-    if (!window.isSecureContext) {
-      showCameraWarning('La camara del telefono requiere HTTPS o localhost. En HTTP por IP puede quedar bloqueada; use el modo manual o sirva esta PWA con HTTPS.');
-    } else {
-      showCameraWarning('');
     }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      showCameraWarning('Este navegador no permite acceso a camara desde esta pagina. Use modo manual.');
+      showCameraWarning('Este navegador no permite acceso a cámara desde esta página. Use modo manual.');
       return;
     }
-    if (!('BarcodeDetector' in window)) {
-      showCameraWarning('Este navegador no tiene BarcodeDetector para leer QR. Use modo manual o Chrome/Edge Android.');
-      return;
+    var activeDetector = createQrDetector();
+    var warnings = [];
+    if (!window.isSecureContext) {
+      warnings.push('La cámara del teléfono requiere HTTPS o localhost. En HTTP por IP puede quedar bloqueada.');
     }
-    detector = detector || new BarcodeDetector({ formats: ['qr_code'] });
+    if (!activeDetector) {
+      warnings.push('Este navegador puede abrir la cámara, pero no tiene lector QR automático. Use el modo avanzado/manual o Chrome/Edge Android.');
+    }
+    showCameraWarning(warnings.join(' '));
+    stopCamera();
     navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: 'environment' }
@@ -689,11 +699,14 @@
       var video = $('qrVideo');
       video.srcObject = mediaStream;
       video.play();
-      scanning = true;
-      setStatus('Camara activa. Apunte al QR del resumen final.');
-      scanLoop();
+      scanning = !!activeDetector;
+      setStatus(activeDetector
+        ? 'Cámara activa. Apunte al QR del resumen final.'
+        : 'Cámara activa. Este navegador no decodifica QR automáticamente; use el modo avanzado/manual para registrar el resultado.',
+        !activeDetector);
+      if (activeDetector) scanLoop();
     }).catch(function (err) {
-      showCameraWarning('No se pudo abrir la camara: ' + (err && err.message || 'permiso denegado') + '.');
+      showCameraWarning('No se pudo abrir la cámara: ' + (err && err.message || 'permiso denegado') + '.');
     });
   }
 
