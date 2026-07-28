@@ -9,6 +9,8 @@
   var stream = null;
   var scanning = false;
   var detector = null;
+  var scanCanvas = null;
+  var scanErrorCount = 0;
   var deferredInstallPrompt = null;
   var pendingQrData = null;
 
@@ -431,6 +433,11 @@
     }
   }
 
+  function rememberRawQrText(text) {
+    var input = $('qrManualText');
+    if (input) input.value = String(text == null ? '' : text);
+  }
+
   function numberField(payload, names, label) {
     for (var i = 0; i < names.length; i++) {
       if (payload[names[i]] !== undefined && payload[names[i]] !== null && payload[names[i]] !== '') {
@@ -634,6 +641,7 @@
 
   function handleQrText(text) {
     var payload;
+    rememberRawQrText(text);
     try {
       pendingQrData = parseQrText(text);
       payload = attachSelectedActivityPayload(basePayloadFromQr(pendingQrData));
@@ -650,7 +658,7 @@
         renderResult(null);
       }
       setStatus(err.message, true);
-      return;
+      return false;
     }
     api('POST', '/api/resultados/validar', payload, function (err) {
       if (err) {
@@ -665,6 +673,7 @@
       setStatus('QR leído y validado. Para guardarlo, presione Enviar Resultado a base de datos.');
       stopCamera();
     });
+    return true;
   }
 
   function handleManualFields() {
@@ -719,30 +728,69 @@
       stream = mediaStream;
       var video = $('qrVideo');
       video.srcObject = mediaStream;
-      video.play();
+      var playPromise = video.play();
       scanning = !!activeDetector;
+      scanErrorCount = 0;
       setStatus(activeDetector
         ? 'Cámara activa. Apunte al QR del resumen final.'
         : 'Cámara activa, pero este navegador no decodifica QR automáticamente. Use modo manual o Chrome/Edge Android.',
         !activeDetector);
-      if (activeDetector) scanLoop();
+      if (activeDetector) {
+        if (playPromise && typeof playPromise.then === 'function') {
+          playPromise.then(function () { scanLoop(); }).catch(function () { scanLoop(); });
+        } else {
+          scanLoop();
+        }
+      }
     }).catch(function (err) {
       showCameraWarning('No se pudo abrir la cámara: ' + (err && err.message || 'permiso denegado') + '.');
       setStatus('No se pudo abrir la cámara. Revise permisos del navegador o use modo manual.', true);
     });
   }
 
+  function detectFrameFromCanvas(video) {
+    if (!detector || !video || !video.videoWidth || !video.videoHeight) {
+      return Promise.resolve([]);
+    }
+    try {
+      scanCanvas = scanCanvas || document.createElement('canvas');
+      var maxWidth = 900;
+      var scale = Math.min(1, maxWidth / video.videoWidth);
+      var width = Math.max(1, Math.round(video.videoWidth * scale));
+      var height = Math.max(1, Math.round(video.videoHeight * scale));
+      scanCanvas.width = width;
+      scanCanvas.height = height;
+      var ctx = scanCanvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(video, 0, 0, width, height);
+      return detector.detect(scanCanvas).catch(function () { return []; });
+    } catch (err) {
+      return Promise.resolve([]);
+    }
+  }
+
+  function detectFrame(video) {
+    return detector.detect(video).then(function (codes) {
+      if (codes && codes.length) return codes;
+      return detectFrameFromCanvas(video);
+    }).catch(function () {
+      scanErrorCount++;
+      if (scanErrorCount === 12) {
+        showCameraWarning('La cÃ¡mara estÃ¡ activa, pero el lector automÃ¡tico no logra decodificar. Acerque el QR, mejore la luz o use modo avanzado/manual.');
+      }
+      return detectFrameFromCanvas(video);
+    });
+  }
+
   function scanLoop() {
     if (!scanning || !detector) return;
     var video = $('qrVideo');
-    if (!video || video.readyState < 2) {
+    if (!video || video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
       window.requestAnimationFrame(scanLoop);
       return;
     }
-    detector.detect(video).then(function (codes) {
+    detectFrame(video).then(function (codes) {
       if (codes && codes.length && codes[0].rawValue) {
-        handleQrText(codes[0].rawValue);
-        return;
+        if (handleQrText(codes[0].rawValue)) return;
       }
       window.requestAnimationFrame(scanLoop);
     }).catch(function () {
