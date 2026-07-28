@@ -1,6 +1,6 @@
 {
   "escuelaId": "1077",
-  "generadoEn": "2026-07-28T05:14:00.558Z",
+  "generadoEn": "2026-07-28T05:29:23.133Z",
   "githubPagesBasePath": "/escuela1077buenosaires-edu/",
   "backendBaseUrlConfigurado": false,
   "supabasePublicConfigConfigurada": true,
@@ -48,8 +48,8 @@
     },
     {
       "nombre": "index.html",
-      "bytes": 6622,
-      "sha256": "34c3b38811bc7dcbb058818702977238b7bca9d4802d29ac7a3bf0075ca74176"
+      "bytes": 6628,
+      "sha256": "5b71613af9afaa28c0fcbd44a11f03729b53450c6d3a62c888bbbb5949c9cf13"
     },
     {
       "nombre": "lector-qr-icon.svg",
@@ -63,8 +63,8 @@
     },
     {
       "nombre": "lector-qr.html",
-      "bytes": 5545,
-      "sha256": "6802a932ce156b9704a13c98a958d7a26ed4a8c8af70bdfb89b8e3bfde87e5af"
+      "bytes": 5626,
+      "sha256": "c98b3854b1fb5148bb06d3f93fb34ec6b641d14691aa9e0a19cb3c75cb7eabb5"
     },
     {
       "nombre": "lector-qr.js",
@@ -79,7 +79,7 @@
     {
       "nombre": "manifest-publicacion.json",
       "bytes": 3192,
-      "sha256": "ea87167281f2a15d963751fcbec043d94d352f908bff5b6df09ab23eb9f271f0"
+      "sha256": "c14202b98da18b37dd1924a1cc23037804fb2c7d48706cb8796522ccb38408c2"
     },
     {
       "nombre": "portal-docente-fixes.js",
@@ -98,8 +98,8 @@
     },
     {
       "nombre": "styles.css",
-      "bytes": 70938,
-      "sha256": "90a4733257737717dd53015604dbafa069a84cc704051a07e3b5ae6b2c907545"
+      "bytes": 70998,
+      "sha256": "b9c4c316ddf0e6493cbdd2743075831a492be887cb40750eb17372cecf6d0507"
     }
   ]
 }

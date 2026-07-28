@@ -321,8 +321,13 @@ body {
   font-weight: 700;
 }
 
+#qrReadManualFields,
+#qrReadManual {
+  margin-top: 12px;
+}
+
 .qr-json-advanced {
-  margin-top: 10px;
+  margin-top: 14px;
   padding-top: 10px;
   border-top: 1px dashed var(--line);
 }
