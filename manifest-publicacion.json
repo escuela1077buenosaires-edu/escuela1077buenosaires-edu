@@ -1,6 +1,6 @@
 {
   "escuelaId": "1077",
-  "generadoEn": "2026-07-28T02:22:09.508Z",
+  "generadoEn": "2026-07-28T02:26:19.883Z",
   "githubPagesBasePath": "/escuela1077buenosaires-edu/",
   "backendBaseUrlConfigurado": false,
   "supabasePublicConfigConfigurada": true,
@@ -79,7 +79,7 @@
     {
       "nombre": "manifest-publicacion.json",
       "bytes": 3192,
-      "sha256": "263a1b908fa1ed4b41b8dae990a7815cbf3f34521cb4a64e8ec48b8d8c167f9f"
+      "sha256": "ce6ca643893622ba95bd7657dcbf55345ebffb92bf12228e22cd380c8358fe83"
     },
     {
       "nombre": "portal-docente-fixes.js",
@@ -98,8 +98,8 @@
     },
     {
       "nombre": "styles.css",
-      "bytes": 69989,
-      "sha256": "5d90784ff95414b7482d34db95b2e82366cc966800d87a022bfe0eb09c30979b"
+      "bytes": 70368,
+      "sha256": "3f551fd274533ab49a454d848bc7781c8a614a65907344fc47961b2473976e74"
     }
   ]
 }
