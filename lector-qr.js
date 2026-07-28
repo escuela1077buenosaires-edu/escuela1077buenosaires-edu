@@ -28,7 +28,8 @@
   function rpc(functionName, payload, callback, authenticated) {
     if (!window.AIE_RUNTIME || !window.AIE_RUNTIME.supabaseReady()) {
       window.setTimeout(function () {
-        callback({ error: window.AIE_RUNTIME ? window.AIE_RUNTIME.supabaseUnavailableMessage() : 'Falta configuracion Supabase.' });
+        var message = window.AIE_RUNTIME ? window.AIE_RUNTIME.supabaseUnavailableMessage() : 'Falta configuracion de Base de Datos.';
+        callback({ error: clean(message).replace(/Supabase/g, 'Base de Datos') });
       }, 0);
       return true;
     }
@@ -272,6 +273,36 @@
     });
   }
 
+  function selectedSource() {
+    var thirdRadio = $('qrSourceThird');
+    return thirdRadio && thirdRadio.checked ? 'tercero' : 'propia';
+  }
+
+  function setSourceAvailability() {
+    var source = selectedSource();
+    var ownSelect = $('qrActivitySelect');
+    var thirdSelect = $('qrThirdPartyActivitySelect');
+    var ownRadio = $('qrSourceOwn');
+    var thirdRadio = $('qrSourceThird');
+    var allowed = !!(state && state.autorizado && canUseQr());
+    var thirdAllowed = allowed && canUseThirdPartyActivities();
+    if (source === 'tercero' && !thirdAllowed && ownRadio) {
+      ownRadio.checked = true;
+      source = 'propia';
+    }
+    if (ownRadio) ownRadio.disabled = !allowed;
+    if (thirdRadio) thirdRadio.disabled = !thirdAllowed;
+    if (source === 'propia') {
+      if (thirdSelect) thirdSelect.value = '';
+      if (ownSelect) ownSelect.disabled = !allowed || !activities.length;
+      if (thirdSelect) thirdSelect.disabled = true;
+    } else {
+      if (ownSelect) ownSelect.value = '';
+      if (ownSelect) ownSelect.disabled = true;
+      if (thirdSelect) thirdSelect.disabled = !thirdAllowed || !thirdPartyActivities.length;
+    }
+  }
+
   function renderActivities() {
     var select = $('qrActivitySelect');
     var thirdSelect = $('qrThirdPartyActivitySelect');
@@ -287,6 +318,7 @@
       thirdSelect.appendChild(thirdOption);
       select.disabled = true;
       thirdSelect.disabled = true;
+      setSourceAvailability();
       return;
     }
     renderSelectOptions(select, activities, 'No hay actividades propias visibles');
@@ -297,18 +329,24 @@
       denied.textContent = 'Sin permiso para actividades de terceros';
       thirdSelect.appendChild(denied);
       thirdSelect.disabled = true;
+      setSourceAvailability();
       return;
     }
     renderSelectOptions(thirdSelect, thirdPartyActivities, 'No hay actividades de terceros disponibles');
+    setSourceAvailability();
   }
 
   function selectedActivity() {
     var select = $('qrActivitySelect');
     var thirdSelect = $('qrThirdPartyActivitySelect');
+    var source = selectedSource();
     var id = select ? select.value : '';
     var thirdId = thirdSelect ? thirdSelect.value : '';
-    for (var i = 0; i < activities.length; i++) {
-      if (activities[i].id === id) return activities[i];
+    if (source === 'propia') {
+      for (var i = 0; i < activities.length; i++) {
+        if (activities[i].id === id) return activities[i];
+      }
+      return null;
     }
     for (var j = 0; j < thirdPartyActivities.length; j++) {
       if (thirdPartyActivities[j].id === thirdId) return thirdPartyActivities[j];
@@ -468,15 +506,24 @@
     syncManualGrade();
     var idAlumno = clean($('qrManualStudent') && $('qrManualStudent').value);
     if (!idAlumno) throw new Error('Falta ID de alumno.');
+    var correctos = validateNumber(manualInputNumber('qrManualCorrect'), 'correctos', 0, 200, true);
+    var incorrectos = validateNumber(manualInputNumber('qrManualIncorrect'), 'incorrectos', 0, 200, true);
+    var total = validateNumber(manualInputNumber('qrManualTotal'), 'cantidad_ejercicios', 1, 200, true);
+    var nota = Number(roundedGrade(correctos, total));
+    if (correctos + incorrectos !== total) {
+      throw new Error('correctos + incorrectos debe coincidir con cantidad_ejercicios.');
+    }
+    var gradeInput = $('qrManualGrade');
+    if (gradeInput) gradeInput.value = roundedGrade(correctos, total);
     return Object.assign(selectedActivityPayload(activity), {
       intento_id: randomUuid(),
       id_alumno: idAlumno,
       tipo_actividad: activity.tipo || '',
       titulo: activity.titulo || '',
-      correctos: validateNumber(manualInputNumber('qrManualCorrect'), 'correctos', 0, 200, true),
-      incorrectos: validateNumber(manualInputNumber('qrManualIncorrect'), 'incorrectos', 0, 200, true),
-      cantidad_ejercicios: validateNumber(manualInputNumber('qrManualTotal'), 'cantidad_ejercicios', 1, 200, true),
-      nota: validateNumber(manualInputNumber('qrManualGrade'), 'nota', 0, 10, false),
+      correctos: correctos,
+      incorrectos: incorrectos,
+      cantidad_ejercicios: total,
+      nota: nota,
       tiempo_minutos: validateNumber(manualInputNumber('qrManualMinutes'), 'tiempo_minutos', 0, 600, false)
     });
   }
@@ -525,7 +572,7 @@
     if (!box) return;
     box.innerHTML = '';
     if (!payload) {
-      box.textContent = 'Todavia no hay QR leido.';
+      box.textContent = 'Todavía no hay QR leído.';
       return;
     }
     var table = document.createElement('div');
@@ -579,7 +626,7 @@
       }
       selectedPayload = payload;
       renderResult(payload, true);
-      setStatus('QR leido y validado.');
+      setStatus('QR leído y validado.');
       stopCamera();
     });
   }
@@ -769,15 +816,30 @@
     };
     $('qrStartCamera').onclick = startCamera;
     $('qrStopCamera').onclick = stopCamera;
+    ['qrSourceOwn', 'qrSourceThird'].forEach(function (id) {
+      var radio = $(id);
+      if (!radio) return;
+      radio.onchange = function () {
+        selectedPayload = null;
+        renderResult(null);
+        setSourceAvailability();
+      };
+    });
     $('qrActivitySelect').onchange = function () {
       var thirdSelect = $('qrThirdPartyActivitySelect');
       if (this.value && thirdSelect) thirdSelect.value = '';
+      var ownRadio = $('qrSourceOwn');
+      if (ownRadio) ownRadio.checked = true;
+      setSourceAvailability();
       selectedPayload = null;
       renderResult(null);
     };
     $('qrThirdPartyActivitySelect').onchange = function () {
       var ownSelect = $('qrActivitySelect');
       if (this.value && ownSelect) ownSelect.value = '';
+      var thirdRadio = $('qrSourceThird');
+      if (thirdRadio) thirdRadio.checked = true;
+      setSourceAvailability();
       selectedPayload = null;
       renderResult(null);
     };

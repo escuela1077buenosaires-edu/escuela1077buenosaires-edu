@@ -209,6 +209,43 @@ body {
   font-size: 20px;
 }
 
+.qr-activity-source-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.qr-activity-source {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border: 2px solid #bbf7d0;
+  border-radius: 10px;
+  background: #fbfffc;
+}
+
+.qr-activity-source legend {
+  padding: 0 6px;
+  color: var(--ink);
+}
+
+.qr-activity-source-third {
+  border-color: #f3b4b4;
+  background: #fffafa;
+}
+
+.qr-source-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.qr-source-radio input {
+  width: auto;
+}
+
 .qr-reader-box {
   display: grid;
   gap: 7px;
@@ -252,13 +289,14 @@ body {
 .qr-manual {
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 10px;
+  padding: 12px;
   background: #fbfcfd;
 }
 
 .qr-manual summary {
   cursor: pointer;
   font-weight: 700;
+  margin-bottom: 12px;
 }
 
 .qr-manual-separator {
@@ -272,12 +310,12 @@ body {
 .qr-manual-grid {
   display: grid;
   grid-template-columns: minmax(110px, 1.2fr) repeat(5, minmax(74px, 0.75fr));
-  gap: 8px;
+  gap: 12px 10px;
   align-items: end;
 }
 
 .qr-manual-note {
-  margin: 0;
+  margin: 10px 0 0;
   color: var(--muted);
   font-size: 13px;
   font-weight: 700;

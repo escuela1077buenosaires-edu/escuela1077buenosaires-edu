@@ -7,14 +7,14 @@
   <title>Lector QR 1077</title>
   <link rel="icon" href="lector-qr-icon.svg" type="image/svg+xml">
   <link rel="manifest" href="lector-qr.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=qr-20260721-02">
+  <link rel="stylesheet" href="styles.css?v=qr-20260728-01">
 </head>
 <body class="qr-reader-body">
   <main class="qr-reader">
     <section class="qr-reader-hero">
       <span>Escuela 1077</span>
       <h1>Lector de resultados QR</h1>
-      <p>La docente selecciona la actividad, escanea el QR del alumno y envia el resultado a Supabase sin exponer claves.</p>
+      <p>La docente selecciona la actividad, escanea el QR del alumno y envía el resultado a la Base de Datos.</p>
     </section>
 
     <section class="qr-reader-panel">
@@ -29,19 +29,37 @@
 
     <section class="qr-reader-panel">
       <h2>1. Seleccionar actividad</h2>
-      <label class="qr-reader-label">
-        Actividad de desarrollo propio
-        <select id="qrActivitySelect">
-          <option value="">Inicie sesion para cargar actividades</option>
-        </select>
-      </label>
-      <label class="qr-reader-label">
-        Actividad desarrollada por terceros
-        <select id="qrThirdPartyActivitySelect">
-          <option value="">Inicie sesion para cargar actividades de terceros</option>
-        </select>
-      </label>
-      <p id="qrActivityHint" class="portal-muted">Seleccione una sola fuente. Las propias se toman del indice visible; las de terceros deben estar cargadas y disponibles.</p>
+      <div class="qr-activity-source-grid">
+        <fieldset class="qr-activity-source qr-activity-source-own">
+          <legend>
+            <label class="qr-source-radio">
+              <input id="qrSourceOwn" name="qrActivitySource" type="radio" value="propia" checked>
+              <strong>Actividad de desarrollo propio</strong>
+            </label>
+          </legend>
+          <label class="qr-reader-label">
+            Actividad
+            <select id="qrActivitySelect">
+              <option value="">Inicie sesion para cargar actividades</option>
+            </select>
+          </label>
+        </fieldset>
+
+        <fieldset class="qr-activity-source qr-activity-source-third">
+          <legend>
+            <label class="qr-source-radio">
+              <input id="qrSourceThird" name="qrActivitySource" type="radio" value="tercero">
+              <strong>Actividad desarrollada por terceros</strong>
+            </label>
+          </legend>
+          <label class="qr-reader-label">
+            Actividad
+            <select id="qrThirdPartyActivitySelect">
+              <option value="">Inicie sesion para cargar actividades de terceros</option>
+            </select>
+          </label>
+        </fieldset>
+      </div>
     </section>
 
     <section class="qr-reader-panel">
@@ -97,9 +115,9 @@
 
     <section class="qr-reader-panel">
       <h2>3. Validar y enviar</h2>
-      <div id="qrResultBox" class="qr-reader-box">Todavia no hay QR leido.</div>
+      <div id="qrResultBox" class="qr-reader-box">Todavía no hay QR leído.</div>
       <div class="portal-actions">
-        <button type="button" id="qrSendResult">Enviar resultado a Supabase</button>
+        <button type="button" id="qrSendResult">Enviar Resultado a base de datos</button>
         <button type="button" id="qrClearResult" class="secondary">Limpiar</button>
       </div>
     </section>
@@ -107,7 +125,7 @@
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="lector-qr.js?v=qr-20260721-03"></script>
+  <script src="lector-qr.js?v=qr-20260728-01"></script>
   <script src="aie-login-redirect.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
