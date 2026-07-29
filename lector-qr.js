@@ -857,6 +857,24 @@
     });
   }
 
+  function decodeQrBinaryText(binaryData) {
+    if (!binaryData || !binaryData.length) return '';
+    var bytes = binaryData instanceof Uint8Array ? binaryData : new Uint8Array(binaryData);
+    if (window.TextDecoder) {
+      try {
+        var utf8Text = new window.TextDecoder('utf-8', { fatal: true }).decode(bytes);
+        if (utf8Text) return utf8Text;
+      } catch (utf8Err) {}
+      try {
+        var latinText = new window.TextDecoder('windows-1252').decode(bytes);
+        if (latinText) return latinText;
+      } catch (latinErr) {}
+    }
+    var text = '';
+    for (var i = 0; i < bytes.length; i++) text += String.fromCharCode(bytes[i]);
+    return text;
+  }
+
   function decodeVideoWithJsQr(video) {
     if (!hasJsQrDecoder() || !video || !video.videoWidth || !video.videoHeight) return '';
     scanCanvas = scanCanvas || document.createElement('canvas');
@@ -878,7 +896,13 @@
       context.drawImage(video, sourceX, sourceY, cropWidth, cropHeight, 0, 0, width, height);
       var image = context.getImageData(0, 0, width, height);
       var decoded = window.jsQR(image.data, width, height, { inversionAttempts: 'attemptBoth' });
-      if (decoded && decoded.data) return decoded.data;
+      if (decoded) {
+        var decodedText = String(decoded.data || '');
+        if ((!decodedText || decodedText.indexOf('\uFFFD') >= 0) && decoded.binaryData) {
+          decodedText = decodeQrBinaryText(decoded.binaryData);
+        }
+        if (decodedText) return decodedText;
+      }
     }
     return '';
   }

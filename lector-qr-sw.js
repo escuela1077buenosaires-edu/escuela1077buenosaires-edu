@@ -1,4 +1,4 @@
-var CACHE_NAME = 'lector-qr-1077-v9-20260728';
+var CACHE_NAME = 'lector-qr-1077-v10-20260728';
 var STATIC_FILES = [
   './lector-qr.html',
   './lector-qr.js',
