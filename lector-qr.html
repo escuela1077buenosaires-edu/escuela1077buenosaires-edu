@@ -7,7 +7,7 @@
   <title>Lector QR 1077</title>
   <link rel="icon" href="lector-qr-icon.svg" type="image/svg+xml">
   <link rel="manifest" href="lector-qr.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=qr-20260728-11">
+  <link rel="stylesheet" href="styles.css?v=qr-20260729-12">
 </head>
 <body class="qr-reader-body">
   <main class="qr-reader">
@@ -129,13 +129,14 @@
         <button type="button" id="qrSendResult">Enviar Resultado a base de datos</button>
         <button type="button" id="qrClearResult" class="secondary">Limpiar</button>
       </div>
+      <div id="qrSendStatus" class="qr-send-status" role="status" aria-live="polite"></div>
     </section>
   </main>
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
   <script src="jsQR.js?v=1.4.0"></script>
-  <script src="lector-qr.js?v=qr-20260728-11"></script>
+  <script src="lector-qr.js?v=qr-20260729-12"></script>
   <script src="aie-login-redirect.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

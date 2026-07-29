@@ -16,6 +16,8 @@
   var deferredInstallPrompt = null;
   var pendingQrData = null;
   var lastResultError = '';
+  var resultSubmitting = false;
+  var resultSubmitted = false;
 
   function $(id) {
     return document.getElementById(id);
@@ -30,6 +32,26 @@
     if (!box) return;
     box.textContent = text;
     box.className = error ? 'student-index-status closed' : 'student-index-status open';
+  }
+
+  function setSendStatus(text, kind) {
+    var box = $('qrSendStatus');
+    if (!box) return;
+    box.textContent = text || '';
+    box.className = 'qr-send-status' + (kind ? ' ' + kind : '');
+  }
+
+  function syncSendButton() {
+    var button = $('qrSendResult');
+    if (!button) return;
+    button.disabled = !selectedPayload || resultSubmitting || resultSubmitted;
+  }
+
+  function resetSubmissionState(clearStatus) {
+    resultSubmitting = false;
+    resultSubmitted = false;
+    if (clearStatus !== false) setSendStatus('');
+    syncSendButton();
   }
 
   function rpc(functionName, payload, callback, authenticated) {
@@ -730,12 +752,15 @@
   function handleQrText(text) {
     var payload;
     lastResultError = '';
+    selectedPayload = null;
+    resetSubmissionState();
     rememberRawQrText(text);
     try {
       pendingQrData = parseQrText(text);
       payload = attachSelectedActivityPayload(basePayloadFromQr(pendingQrData));
     } catch (err) {
       selectedPayload = null;
+      syncSendButton();
       lastResultError = err.message || 'El contenido del QR no es válido.';
       if (pendingQrData) {
         try {
@@ -755,12 +780,14 @@
     api('POST', '/api/resultados/validar', payload, function (err) {
       if (err) {
         selectedPayload = null;
+        syncSendButton();
         lastResultError = err.error || 'El resultado del QR no pasó la validación.';
         renderResult(payload, false);
         setStatus(lastResultError, true);
         return;
       }
       selectedPayload = payload;
+      resetSubmissionState();
       pendingQrData = null;
       lastResultError = '';
       renderResult(payload, true);
@@ -772,10 +799,13 @@
 
   function handleManualFields() {
     var payload;
+    selectedPayload = null;
+    resetSubmissionState();
     try {
       payload = resultPayloadFromManualFields();
     } catch (err) {
       selectedPayload = null;
+      syncSendButton();
       renderResult(null);
       setStatus(err.message, true);
       return;
@@ -783,11 +813,13 @@
     api('POST', '/api/resultados/validar', payload, function (err) {
       if (err) {
         selectedPayload = null;
+        syncSendButton();
         renderResult(payload, false);
         setStatus(err.error || 'El resultado manual no paso la validacion.', true);
         return;
       }
       selectedPayload = payload;
+      resetSubmissionState();
       renderResult(payload, true);
       setStatus('Resultado manual validado. Para guardarlo, presione Enviar Resultado a base de datos.');
       stopCamera();
@@ -940,28 +972,43 @@
   }
 
   function sendResult() {
+    if (resultSubmitting || resultSubmitted) return;
     if (!selectedPayload) {
-      setStatus(lastResultError
+      var missingMessage = lastResultError
         ? 'No se puede enviar: ' + lastResultError
-        : 'No hay resultado validado para enviar.', true);
+        : 'No hay resultado validado para enviar.';
+      setSendStatus(missingMessage, 'error');
+      setStatus(missingMessage, true);
       return;
     }
     if (!accessToken) {
+      setSendStatus('Debe iniciar sesión con una cuenta autorizada antes de enviar.', 'error');
       setStatus('Debe iniciar sesion con cuenta autorizada antes de enviar.', true);
       return;
     }
     if (!canUseQr()) {
+      setSendStatus('Su perfil no tiene permiso para usar el lector QR.', 'error');
       setStatus('Su perfil no tiene permiso para usar el lector QR.', true);
       return;
     }
+    resultSubmitting = true;
+    syncSendButton();
+    setSendStatus('Enviando resultado...', 'pending');
     api('POST', '/api/lector-qr/resultados', selectedPayload, function (err) {
       if (err) {
-        setStatus(err.error || 'No se pudo registrar el resultado.', true);
+        var errorMessage = err.error || 'No se pudo registrar el resultado.';
+        resultSubmitting = false;
+        syncSendButton();
+        setSendStatus(errorMessage, 'error');
+        setStatus(errorMessage, true);
         return;
       }
+      resultSubmitting = false;
+      resultSubmitted = true;
+      syncSendButton();
+      renderResult(selectedPayload, false);
+      setSendStatus('Resultado enviado y registrado. Presione Limpiar para cargar otro resultado.', 'success');
       setStatus('Resultado enviado y registrado.');
-      selectedPayload = null;
-      renderResult(null);
     }, true);
   }
 
@@ -1072,6 +1119,7 @@
       stopCamera();
       selectedPayload = null;
       pendingQrData = null;
+      resetSubmissionState();
       renderResult(null);
       loadConfig();
     };
@@ -1084,6 +1132,7 @@
       if (!radio) return;
       radio.onchange = function () {
         selectedPayload = null;
+        resetSubmissionState();
         renderResult(null);
         setSourceAvailability();
         if (pendingQrData) handleQrText(JSON.stringify(pendingQrData));
@@ -1096,6 +1145,7 @@
       if (ownRadio) ownRadio.checked = true;
       setSourceAvailability();
       selectedPayload = null;
+      resetSubmissionState();
       renderResult(null);
       if (pendingQrData) handleQrText(JSON.stringify(pendingQrData));
     };
@@ -1106,6 +1156,7 @@
       if (thirdRadio) thirdRadio.checked = true;
       setSourceAvailability();
       selectedPayload = null;
+      resetSubmissionState();
       renderResult(null);
       if (pendingQrData) handleQrText(JSON.stringify(pendingQrData));
     };
@@ -1121,6 +1172,8 @@
     $('qrClearResult').onclick = function () {
       selectedPayload = null;
       pendingQrData = null;
+      lastResultError = '';
+      resetSubmissionState();
       renderResult(null);
       setStatus('Resultado limpiado.');
     };
@@ -1138,6 +1191,7 @@
   }
 
   bind();
+  syncSendButton();
   registerServiceWorker();
   loadConfig();
 }());
