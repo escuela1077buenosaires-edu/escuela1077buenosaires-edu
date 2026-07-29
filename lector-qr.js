@@ -9,8 +9,6 @@
   var stream = null;
   var scanning = false;
   var detector = null;
-  var scanCanvas = null;
-  var scanErrorCount = 0;
   var deferredInstallPrompt = null;
   var pendingQrData = null;
 
@@ -423,14 +421,6 @@
     }
   }
 
-  function hasJsQrDecoder() {
-    return typeof window.jsQR === 'function';
-  }
-
-  function hasAnyQrDecoder() {
-    return !!createQrDetector() || hasJsQrDecoder();
-  }
-
   function parseQrText(text) {
     var raw = clean(text);
     if (!raw) throw new Error('QR vacio.');
@@ -666,7 +656,7 @@
         renderResult(null);
       }
       setStatus(err.message, true);
-      return false;
+      return;
     }
     api('POST', '/api/resultados/validar', payload, function (err) {
       if (err) {
@@ -681,7 +671,6 @@
       setStatus('QR leído y validado. Para guardarlo, presione Enviar Resultado a base de datos.');
       stopCamera();
     });
-    return true;
   }
 
   function handleManualFields() {
@@ -718,12 +707,11 @@
       return;
     }
     var activeDetector = createQrDetector();
-    var activeDecoder = !!activeDetector || hasJsQrDecoder();
     var warnings = [];
     if (!window.isSecureContext) {
       warnings.push('La cámara del teléfono requiere HTTPS o localhost. En HTTP por IP puede quedar bloqueada.');
     }
-    if (!activeDecoder) {
+    if (!activeDetector) {
       warnings.push('Este navegador puede abrir la cámara, pero no tiene lector QR automático. Use el modo avanzado/manual o Chrome/Edge Android.');
     }
     showCameraWarning(warnings.join(' '));
@@ -737,101 +725,30 @@
       stream = mediaStream;
       var video = $('qrVideo');
       video.srcObject = mediaStream;
-      var playPromise = video.play();
-      scanning = !!activeDecoder;
-      scanErrorCount = 0;
-      setStatus(activeDecoder
+      video.play();
+      scanning = !!activeDetector;
+      setStatus(activeDetector
         ? 'Cámara activa. Apunte al QR del resumen final.'
         : 'Cámara activa, pero este navegador no decodifica QR automáticamente. Use modo manual o Chrome/Edge Android.',
-        !activeDecoder);
-      if (activeDecoder) {
-        if (playPromise && typeof playPromise.then === 'function') {
-          playPromise.then(function () { scanLoop(); }).catch(function () { scanLoop(); });
-        } else {
-          scanLoop();
-        }
-      }
+        !activeDetector);
+      if (activeDetector) scanLoop();
     }).catch(function (err) {
       showCameraWarning('No se pudo abrir la cámara: ' + (err && err.message || 'permiso denegado') + '.');
       setStatus('No se pudo abrir la cámara. Revise permisos del navegador o use modo manual.', true);
     });
   }
 
-  function detectFrameFromCanvas(video) {
-    if (!video || !video.videoWidth || !video.videoHeight) {
-      return Promise.resolve([]);
-    }
-    try {
-      scanCanvas = scanCanvas || document.createElement('canvas');
-      var maxWidth = 900;
-      var scale = Math.min(1, maxWidth / video.videoWidth);
-      var width = Math.max(1, Math.round(video.videoWidth * scale));
-      var height = Math.max(1, Math.round(video.videoHeight * scale));
-      scanCanvas.width = width;
-      scanCanvas.height = height;
-      var ctx = scanCanvas.getContext('2d', { willReadFrequently: true });
-      ctx.drawImage(video, 0, 0, width, height);
-      if (hasJsQrDecoder()) {
-        var image = ctx.getImageData(0, 0, width, height);
-        var qr = window.jsQR(image.data, width, height, { inversionAttempts: 'attemptBoth' });
-        if (qr && qr.data) return Promise.resolve([{ rawValue: qr.data }]);
-      }
-      return Promise.resolve([]);
-    } catch (err) {
-      return Promise.resolve([]);
-    }
-  }
-
-  function detectWithNative(video) {
-    if (!detector) return Promise.resolve([]);
-    return new Promise(function (resolve) {
-      var done = false;
-      var timer = window.setTimeout(function () {
-        if (done) return;
-        done = true;
-        resolve([]);
-      }, 250);
-      detector.detect(video).then(function (codes) {
-        if (done) return;
-        done = true;
-        window.clearTimeout(timer);
-        resolve(codes || []);
-      }).catch(function () {
-        if (done) return;
-        done = true;
-        window.clearTimeout(timer);
-        resolve([]);
-      });
-    });
-  }
-
-  function detectFrame(video) {
-    return detectFrameFromCanvas(video).then(function (canvasCodes) {
-      if (canvasCodes && canvasCodes.length) return canvasCodes;
-      if (!detector) return [];
-      return detectWithNative(video);
-    }).then(function (codes) {
-      if (codes && codes.length) return codes;
-      return [];
-    }).catch(function () {
-      scanErrorCount++;
-      if (scanErrorCount === 12) {
-        showCameraWarning('La cÃ¡mara estÃ¡ activa, pero el lector automÃ¡tico no logra decodificar. Acerque el QR, mejore la luz o use modo avanzado/manual.');
-      }
-      return detectFrameFromCanvas(video);
-    });
-  }
-
   function scanLoop() {
-    if (!scanning || (!detector && !hasJsQrDecoder())) return;
+    if (!scanning || !detector) return;
     var video = $('qrVideo');
-    if (!video || video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
+    if (!video || video.readyState < 2) {
       window.requestAnimationFrame(scanLoop);
       return;
     }
-    detectFrame(video).then(function (codes) {
+    detector.detect(video).then(function (codes) {
       if (codes && codes.length && codes[0].rawValue) {
-        if (handleQrText(codes[0].rawValue)) return;
+        handleQrText(codes[0].rawValue);
+        return;
       }
       window.requestAnimationFrame(scanLoop);
     }).catch(function () {
