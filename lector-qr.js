@@ -776,18 +776,43 @@
         var qr = window.jsQR(image.data, width, height, { inversionAttempts: 'attemptBoth' });
         if (qr && qr.data) return Promise.resolve([{ rawValue: qr.data }]);
       }
-      if (detector) return detector.detect(scanCanvas).catch(function () { return []; });
       return Promise.resolve([]);
     } catch (err) {
       return Promise.resolve([]);
     }
   }
 
+  function detectWithNative(video) {
+    if (!detector) return Promise.resolve([]);
+    return new Promise(function (resolve) {
+      var done = false;
+      var timer = window.setTimeout(function () {
+        if (done) return;
+        done = true;
+        resolve([]);
+      }, 250);
+      detector.detect(video).then(function (codes) {
+        if (done) return;
+        done = true;
+        window.clearTimeout(timer);
+        resolve(codes || []);
+      }).catch(function () {
+        if (done) return;
+        done = true;
+        window.clearTimeout(timer);
+        resolve([]);
+      });
+    });
+  }
+
   function detectFrame(video) {
-    if (!detector) return detectFrameFromCanvas(video);
-    return detector.detect(video).then(function (codes) {
+    return detectFrameFromCanvas(video).then(function (canvasCodes) {
+      if (canvasCodes && canvasCodes.length) return canvasCodes;
+      if (!detector) return [];
+      return detectWithNative(video);
+    }).then(function (codes) {
       if (codes && codes.length) return codes;
-      return detectFrameFromCanvas(video);
+      return [];
     }).catch(function () {
       scanErrorCount++;
       if (scanErrorCount === 12) {
@@ -798,7 +823,7 @@
   }
 
   function scanLoop() {
-    if (!scanning || !detector) return;
+    if (!scanning || (!detector && !hasJsQrDecoder())) return;
     var video = $('qrVideo');
     if (!video || video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
       window.requestAnimationFrame(scanLoop);
