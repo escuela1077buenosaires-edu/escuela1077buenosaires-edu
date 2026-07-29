@@ -15,6 +15,7 @@
   var jsQrTimer = null;
   var deferredInstallPrompt = null;
   var pendingQrData = null;
+  var lastResultError = '';
 
   function $(id) {
     return document.getElementById(id);
@@ -728,12 +729,14 @@
 
   function handleQrText(text) {
     var payload;
+    lastResultError = '';
     rememberRawQrText(text);
     try {
       pendingQrData = parseQrText(text);
       payload = attachSelectedActivityPayload(basePayloadFromQr(pendingQrData));
     } catch (err) {
       selectedPayload = null;
+      lastResultError = err.message || 'El contenido del QR no es válido.';
       if (pendingQrData) {
         try {
           renderResult(basePayloadFromQr(pendingQrData), false);
@@ -752,12 +755,14 @@
     api('POST', '/api/resultados/validar', payload, function (err) {
       if (err) {
         selectedPayload = null;
+        lastResultError = err.error || 'El resultado del QR no pasó la validación.';
         renderResult(payload, false);
-        setStatus(err.error || 'El resultado del QR no paso la validacion.', true);
+        setStatus(lastResultError, true);
         return;
       }
       selectedPayload = payload;
       pendingQrData = null;
+      lastResultError = '';
       renderResult(payload, true);
       setStatus('QR leído y validado. Para guardarlo, presione Enviar Resultado a base de datos.');
       stopCamera();
@@ -936,7 +941,9 @@
 
   function sendResult() {
     if (!selectedPayload) {
-      setStatus('No hay resultado validado para enviar.', true);
+      setStatus(lastResultError
+        ? 'No se puede enviar: ' + lastResultError
+        : 'No hay resultado validado para enviar.', true);
       return;
     }
     if (!accessToken) {
