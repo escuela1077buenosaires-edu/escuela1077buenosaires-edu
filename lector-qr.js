@@ -1,5 +1,6 @@
 (function () {
   var sessionKey = 'aieQr1077AccessToken';
+  var sharedSessionKeys = [sessionKey, 'aiePortal1077AccessToken'];
   var accessToken = '';
   var config = null;
   var state = null;
@@ -159,8 +160,10 @@
   function saveToken(token) {
     var session = storage();
     var persistent = persistentStorage();
-    if (session) session.setItem(sessionKey, token);
-    if (persistent) persistent.setItem(sessionKey, token);
+    sharedSessionKeys.forEach(function (key) {
+      if (session) session.setItem(key, token);
+      if (persistent) persistent.setItem(key, token);
+    });
   }
 
   function captureTokenFromHash() {
@@ -182,10 +185,15 @@
     if (accessToken) return;
     var session = storage();
     var persistent = persistentStorage();
-    accessToken = session ? session.getItem(sessionKey) || '' : '';
-    if (!accessToken && persistent) accessToken = persistent.getItem(sessionKey) || '';
+    sharedSessionKeys.some(function (key) {
+      accessToken = session ? session.getItem(key) || '' : '';
+      if (!accessToken && persistent) accessToken = persistent.getItem(key) || '';
+      return !!accessToken;
+    });
     if (accessToken && tokenExpired(accessToken)) {
       clearToken();
+    } else if (accessToken) {
+      saveToken(accessToken);
     }
   }
 
@@ -193,8 +201,10 @@
     accessToken = '';
     var session = storage();
     var persistent = persistentStorage();
-    if (session) session.removeItem(sessionKey);
-    if (persistent) persistent.removeItem(sessionKey);
+    sharedSessionKeys.forEach(function (key) {
+      if (session) session.removeItem(key);
+      if (persistent) persistent.removeItem(key);
+    });
   }
 
   function loginUrl() {
@@ -372,7 +382,8 @@
   function setActivityStatusAfterLoads() {
     var total = activities.length + thirdPartyActivities.length;
     setStatus(total
-      ? 'Sesion autorizada. Seleccione actividad y lea QR.'
+      ? 'Sesion autorizada. Actividades propias: ' + activities.length +
+        '. Actividades de terceros: ' + thirdPartyActivities.length + '.'
       : 'No hay actividades disponibles para el lector QR.', !total);
   }
 
@@ -422,13 +433,61 @@
   }
 
   function parseQrText(text) {
-    var raw = clean(text);
+    var raw = String(text == null ? '' : text)
+      .replace(/^\uFEFF/, '')
+      .replace(/[\u200B-\u200D\u2060]/g, '')
+      .trim();
     if (!raw) throw new Error('QR vacio.');
+
+    var candidates = [raw];
     try {
-      return JSON.parse(raw);
-    } catch (err) {
-      throw new Error('El QR no contiene JSON valido.');
+      var decoded = decodeURIComponent(raw);
+      if (decoded !== raw) candidates.push(decoded);
+    } catch (decodeErr) {}
+
+    candidates.slice().forEach(function (candidate) {
+      var firstBrace = candidate.indexOf('{');
+      var lastBrace = candidate.lastIndexOf('}');
+      if (firstBrace >= 0 && lastBrace > firstBrace) {
+        candidates.push(candidate.slice(firstBrace, lastBrace + 1));
+      }
+      try {
+        var url = new URL(candidate);
+        ['payload', 'data', 'qr', 'resultado'].forEach(function (key) {
+          var value = url.searchParams.get(key);
+          if (value) candidates.push(value);
+        });
+      } catch (urlErr) {}
+    });
+
+    for (var i = 0; i < candidates.length; i++) {
+      try {
+        return JSON.parse(candidates[i]);
+      } catch (jsonErr) {}
     }
+
+    var legacy = {};
+    raw.split(/[\r\n;|]+/).forEach(function (part) {
+      var match = part.match(/^\s*([^:=]+?)\s*[:=]\s*(.*?)\s*$/);
+      if (!match) return;
+      var key = match[1].toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '');
+      var value = match[2];
+      if (key === 'id' || key === 'idalumno' || key === 'alumno') legacy.id = value;
+      else if (key === 'actividad' || key === 'titulo') legacy.tit = value;
+      else if (key === 'tipo') legacy.tipo = value;
+      else if (key === 'cantidad' || key === 'cant' || key === 'ejercicios' || key === 'cantidaddeejercicios') legacy.ej = value;
+      else if (key === 'ok' || key === 'correctos' || key === 'correctas' || key === 'aciertos') legacy.pts = value;
+      else if (key === 'err' || key === 'incorrectos' || key === 'incorrectas' || key === 'errores') legacy.err = value;
+      else if (key === 'nota' || key === 'calificacion') legacy.nota = value;
+      else if (key === 't/m' || key === 'tm' || key === 'tiempo' || key === 'minutos' || key === 'tiempominutos') legacy.m = value;
+    });
+    if (legacy.id && legacy.ej !== undefined && legacy.pts !== undefined &&
+        legacy.err !== undefined && legacy.nota !== undefined && legacy.m !== undefined) {
+      return legacy;
+    }
+    throw new Error('El QR fue detectado, pero su contenido no tiene un formato de resultados reconocido.');
   }
 
   function rememberRawQrText(text) {
@@ -649,6 +708,8 @@
         try {
           renderResult(basePayloadFromQr(pendingQrData), false);
           stopCamera();
+          setStatus(err.message, true);
+          return true;
         } catch (renderErr) {
           renderResult(null);
         }
@@ -656,7 +717,7 @@
         renderResult(null);
       }
       setStatus(err.message, true);
-      return;
+      return false;
     }
     api('POST', '/api/resultados/validar', payload, function (err) {
       if (err) {
@@ -671,6 +732,7 @@
       setStatus('QR leído y validado. Para guardarlo, presione Enviar Resultado a base de datos.');
       stopCamera();
     });
+    return true;
   }
 
   function handleManualFields() {
@@ -747,8 +809,7 @@
     }
     detector.detect(video).then(function (codes) {
       if (codes && codes.length && codes[0].rawValue) {
-        handleQrText(codes[0].rawValue);
-        return;
+        if (handleQrText(codes[0].rawValue)) return;
       }
       window.requestAnimationFrame(scanLoop);
     }).catch(function () {
