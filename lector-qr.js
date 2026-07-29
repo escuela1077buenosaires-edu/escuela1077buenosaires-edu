@@ -10,6 +10,9 @@
   var stream = null;
   var scanning = false;
   var detector = null;
+  var scanCanvas = null;
+  var qrProcessing = false;
+  var jsQrTimer = null;
   var deferredInstallPrompt = null;
   var pendingQrData = null;
 
@@ -432,6 +435,33 @@
     }
   }
 
+  function hasJsQrDecoder() {
+    return typeof window.jsQR === 'function';
+  }
+
+  function scheduleNativeScan() {
+    if (scanning && detector && !qrProcessing) {
+      window.requestAnimationFrame(scanLoop);
+    }
+  }
+
+  function scheduleJsQrScan() {
+    if (!scanning || !hasJsQrDecoder() || qrProcessing) return;
+    window.clearTimeout(jsQrTimer);
+    jsQrTimer = window.setTimeout(jsQrScanLoop, 160);
+  }
+
+  function acceptDetectedQr(rawValue) {
+    if (!rawValue || qrProcessing) return false;
+    var accepted = handleQrText(rawValue);
+    if (accepted) {
+      qrProcessing = true;
+      scanning = false;
+      window.clearTimeout(jsQrTimer);
+    }
+    return accepted;
+  }
+
   function parseQrText(text) {
     var raw = String(text == null ? '' : text)
       .replace(/^\uFEFF/, '')
@@ -769,11 +799,12 @@
       return;
     }
     var activeDetector = createQrDetector();
+    var activeJsQr = hasJsQrDecoder();
     var warnings = [];
     if (!window.isSecureContext) {
       warnings.push('La cámara del teléfono requiere HTTPS o localhost. En HTTP por IP puede quedar bloqueada.');
     }
-    if (!activeDetector) {
+    if (!activeDetector && !activeJsQr) {
       warnings.push('Este navegador puede abrir la cámara, pero no tiene lector QR automático. Use el modo avanzado/manual o Chrome/Edge Android.');
     }
     showCameraWarning(warnings.join(' '));
@@ -787,13 +818,22 @@
       stream = mediaStream;
       var video = $('qrVideo');
       video.srcObject = mediaStream;
-      video.play();
-      scanning = !!activeDetector;
-      setStatus(activeDetector
+      qrProcessing = false;
+      var playPromise = video.play();
+      scanning = !!(activeDetector || activeJsQr);
+      setStatus(scanning
         ? 'Cámara activa. Apunte al QR del resumen final.'
         : 'Cámara activa, pero este navegador no decodifica QR automáticamente. Use modo manual o Chrome/Edge Android.',
-        !activeDetector);
-      if (activeDetector) scanLoop();
+        !scanning);
+      var beginScanning = function () {
+        if (activeDetector) scheduleNativeScan();
+        if (activeJsQr) scheduleJsQrScan();
+      };
+      if (playPromise && typeof playPromise.then === 'function') {
+        playPromise.then(beginScanning).catch(beginScanning);
+      } else {
+        beginScanning();
+      }
     }).catch(function (err) {
       showCameraWarning('No se pudo abrir la cámara: ' + (err && err.message || 'permiso denegado') + '.');
       setStatus('No se pudo abrir la cámara. Revise permisos del navegador o use modo manual.', true);
@@ -801,24 +841,67 @@
   }
 
   function scanLoop() {
-    if (!scanning || !detector) return;
+    if (!scanning || !detector || qrProcessing) return;
     var video = $('qrVideo');
     if (!video || video.readyState < 2) {
-      window.requestAnimationFrame(scanLoop);
+      scheduleNativeScan();
       return;
     }
     detector.detect(video).then(function (codes) {
       if (codes && codes.length && codes[0].rawValue) {
-        if (handleQrText(codes[0].rawValue)) return;
+        if (acceptDetectedQr(codes[0].rawValue)) return;
       }
-      window.requestAnimationFrame(scanLoop);
+      scheduleNativeScan();
     }).catch(function () {
-      window.requestAnimationFrame(scanLoop);
+      scheduleNativeScan();
     });
+  }
+
+  function decodeVideoWithJsQr(video) {
+    if (!hasJsQrDecoder() || !video || !video.videoWidth || !video.videoHeight) return '';
+    scanCanvas = scanCanvas || document.createElement('canvas');
+    var sourceWidth = video.videoWidth;
+    var sourceHeight = video.videoHeight;
+    var crops = [1, 0.78, 0.58];
+    for (var i = 0; i < crops.length; i++) {
+      var ratio = crops[i];
+      var cropWidth = Math.max(1, Math.round(sourceWidth * ratio));
+      var cropHeight = Math.max(1, Math.round(sourceHeight * ratio));
+      var sourceX = Math.round((sourceWidth - cropWidth) / 2);
+      var sourceY = Math.round((sourceHeight - cropHeight) / 2);
+      var scale = Math.min(1, 960 / cropWidth);
+      var width = Math.max(1, Math.round(cropWidth * scale));
+      var height = Math.max(1, Math.round(cropHeight * scale));
+      scanCanvas.width = width;
+      scanCanvas.height = height;
+      var context = scanCanvas.getContext('2d', { willReadFrequently: true });
+      context.drawImage(video, sourceX, sourceY, cropWidth, cropHeight, 0, 0, width, height);
+      var image = context.getImageData(0, 0, width, height);
+      var decoded = window.jsQR(image.data, width, height, { inversionAttempts: 'attemptBoth' });
+      if (decoded && decoded.data) return decoded.data;
+    }
+    return '';
+  }
+
+  function jsQrScanLoop() {
+    if (!scanning || !hasJsQrDecoder() || qrProcessing) return;
+    var video = $('qrVideo');
+    if (!video || video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
+      scheduleJsQrScan();
+      return;
+    }
+    try {
+      var rawValue = decodeVideoWithJsQr(video);
+      if (rawValue && acceptDetectedQr(rawValue)) return;
+    } catch (err) {}
+    scheduleJsQrScan();
   }
 
   function stopCamera() {
     scanning = false;
+    qrProcessing = false;
+    window.clearTimeout(jsQrTimer);
+    jsQrTimer = null;
     if (stream) {
       stream.getTracks().forEach(function (track) { track.stop(); });
       stream = null;

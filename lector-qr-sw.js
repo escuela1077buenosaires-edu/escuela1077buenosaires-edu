@@ -1,10 +1,11 @@
-var CACHE_NAME = 'lector-qr-1077-v8-20260728';
+var CACHE_NAME = 'lector-qr-1077-v9-20260728';
 var STATIC_FILES = [
   './lector-qr.html',
   './lector-qr.js',
   './lector-qr.webmanifest',
   './lector-qr-icon.svg',
   './styles.css',
+  './jsQR.js',
   './aie-runtime.js',
   './aie-login-redirect.js'
 ];
