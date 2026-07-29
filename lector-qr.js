@@ -423,6 +423,14 @@
     }
   }
 
+  function hasJsQrDecoder() {
+    return typeof window.jsQR === 'function';
+  }
+
+  function hasAnyQrDecoder() {
+    return !!createQrDetector() || hasJsQrDecoder();
+  }
+
   function parseQrText(text) {
     var raw = clean(text);
     if (!raw) throw new Error('QR vacio.');
@@ -710,11 +718,12 @@
       return;
     }
     var activeDetector = createQrDetector();
+    var activeDecoder = !!activeDetector || hasJsQrDecoder();
     var warnings = [];
     if (!window.isSecureContext) {
       warnings.push('La cámara del teléfono requiere HTTPS o localhost. En HTTP por IP puede quedar bloqueada.');
     }
-    if (!activeDetector) {
+    if (!activeDecoder) {
       warnings.push('Este navegador puede abrir la cámara, pero no tiene lector QR automático. Use el modo avanzado/manual o Chrome/Edge Android.');
     }
     showCameraWarning(warnings.join(' '));
@@ -729,13 +738,13 @@
       var video = $('qrVideo');
       video.srcObject = mediaStream;
       var playPromise = video.play();
-      scanning = !!activeDetector;
+      scanning = !!activeDecoder;
       scanErrorCount = 0;
-      setStatus(activeDetector
+      setStatus(activeDecoder
         ? 'Cámara activa. Apunte al QR del resumen final.'
         : 'Cámara activa, pero este navegador no decodifica QR automáticamente. Use modo manual o Chrome/Edge Android.',
-        !activeDetector);
-      if (activeDetector) {
+        !activeDecoder);
+      if (activeDecoder) {
         if (playPromise && typeof playPromise.then === 'function') {
           playPromise.then(function () { scanLoop(); }).catch(function () { scanLoop(); });
         } else {
@@ -749,7 +758,7 @@
   }
 
   function detectFrameFromCanvas(video) {
-    if (!detector || !video || !video.videoWidth || !video.videoHeight) {
+    if (!video || !video.videoWidth || !video.videoHeight) {
       return Promise.resolve([]);
     }
     try {
@@ -762,13 +771,20 @@
       scanCanvas.height = height;
       var ctx = scanCanvas.getContext('2d', { willReadFrequently: true });
       ctx.drawImage(video, 0, 0, width, height);
-      return detector.detect(scanCanvas).catch(function () { return []; });
+      if (hasJsQrDecoder()) {
+        var image = ctx.getImageData(0, 0, width, height);
+        var qr = window.jsQR(image.data, width, height, { inversionAttempts: 'attemptBoth' });
+        if (qr && qr.data) return Promise.resolve([{ rawValue: qr.data }]);
+      }
+      if (detector) return detector.detect(scanCanvas).catch(function () { return []; });
+      return Promise.resolve([]);
     } catch (err) {
       return Promise.resolve([]);
     }
   }
 
   function detectFrame(video) {
+    if (!detector) return detectFrameFromCanvas(video);
     return detector.detect(video).then(function (codes) {
       if (codes && codes.length) return codes;
       return detectFrameFromCanvas(video);
