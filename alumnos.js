@@ -104,6 +104,74 @@
     return value;
   }
 
+  function isRemoteActivityUrl(url) {
+    return /\/functions\/v1\/actividad-1077\?codigo=/.test(String(url || ''));
+  }
+
+  function showActivityLoadError(openedWindow, message) {
+    var safeMessage = text(message) || 'No se pudo abrir la actividad.';
+    if (!openedWindow || openedWindow.closed) {
+      window.alert(safeMessage);
+      return;
+    }
+    openedWindow.document.open();
+    openedWindow.document.write(
+      '<!doctype html><html lang="es"><head><meta charset="utf-8">'
+      + '<title>Actividad no disponible</title></head>'
+      + '<body style="font-family:Arial,sans-serif;padding:24px">'
+      + '<h1>Actividad no disponible</h1><p>'
+      + safeMessage.replace(/[&<>"']/g, function (character) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[character];
+      })
+      + '</p></body></html>'
+    );
+    openedWindow.document.close();
+  }
+
+  function openRemoteActivity(event, url) {
+    event.preventDefault();
+    var openedWindow = window.open('about:blank', '_blank');
+    if (!openedWindow) {
+      window.alert('El navegador bloqueo la pestaña de la actividad. Habilite las ventanas emergentes para este sitio.');
+      return;
+    }
+    openedWindow.opener = null;
+    openedWindow.document.write(
+      '<!doctype html><html lang="es"><head><meta charset="utf-8">'
+      + '<title>Abriendo actividad</title></head>'
+      + '<body style="font-family:Arial,sans-serif;padding:24px">'
+      + '<p>Abriendo actividad, espere un momento.</p></body></html>'
+    );
+    openedWindow.document.close();
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+      if (xhr.status < 200 || xhr.status >= 300 || !xhr.responseText) {
+        showActivityLoadError(openedWindow, xhr.responseText || 'La actividad no esta habilitada en este momento.');
+        return;
+      }
+      try {
+        var blob = new Blob([xhr.responseText], { type: 'text/html;charset=utf-8' });
+        var blobUrl = window.URL.createObjectURL(blob);
+        openedWindow.location.replace(blobUrl);
+        window.setTimeout(function () {
+          window.URL.revokeObjectURL(blobUrl);
+        }, 60000);
+      } catch (error) {
+        showActivityLoadError(openedWindow, 'El navegador no pudo preparar la actividad.');
+      }
+    };
+    xhr.send();
+  }
+
   function renderActivities(activities, searched) {
     var box = $('studentActivities');
     if (!box) return;
@@ -122,6 +190,11 @@
       link.href = activityUrl(activity.url);
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
+      if (isRemoteActivityUrl(link.href)) {
+        link.onclick = function (event) {
+          openRemoteActivity(event, this.href);
+        };
+      }
       var title = document.createElement('strong');
       title.textContent = activity.titulo || activity.codigo || 'Actividad';
       var meta = document.createElement('span');
