@@ -89,8 +89,17 @@
   function activityUrl(url) {
     var value = String(url || '#');
     if (value.charAt(0) === '/' && window.AIE_RUNTIME) {
-      if (!window.AIE_RUNTIME.canCallBackend(value)) return '#';
-      return window.AIE_RUNTIME.apiUrl(value);
+      if (window.AIE_RUNTIME.canCallBackend(value)) {
+        return window.AIE_RUNTIME.apiUrl(value);
+      }
+      var match = value.match(/^\/actividad\/([a-zA-Z0-9_-]{6,120})$/);
+      var config = window.AIE_RUNTIME.getConfig();
+      if (match && config.supabaseUrl) {
+        return config.supabaseUrl
+          + '/functions/v1/actividad-1077?codigo='
+          + encodeURIComponent(match[1]);
+      }
+      return '#';
     }
     return value;
   }
@@ -111,6 +120,8 @@
       var link = document.createElement('a');
       link.className = 'student-activity-card';
       link.href = activityUrl(activity.url);
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
       var title = document.createElement('strong');
       title.textContent = activity.titulo || activity.codigo || 'Actividad';
       var meta = document.createElement('span');
