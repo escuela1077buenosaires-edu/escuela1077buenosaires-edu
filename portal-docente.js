@@ -2167,12 +2167,7 @@
   }
 
   function studentPayload() {
-    var idAlumno = $('portalStudentCode') ? clean($('portalStudentCode').value) : '';
-    if (!/^\d{1,3}$/.test(idAlumno)) {
-      throw new Error('ID alumno debe tener de 1 a 3 digitos.');
-    }
     return {
-      id_alumno: idAlumno,
       nombre: $('portalStudentName') ? clean($('portalStudentName').value) : '',
       apellido: $('portalStudentLastName') ? clean($('portalStudentLastName').value) : '',
       grado: $('portalStudentGrade') ? $('portalStudentGrade').value : '',
