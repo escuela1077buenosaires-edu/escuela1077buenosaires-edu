@@ -8,6 +8,10 @@
     state: null,
     accessToken: '',
     roleContext: '',
+    drts: [],
+    drtScopeId: '',
+    drtScopeLoaded: false,
+    drtScopeLoading: false,
     actividades: [],
     activityControls: {},
     activityListAll: false,
@@ -160,6 +164,9 @@
       if (method === 'GET' && pathname === '/api/portal-docente/estado') {
         return rpc('aie_1077_portal_estado', {}, callback, authenticated);
       }
+      if (method === 'GET' && pathname === '/api/portal-docente/drts') {
+        return rpc('aie_1077_drt_listar', {}, callback, authenticated);
+      }
       if (method === 'GET' && pathname === '/api/portal-docente/actividades') {
         return rpc('aie_1077_actividades_listar', {
           p_titulo: parsed.params.get('titulo') || '',
@@ -242,7 +249,8 @@
       if (method === 'GET' && pathname === '/api/portal-docente/resultados') {
         return rpc('aie_1077_resultados_recientes', {
           p_id_alumno: parsed.params.get('alumno') || parsed.params.get('id_alumno') || '',
-          p_limite: Number(parsed.params.get('limit') || 50)
+          p_limite: Number(parsed.params.get('limit') || 50),
+          p_drt_id: parsed.params.get('drt_id') || null
         }, callback, authenticated);
       }
       if (method === 'GET' && pathname === '/api/portal-docente/estadisticas') {
@@ -256,7 +264,8 @@
           p_tipo: parsed.params.get('tipo') || '',
           p_desde: parsed.params.get('desde') || null,
           p_hasta: parsed.params.get('hasta') || null,
-          p_limite: Number(parsed.params.get('limit') || parsed.params.get('limite') || 10)
+          p_limite: Number(parsed.params.get('limit') || parsed.params.get('limite') || 10),
+          p_drt_id: parsed.params.get('drt_id') || null
         }, callback, authenticated);
       }
       if (method === 'GET' && pathname === '/api/portal-docente/alumnos-apoyo') {
@@ -270,7 +279,8 @@
           p_activo: parsed.params.get('activo') === 'true'
             ? true
             : parsed.params.get('activo') === 'false' ? false : null,
-          p_listar_todos: parsed.params.get('listar_todos') === 'true'
+          p_listar_todos: parsed.params.get('listar_todos') === 'true',
+          p_drt_id: parsed.params.get('drt_id') || null
         }, callback, authenticated);
       }
       if (method === 'POST' && pathname === '/api/portal-docente/alumnos-apoyo') {
@@ -369,6 +379,80 @@
     if (role === 'supervisora') return 'Personal de Supervisión';
     if (role === 'administrador') return 'Administrador del Sistema';
     return 'Personal docente';
+  }
+
+  function authenticatedRole(state) {
+    return normalizeRoleContext(state && state.perfil && state.perfil.rol || '');
+  }
+
+  function canSelectDrtScope(state) {
+    var role = authenticatedRole(state);
+    return role === 'administrador' || role === 'directora' || role === 'supervisora';
+  }
+
+  function effectiveDrtScopeId() {
+    var state = portal.state || {};
+    if (authenticatedRole(state) === 'drt') {
+      return clean(state.perfil && state.perfil.id || '');
+    }
+    return clean(portal.drtScopeId);
+  }
+
+  function drtScopeLabel(drt) {
+    return [clean(drt && drt.nombre), clean(drt && drt.email)].filter(Boolean).join(' | ') || 'DRT';
+  }
+
+  function renderDrtScope(state) {
+    var card = $('portalDrtScopeCard');
+    var select = $('portalDrtScopeSelect');
+    var visible = !!(state && state.autorizado && canSelectDrtScope(state));
+    setHidden(card, !visible);
+    if (!select) return;
+    var selected = portal.drtScopeId || '';
+    select.innerHTML = '';
+    var all = document.createElement('option');
+    all.value = '';
+    all.textContent = 'Todas las DRT';
+    select.appendChild(all);
+    (portal.drts || []).forEach(function (drt) {
+      var option = document.createElement('option');
+      option.value = drt.id || '';
+      option.textContent = drtScopeLabel(drt);
+      select.appendChild(option);
+    });
+    select.value = selected;
+    if (select.value !== selected) {
+      portal.drtScopeId = '';
+      select.value = '';
+    }
+    select.disabled = !visible || portal.drtScopeLoading;
+  }
+
+  function clearDrtScopedData() {
+    portal.alumnosApoyo = [];
+    portal.resultados = [];
+    portal.estadisticas = null;
+    portal.studentListAll = false;
+    renderStudents(portal.state || {}, []);
+    renderResults(portal.state || {}, []);
+    renderAnalytics(portal.state || {}, null);
+    setStudentsStatus('Seleccione filtros y presione Listar.');
+    setResultsStatus('Seleccione filtros y presione Filtrar.');
+    setAnalyticsStatus('Seleccione filtros y presione Listar.');
+  }
+
+  function loadPortalDrts() {
+    var state = portal.state || {};
+    if (!state.autorizado || portal.drtScopeLoading || portal.drtScopeLoaded) return;
+    portal.drtScopeLoading = true;
+    renderDrtScope(state);
+    api('GET', '/api/portal-docente/drts', null, function (err, data) {
+      portal.drtScopeLoading = false;
+      portal.drtScopeLoaded = !err;
+      portal.drts = err ? [] : data && data.drts || [];
+      renderDrtScope(portal.state || {});
+      if (err) setStatus(err.error || 'No se pudo cargar la lista de DRT.', true);
+    }, true);
   }
 
   function roleContextInfo(role) {
@@ -1568,7 +1652,11 @@
       return;
     }
     var filters = readResultFilters();
-    var qs = query({ alumno: filters.alumno, limit: filters.limit });
+    var qs = query({
+      alumno: filters.alumno,
+      limit: filters.limit,
+      drt_id: effectiveDrtScopeId()
+    });
     api('GET', '/api/portal-docente/resultados' + (qs ? '?' + qs : ''), null, function (err, data) {
       if (err) {
         portal.resultados = [];
@@ -1957,7 +2045,8 @@
       tipo: filters.tipo,
       desde: filters.desde,
       hasta: filters.hasta,
-      limit: filters.limit
+      limit: filters.limit,
+      drt_id: effectiveDrtScopeId()
     });
     setAnalyticsStatus('Calculando estadísticas...');
     api('GET', '/api/portal-docente/estadisticas' + (qs ? '?' + qs : ''), null, function (err, data) {
@@ -2057,7 +2146,8 @@
       turno: filters && filters.turno,
       division: filters && filters.division,
       activo: filters && filters.activo,
-      listar_todos: portal.studentListAll ? 'true' : ''
+      listar_todos: portal.studentListAll ? 'true' : '',
+      drt_id: effectiveDrtScopeId()
     });
   }
 
@@ -2078,8 +2168,8 @@
 
   function studentPayload() {
     var idAlumno = $('portalStudentCode') ? clean($('portalStudentCode').value) : '';
-    if (!/^\d{1,2}$/.test(idAlumno)) {
-      throw new Error('ID alumno debe tener 1 o 2 digitos.');
+    if (!/^\d{1,3}$/.test(idAlumno)) {
+      throw new Error('ID alumno debe tener de 1 a 3 digitos.');
     }
     return {
       id_alumno: idAlumno,
@@ -2089,7 +2179,8 @@
       division: $('portalStudentDivision') ? clean($('portalStudentDivision').value).toUpperCase() : '',
       turno: $('portalStudentShift') ? $('portalStudentShift').value : '',
       activo: $('portalStudentActive') ? $('portalStudentActive').checked : true,
-      observaciones: $('portalStudentNotes') ? clean($('portalStudentNotes').value) : ''
+      observaciones: $('portalStudentNotes') ? clean($('portalStudentNotes').value) : '',
+      drt_responsable_id: effectiveDrtScopeId()
     };
   }
 
@@ -2346,6 +2437,7 @@
     var config = state && state.configuracion || portal.config || {};
     applyPortalRoleContext(state);
     updatePortalFeatureVisibility(state);
+    renderDrtScope(state);
     renderSession(state);
     renderIndex(state);
     renderClassSession(state);
@@ -2361,6 +2453,7 @@
       return;
     }
     if (state.autorizado) {
+      loadPortalDrts();
       var currentRole = normalizeRoleContext(state.perfil && state.perfil.rol || '');
       if (portal.roleContext && currentRole && portal.roleContext !== currentRole && currentRole !== 'administrador') {
         setStatus('Sesion autorizada como ' + roleLabel(currentRole) + '. Esta entrada corresponde a ' + roleLabel(portal.roleContext) + '; se muestran solo las funcionalidades habilitadas para el perfil autenticado.');
@@ -2421,6 +2514,10 @@
 
   function logout() {
     clearToken();
+    portal.drts = [];
+    portal.drtScopeId = '';
+    portal.drtScopeLoaded = false;
+    portal.drtScopeLoading = false;
     loadPortal();
   }
 
@@ -2786,6 +2883,10 @@
       setStudentsStatus('Su perfil no tiene permiso para guardar alumnos.', true);
       return;
     }
+    if (!id && !effectiveDrtScopeId()) {
+      setStudentsStatus('Seleccione primero la DRT responsable del alumno.', true);
+      return;
+    }
     var payload;
     try {
       payload = studentPayload();
@@ -2842,6 +2943,15 @@
   function bind() {
     if ($('portalLoginGoogle')) $('portalLoginGoogle').onclick = login;
     if ($('portalLogout')) $('portalLogout').onclick = logout;
+    if ($('portalDrtScopeSelect')) {
+      $('portalDrtScopeSelect').onchange = function () {
+        portal.drtScopeId = clean(this.value);
+        clearDrtScopedData();
+        setStatus(portal.drtScopeId
+          ? 'Filtro principal aplicado a ' + clean(this.options[this.selectedIndex] && this.options[this.selectedIndex].text) + '.'
+          : 'Filtro principal aplicado a todas las DRT.');
+      };
+    }
     if ($('portalEnableIndex')) $('portalEnableIndex').onclick = function () { toggleIndex(true); };
     if ($('portalDisableIndex')) $('portalDisableIndex').onclick = function () { toggleIndex(false); };
     if ($('portalStartClassSession')) $('portalStartClassSession').onclick = startClassSession;
@@ -2921,6 +3031,10 @@
     }
     if ($('portalStudentActionNew')) {
       $('portalStudentActionNew').onclick = function () {
+        if (!effectiveDrtScopeId()) {
+          setStudentsStatus('Seleccione primero la DRT responsable del alumno.', true);
+          return;
+        }
         clearStudentForm();
         setStudentMode('alta');
         portal.studentListAll = false;

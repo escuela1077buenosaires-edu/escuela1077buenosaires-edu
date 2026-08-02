@@ -1049,6 +1049,34 @@ body {
   background: #f8fafc;
 }
 
+.admin-student-drt-scope {
+  flex: 0 0 100%;
+  display: grid;
+  grid-template-columns: minmax(300px, 560px) 1fr;
+  align-items: end;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 2px solid #7f1d1d;
+  border-radius: 8px;
+  background: #fffafb;
+}
+
+.admin-student-drt-scope label {
+  min-width: 0;
+  font-weight: 800;
+}
+
+.admin-student-drt-scope select {
+  min-height: 36px;
+}
+
+.admin-student-drt-scope p {
+  margin: 0 0 7px;
+  color: var(--muted);
+}
+
 .admin-toolbar .admin-student-filters label,
 .admin-toolbar .admin-student-filters label:first-child {
   min-width: 0;
@@ -1309,6 +1337,10 @@ body {
 
 .admin-student-form .admin-field-id_alumno {
   grid-column: span 2;
+}
+
+.admin-student-form .admin-field-drt_responsable_id {
+  grid-column: span 4;
 }
 
 .admin-student-form .admin-field-nombre,
@@ -1892,6 +1924,46 @@ body {
   background: #ecfeff;
   color: #0f4f55;
   font-weight: 800;
+}
+
+.portal-drt-scope {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.55fr);
+  gap: 16px;
+  align-items: end;
+  margin: 12px 14px 0;
+  padding: 12px 14px;
+  border: 3px solid #7f1d1d;
+  border-radius: 10px;
+  background: #fff7f7;
+}
+
+.portal-drt-scope h3,
+.portal-drt-scope p {
+  margin: 0;
+}
+
+.portal-drt-scope h3 {
+  font-size: 18px;
+}
+
+.portal-drt-scope p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.portal-drt-scope label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.portal-drt-scope select {
+  width: 100%;
+  min-height: 38px;
 }
 
 .portal-card,
@@ -3023,9 +3095,24 @@ body {
 
 .publisher-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(280px, 0.9fr);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.7fr);
+  grid-template-areas:
+    "activities activities"
+    "schools destinations";
   gap: 14px;
   padding: 14px;
+}
+
+.publisher-activities-column {
+  grid-area: activities;
+}
+
+.publisher-schools-column {
+  grid-area: schools;
+}
+
+.publisher-destinations-column {
+  grid-area: destinations;
 }
 
 .publisher-column {
@@ -3044,6 +3131,7 @@ body {
 .school-list {
   display: grid;
   gap: 8px;
+  min-width: 0;
 }
 
 .publisher-item,
@@ -3054,6 +3142,7 @@ body {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
+  min-width: 0;
 }
 
 .publisher-item label,
@@ -3069,6 +3158,74 @@ body {
 .school-item input {
   width: auto;
   margin-top: 2px;
+}
+
+.publisher-activity-fields {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1.25fr)
+    minmax(230px, 1.35fr)
+    minmax(150px, 0.8fr)
+    76px
+    76px
+    minmax(170px, 0.9fr)
+    minmax(170px, 0.9fr);
+  gap: 9px;
+  margin-top: 5px;
+  padding: 10px;
+  border: 1px solid #b9cbd1;
+  border-radius: 8px;
+  background: #f8fbfc;
+}
+
+.publisher-activity-field {
+  display: grid !important;
+  gap: 5px !important;
+  min-width: 0;
+  color: var(--muted) !important;
+  font-size: 12px !important;
+  font-weight: 700;
+}
+
+.publisher-activity-field input,
+.publisher-activity-field select {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.publisher-activity-field input[readonly] {
+  background: #edf1f3;
+  color: #58646c;
+}
+
+.publisher-field-grade select,
+.publisher-field-type select {
+  text-align: center;
+}
+
+@media (max-width: 1280px) {
+  .publisher-activity-fields {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .publisher-field-title,
+  .publisher-field-file {
+    grid-column: span 3;
+  }
+
+  .publisher-field-area {
+    grid-column: span 4;
+  }
+
+  .publisher-field-grade,
+  .publisher-field-type {
+    grid-column: span 1;
+  }
+
+  .publisher-field-date {
+    grid-column: span 3;
+  }
 }
 
 .publisher-meta,
@@ -3087,6 +3244,51 @@ body {
   color: var(--muted);
   font-size: 13px;
   font-weight: 700;
+}
+
+.publisher-action-result {
+  display: none;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f4f7f8;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.publisher-action-result.has-message {
+  display: block;
+}
+
+.publisher-action-result.is-working {
+  border-color: #9bb8c4;
+  background: #edf5f7;
+  color: #285969;
+}
+
+.publisher-action-result.is-success {
+  border-color: #72b584;
+  background: #e5f3e9;
+  color: var(--ok);
+}
+
+.publisher-action-result.is-warning,
+.publisher-action-result.is-error {
+  border-color: #d99898;
+  background: #f8e4e4;
+  color: var(--danger);
+}
+
+.publisher-pending-result {
+  margin: 0 0 12px;
+}
+
+.publisher-result-note {
+  margin-top: 5px;
+  color: var(--danger);
+  font-size: 11px;
+  line-height: 1.25;
 }
 
 .publisher-tracking,
@@ -3879,6 +4081,23 @@ button:disabled {
 
   .publisher-source-controls {
     grid-template-columns: 1fr;
+  }
+
+  .publisher-activity-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-drt-scope {
+    grid-template-columns: 1fr;
+  }
+
+  .publisher-field-title,
+  .publisher-field-file,
+  .publisher-field-area,
+  .publisher-field-grade,
+  .publisher-field-type,
+  .publisher-field-date {
+    grid-column: auto;
   }
 
   .portal-activity-controls {

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Portal funcional del personal docente - Escuela 1077</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css?v=admin-20260725-05">
+  <link rel="stylesheet" href="styles.css?v=admin-20260802-01">
 </head>
 <body>
   <header class="topbar">
@@ -31,6 +31,19 @@
 
       <div id="teacherPortalStatus" class="admin-status">Cargando portal docente.</div>
       <div id="portalPermissionSummary" class="portal-permission-summary hidden"></div>
+
+      <section id="portalDrtScopeCard" class="portal-drt-scope hidden" aria-label="Filtro principal por DRT">
+        <div>
+          <h3>Grupo de alumnos a cargo de</h3>
+          <p>La DRT elegida se aplica antes que los filtros de alumnos, resultados y estadísticas.</p>
+        </div>
+        <label>
+          Docente DRT
+          <select id="portalDrtScopeSelect">
+            <option value="">Todas las DRT</option>
+          </select>
+        </label>
+      </section>
 
       <div class="portal-grid">
         <section class="portal-card portal-feature-block portal-session-block">
@@ -599,7 +612,7 @@
           <input type="hidden" id="portalStudentId">
           <label>
             ID alumno
-            <input id="portalStudentCode" type="text" inputmode="numeric" maxlength="2" pattern="[0-9]{1,2}" required>
+            <input id="portalStudentCode" type="text" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" required>
           </label>
           <label>
             Nombre
@@ -677,7 +690,7 @@
 
   <script src="aie-public-config.js"></script>
   <script src="aie-runtime.js"></script>
-  <script src="portal-docente.js?v=portal-20260725-04"></script>
+  <script src="portal-docente.js?v=portal-20260802-01"></script>
   <script src="portal-docente-fixes.js?v=admin-20260720-03"></script>
   <script src="aie-login-redirect.js"></script>
 </body>
