@@ -1,6 +1,6 @@
 {
   "escuelaId": "1077",
-  "generadoEn": "2026-08-02T03:00:18.608Z",
+  "generadoEn": "2026-08-02T22:59:51.500Z",
   "githubPagesBasePath": "/escuela1077buenosaires-edu/",
   "backendBaseUrlConfigurado": false,
   "supabasePublicConfigConfigurada": true,
@@ -28,8 +28,8 @@
     },
     {
       "nombre": "aie-public-config.js",
-      "bytes": 446,
-      "sha256": "dce9857e98b54456ca06c940a89f9682f3b5aa541028a4b54a1b1c0733720759"
+      "bytes": 468,
+      "sha256": "72968cf75be3b27765cf4e57e8f39f6878a5925c325e0560482be0bdc6d5b1d9"
     },
     {
       "nombre": "aie-runtime.js",
@@ -48,8 +48,8 @@
     },
     {
       "nombre": "index.html",
-      "bytes": 6628,
-      "sha256": "5b71613af9afaa28c0fcbd44a11f03729b53450c6d3a62c888bbbb5949c9cf13"
+      "bytes": 7639,
+      "sha256": "7257951e67812291f17d7dd2daa2c940fe91ebfe9362025b6ad0dcbb00a22ac6"
     },
     {
       "nombre": "jsQR.LICENSE",
@@ -89,7 +89,7 @@
     {
       "nombre": "manifest-publicacion.json",
       "bytes": 3488,
-      "sha256": "339d9209567a8d1f2156ff4a4f28b40395ac5960f78fa52608d230cf4d3332fc"
+      "sha256": "34f86472ac74b658126c0d401ec364cb80dd100098bf16c32b161ca2ec4c4460"
     },
     {
       "nombre": "portal-docente-fixes.js",
@@ -98,18 +98,18 @@
     },
     {
       "nombre": "portal-docente.html",
-      "bytes": 32218,
-      "sha256": "c5fa727fed7ce1451108e17393f060faf585b1ffd5dffa3e9b1305f7b01adda4"
+      "bytes": 32709,
+      "sha256": "febdaeac056ee9cf9f1930474f886034048d850f7a5f4f80a6e1bf15669d2646"
     },
     {
       "nombre": "portal-docente.js",
-      "bytes": 133426,
-      "sha256": "a98adf3c3d7dfd35d5c2b9dd4da2a162106b12f6960dd5b355e012f2918aff5c"
+      "bytes": 140285,
+      "sha256": "ffacf221ad8cd86f66aa978c18a88aceb18f9bc44b5be9652665f4119e69cef9"
     },
     {
       "nombre": "styles.css",
-      "bytes": 75488,
-      "sha256": "a3596146b60166c1bcd136dc1e84e7b12cd211ee21d68b410c2f2df74a2b3818"
+      "bytes": 80549,
+      "sha256": "6cd9b272ba1913f5a5e7cf679c847c9d8e7a3b54ba1e213ad1fd83715ef9b19b"
     }
   ]
 }

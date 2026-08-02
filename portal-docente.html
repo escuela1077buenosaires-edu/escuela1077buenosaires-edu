@@ -32,6 +32,18 @@
       <div id="teacherPortalStatus" class="admin-status">Cargando portal docente.</div>
       <div id="portalPermissionSummary" class="portal-permission-summary hidden"></div>
 
+      <section id="portalRoleSelectorCard" class="portal-role-selector hidden" aria-label="Función activa en esta sesión">
+        <div>
+          <h3>Función activa</h3>
+          <p>Si posee más de una función, elija con cuál trabajará durante esta sesión.</p>
+        </div>
+        <label>
+          Función y turno
+          <select id="portalRoleSelect"></select>
+        </label>
+        <button type="button" id="portalRoleApply">Aplicar función</button>
+      </section>
+
       <section id="portalDrtScopeCard" class="portal-drt-scope hidden" aria-label="Filtro principal por DRT">
         <div>
           <h3>Grupo de alumnos a cargo de</h3>

@@ -9,6 +9,9 @@
   <link rel="stylesheet" href="styles.css">
   <style>
     .hub-main { width: min(1120px, calc(100% - 28px)); }
+    .hub-cover { display: none; min-height: 150px; max-height: 230px; overflow: hidden; border-radius: 18px; border: 1px solid var(--line); background: #edf4f5; box-shadow: 0 10px 22px rgba(20,25,30,.07); }
+    .hub-cover.show { display: block; }
+    .hub-cover img { display: block; width: 100%; height: clamp(150px, 24vw, 230px); object-fit: cover; object-position: center; }
     .hub-hero { overflow: hidden; position: relative; }
     .hub-hero:after { content: ""; position: absolute; right: -80px; top: -90px; width: 250px; height: 250px; border-radius: 50%; background: rgba(23, 111, 115, 0.12); }
     .hub-eyebrow { display: inline-flex; gap: 8px; align-items: center; padding: 7px 10px; border-radius: 999px; background: #e7f3f3; color: var(--accent); font-weight: 800; text-transform: uppercase; letter-spacing: .02em; }
@@ -27,6 +30,7 @@
 </head>
 <body class="student-index-body">
   <main class="student-index hub-main">
+    <div id="hubCover" class="hub-cover" aria-hidden="true"><img id="hubCoverImage" alt="Imagen educativa de la Escuela 1077"></div>
     <section class="student-index-hero hub-hero">
       <div class="hub-eyebrow">Escuela 1077</div>
       <h1>Portal funcional del personal docente - Escuela 1077 "Provincia de Buenos Aires"</h1>
@@ -58,6 +62,14 @@
         box.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
       var config = window.AIE_PUBLIC_CONFIG || {};
+      var coverPath = config.imagenSuperior || "";
+      var cover = document.getElementById("hubCover");
+      var coverImage = document.getElementById("hubCoverImage");
+      if (coverPath && cover && coverImage) {
+        coverImage.onload = function () { cover.classList.add("show"); cover.setAttribute("aria-hidden", "false"); };
+        coverImage.onerror = function () { cover.classList.remove("show"); cover.setAttribute("aria-hidden", "true"); };
+        coverImage.src = coverPath;
+      }
       var solicitudUrl = config.solicitudCreacionUrl || "";
       var solicitudCards = document.querySelectorAll("[data-solicitud-creacion]");
       for (var s = 0; s < solicitudCards.length; s++) {

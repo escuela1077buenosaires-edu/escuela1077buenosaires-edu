@@ -8,6 +8,12 @@
     state: null,
     accessToken: '',
     roleContext: '',
+    roles: [],
+    activeRoleId: '',
+    rolesLoaded: false,
+    rolesLoading: false,
+    roleAutoSelectionAttempted: false,
+    pendingLoginRegistration: false,
     drts: [],
     drtScopeId: '',
     drtScopeLoaded: false,
@@ -163,6 +169,14 @@
       }
       if (method === 'GET' && pathname === '/api/portal-docente/estado') {
         return rpc('aie_1077_portal_estado', {}, callback, authenticated);
+      }
+      if (method === 'GET' && pathname === '/api/portal-docente/roles') {
+        return rpc('aie_1077_roles_disponibles', {}, callback, authenticated);
+      }
+      if (method === 'POST' && pathname === '/api/portal-docente/rol-activo') {
+        return rpc('aie_1077_seleccionar_rol', {
+          p_perfil_rol_id: data && (data.perfilRolId || data.perfil_rol_id) || null
+        }, callback, authenticated);
       }
       if (method === 'GET' && pathname === '/api/portal-docente/drts') {
         return rpc('aie_1077_drt_listar', {}, callback, authenticated);
@@ -359,6 +373,7 @@
     var role = clean(value).toLowerCase();
     if (role === 'directivo' || role === 'directora' || role === 'director') return 'directora';
     if (role === 'supervision' || role === 'supervisor' || role === 'supervisora') return 'supervisora';
+    if (role === 'docente' || role === 'docente_grado' || role === 'grado') return 'docente';
     if (role === 'drt') return 'drt';
     if (role === 'administrador') return 'administrador';
     return '';
@@ -375,6 +390,7 @@
   function roleLabel(role) {
     role = normalizeRoleContext(role);
     if (role === 'drt') return 'Docente DRT';
+    if (role === 'docente') return 'Docente de Grado';
     if (role === 'directora') return 'Personal Directivo';
     if (role === 'supervisora') return 'Personal de Supervisión';
     if (role === 'administrador') return 'Administrador del Sistema';
@@ -428,6 +444,136 @@
     select.disabled = !visible || portal.drtScopeLoading;
   }
 
+  function shiftLabel(value) {
+    var shift = clean(value).toLowerCase();
+    if (shift === 'manana') return 'Mañana';
+    if (shift === 'tarde') return 'Tarde';
+    if (shift === 'vespertino') return 'Vespertino';
+    return 'Sin turno específico';
+  }
+
+  function roleAssignmentLabel(assignment) {
+    return roleLabel(assignment && assignment.rol) + ' | ' + shiftLabel(assignment && assignment.turno);
+  }
+
+  function renderRoleSelector(state) {
+    var card = $('portalRoleSelectorCard');
+    var select = $('portalRoleSelect');
+    var apply = $('portalRoleApply');
+    var visible = !!portal.accessToken && (
+      portal.rolesLoading || (portal.roles || []).length > 0 || !!(state && state.autorizado && state.perfil)
+    );
+    setHidden(card, !visible);
+    if (!select || !apply) return;
+
+    select.innerHTML = '';
+    if (portal.rolesLoading) {
+      var loading = document.createElement('option');
+      loading.value = '';
+      loading.textContent = 'Cargando funciones...';
+      select.appendChild(loading);
+    } else {
+      (portal.roles || []).forEach(function (assignment) {
+        var option = document.createElement('option');
+        option.value = assignment.id || '';
+        option.textContent = roleAssignmentLabel(assignment) + (assignment.esPrincipal === true ? ' | Principal' : '');
+        option.disabled = assignment.disponibleAhora !== true;
+        if (option.disabled && assignment.detalleHorario) {
+          option.textContent += ' | Fuera de horario';
+        }
+        select.appendChild(option);
+      });
+    }
+
+    select.value = portal.activeRoleId || '';
+    if (!select.value && select.options.length) select.selectedIndex = 0;
+    select.disabled = !visible || portal.rolesLoading || !(portal.roles || []).length;
+    apply.disabled = select.disabled || select.value === portal.activeRoleId;
+  }
+
+  function clearRoleScopedData() {
+    portal.drts = [];
+    portal.drtScopeId = '';
+    portal.drtScopeLoaded = false;
+    portal.drtScopeLoading = false;
+    portal.actividades = [];
+    portal.activityControls = {};
+    portal.alumnosApoyo = [];
+    portal.actividadesTerceros = [];
+    portal.resultados = [];
+    portal.estadisticas = null;
+  }
+
+  function applyActiveRole(perfilRolId, automatic, onFailure) {
+    var assignment = (portal.roles || []).filter(function (item) {
+      return item.id === perfilRolId;
+    })[0];
+    if (!assignment || assignment.disponibleAhora !== true || perfilRolId === portal.activeRoleId) return;
+
+    setStatus('Aplicando función para esta sesión');
+    api('POST', '/api/portal-docente/rol-activo', { perfilRolId: perfilRolId }, function (err) {
+      if (err) {
+        setStatus(err.error || 'No se pudo aplicar la función seleccionada.', true);
+        renderRoleSelector(portal.state || {});
+        if (typeof onFailure === 'function') onFailure();
+        return;
+      }
+      portal.activeRoleId = perfilRolId;
+      portal.roleContext = normalizeRoleContext(assignment.rol);
+      var store = storage();
+      if (store && portal.roleContext) store.setItem(roleContextKey, portal.roleContext);
+      clearRoleScopedData();
+      portal.rolesLoaded = false;
+      portal.rolesLoading = false;
+      if (!automatic) portal.roleAutoSelectionAttempted = true;
+      loadPortal();
+    }, true);
+  }
+
+  function loadAvailableRoles(done) {
+    var state = portal.state || {};
+    var completed = typeof done === 'function' ? done : function () {};
+    if (!portal.accessToken) {
+      completed();
+      return;
+    }
+    if (portal.rolesLoaded) {
+      renderRoleSelector(state);
+      completed();
+      return;
+    }
+    if (portal.rolesLoading) {
+      window.setTimeout(function () { loadAvailableRoles(done); }, 50);
+      return;
+    }
+    portal.rolesLoading = true;
+    renderRoleSelector(state);
+    api('GET', '/api/portal-docente/roles', null, function (err, data) {
+      portal.rolesLoading = false;
+      portal.rolesLoaded = !err;
+      portal.roles = err ? [] : data && data.roles || [];
+      portal.activeRoleId = err ? '' : clean(data && data.rolActivoId || '');
+      renderRoleSelector(portal.state || {});
+      if (err) {
+        setStatus(err.error || 'No se pudieron cargar las funciones asignadas.', true);
+        completed();
+        return;
+      }
+
+      if (!portal.roleAutoSelectionAttempted && portal.roleContext) {
+        portal.roleAutoSelectionAttempted = true;
+        var target = portal.roles.filter(function (assignment) {
+          return normalizeRoleContext(assignment.rol) === portal.roleContext && assignment.disponibleAhora === true;
+        })[0];
+        if (target && target.id !== portal.activeRoleId) {
+          applyActiveRole(target.id, true, completed);
+          return;
+        }
+      }
+      completed();
+    }, true);
+  }
+
   function clearDrtScopedData() {
     portal.alumnosApoyo = [];
     portal.resultados = [];
@@ -463,6 +609,12 @@
         subtitle: 'La Docente DRT debe iniciar sesión con Google. Los bloques visibles dependen de los permisos asignados por el AIE.'
       };
     }
+    if (role === 'docente') {
+      return {
+        heading: 'Portal funcional - Docente de Grado',
+        subtitle: 'La Docente de Grado debe iniciar sesión con Google. Los bloques visibles dependen de los permisos asignados por el AIE.'
+      };
+    }
     if (role === 'directora') {
       return {
         heading: 'Portal funcional - Personal Directivo',
@@ -494,7 +646,9 @@
   }
 
   function applyPortalRoleContext(state) {
-    var role = portal.roleContext || normalizeRoleContext(state && state.perfil && state.perfil.rol || '');
+    var role = state && state.autorizado
+      ? normalizeRoleContext(state.perfil && state.perfil.rol || '')
+      : portal.roleContext || normalizeRoleContext(state && state.perfil && state.perfil.rol || '');
     var info = roleContextInfo(role);
     var heading = $('teacherPortalHeading');
     var subtitle = $('teacherPortalSubtitle');
@@ -512,6 +666,7 @@
     var token = params.get('access_token') || '';
     if (!token) return false;
     portal.accessToken = token;
+    portal.pendingLoginRegistration = true;
     var store = storage();
     if (store) store.setItem(sessionKey, token);
     if (window.history && window.history.replaceState) {
@@ -791,7 +946,7 @@
       var name = document.createElement('strong');
       name.textContent = state.perfil.nombre || state.perfil.email;
       var detail = document.createElement('span');
-      detail.textContent = state.perfil.email + ' | ' + state.perfil.rol;
+      detail.textContent = state.perfil.email + ' | ' + roleLabel(state.perfil.rol);
       profile.appendChild(name);
       profile.appendChild(detail);
       box.appendChild(profile);
@@ -2432,6 +2587,7 @@
     var config = state && state.configuracion || portal.config || {};
     applyPortalRoleContext(state);
     updatePortalFeatureVisibility(state);
+    renderRoleSelector(state);
     renderDrtScope(state);
     renderSession(state);
     renderIndex(state);
@@ -2466,7 +2622,7 @@
 
   function loadPortal() {
     setStatus('Cargando portal');
-    var tokenCaptured = captureTokenFromHash();
+    captureTokenFromHash();
     loadStoredToken();
     api('GET', '/api/portal-docente/config', null, function (configErr, configData) {
       if (configErr) {
@@ -2474,27 +2630,36 @@
         return;
       }
       portal.config = configData;
-      if (tokenCaptured && portal.accessToken) {
-        api('POST', '/api/portal-docente/sesion', {}, function (sessionErr) {
-          if (sessionErr) {
-            setStatus(sessionErr.error || 'No se pudo registrar el acceso del personal.', true);
+      function readState() {
+        api('GET', '/api/portal-docente/estado', null, function (stateErr, stateData) {
+          if (stateErr) {
+            renderState({
+              ok: false,
+              configuracion: configData,
+              control: {},
+              actividades: [],
+              accesosRecientes: [],
+              error: stateErr.error || 'No se pudo leer estado del portal.'
+            });
+            return;
           }
+          renderState(stateData);
         }, true);
       }
-      api('GET', '/api/portal-docente/estado', null, function (stateErr, stateData) {
-        if (stateErr) {
-          renderState({
-            ok: false,
-            configuracion: configData,
-            control: {},
-            actividades: [],
-            accesosRecientes: [],
-            error: stateErr.error || 'No se pudo leer estado del portal.'
-          });
+
+      loadAvailableRoles(function () {
+        if (portal.pendingLoginRegistration && portal.accessToken) {
+          api('POST', '/api/portal-docente/sesion', {}, function (sessionErr) {
+            portal.pendingLoginRegistration = false;
+            if (sessionErr) {
+              setStatus(sessionErr.error || 'No se pudo registrar el acceso del personal.', true);
+            }
+            readState();
+          }, true);
           return;
         }
-        renderState(stateData);
-      }, true);
+        readState();
+      });
     });
   }
 
@@ -2509,6 +2674,12 @@
 
   function logout() {
     clearToken();
+    portal.roles = [];
+    portal.activeRoleId = '';
+    portal.rolesLoaded = false;
+    portal.rolesLoading = false;
+    portal.roleAutoSelectionAttempted = false;
+    portal.pendingLoginRegistration = false;
     portal.drts = [];
     portal.drtScopeId = '';
     portal.drtScopeLoaded = false;
@@ -2938,6 +3109,18 @@
   function bind() {
     if ($('portalLoginGoogle')) $('portalLoginGoogle').onclick = login;
     if ($('portalLogout')) $('portalLogout').onclick = logout;
+    if ($('portalRoleSelect')) {
+      $('portalRoleSelect').onchange = function () {
+        var apply = $('portalRoleApply');
+        if (apply) apply.disabled = !this.value || this.value === portal.activeRoleId;
+      };
+    }
+    if ($('portalRoleApply')) {
+      $('portalRoleApply').onclick = function () {
+        var select = $('portalRoleSelect');
+        if (select && select.value) applyActiveRole(select.value, false);
+      };
+    }
     if ($('portalDrtScopeSelect')) {
       $('portalDrtScopeSelect').onchange = function () {
         portal.drtScopeId = clean(this.value);
