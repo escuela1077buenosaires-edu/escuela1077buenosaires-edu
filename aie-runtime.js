@@ -106,7 +106,7 @@
         backendListo: ready,
         sesionesAieObligatorias: false
       },
-      rolesPermitidos: ['administrador', 'drt', 'directora', 'supervisora'],
+      rolesPermitidos: ['administrador', 'drt', 'docente', 'directora', 'supervisora'],
       bloqueantes: ready ? [] : [supabaseUnavailableMessage()]
     };
   }
