@@ -1,4 +1,4 @@
-var CACHE_NAME = 'aie-pages-1077-v35';
+var CACHE_NAME = 'aie-pages-1077-v36';
 var STATIC_FILES = [
   './',
   './index.html',
@@ -7,6 +7,8 @@ var STATIC_FILES = [
   './portal-docente.html',
   './portal-docente.js',
   './portal-docente-fixes.js',
+  './solicitud-actividad.html',
+  './solicitud-actividad.js',
   './aie-login-redirect.js',
   './alumnos.html',
   './alumnos.js',

@@ -7,7 +7,8 @@ Contenido:
 - alumnos.html: indice publico de actividades habilitadas.
 - aie-public-config.js: configuracion publica sin secretos.
 - aie-login-redirect.js: redireccion opcional a login Google desde tarjetas protegidas.
-- Solicitud Creacion de Actividades: tarjeta conectable a Apps Script mediante AIE_SOLICITUD_CREACION_URL_1077.
+- solicitud-actividad.html: formulario publico autenticado con Google.
+- solicitudes-1077: puente seguro entre Supabase Auth y el backend Apps Script.
 - aie-hub.webmanifest y aie-hub-sw.js: instalacion/cache basico del panel central.
 
 Este paquete no incluye service role, tokens, contrasenas ni el administrador local.

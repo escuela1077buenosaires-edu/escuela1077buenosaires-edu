@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solicitud de Creación de Actividades - Escuela 1077</title>
+  <meta name="theme-color" content="#176f73">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --request-accent: #176f73;
+      --request-accent-dark: #0f5558;
+      --request-ok: #2c7a42;
+      --request-warn: #9f5b13;
+      --request-danger: #8b2f2f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #eaf3f3, #f8fafc);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 15px;
+    }
+    .request-main {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 24px 0;
+      display: grid;
+      gap: 16px;
+    }
+    .request-hero,
+    .request-panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(20, 25, 30, .08);
+    }
+    .request-hero {
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .request-hero::after {
+      content: "";
+      position: absolute;
+      right: -80px;
+      top: -90px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: rgba(23, 111, 115, .12);
+    }
+    .request-eyebrow {
+      display: inline-flex;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #e7f3f3;
+      color: var(--request-accent);
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .request-hero h1 {
+      margin: 10px 0 6px;
+      font-size: clamp(30px, 5vw, 44px);
+      line-height: 1.05;
+    }
+    .request-hero p,
+    .request-panel p { margin: 0; color: var(--muted); line-height: 1.35; }
+    .request-status {
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #f8fafc;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    .request-status.ok { background: #e5f3e9; color: var(--request-ok); }
+    .request-status.warn { background: #fff3df; color: var(--request-warn); }
+    .request-status.error { background: #f7e5e5; color: var(--request-danger); }
+    .request-panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .request-panel-head h2 { margin: 0 0 3px; font-size: 20px; }
+    .request-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+    .request-button {
+      min-height: 42px;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      background: var(--request-accent);
+      color: #fff;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .request-button:hover { background: var(--request-accent-dark); }
+    .request-button.secondary { background: #e6ebee; color: var(--ink); }
+    .request-button:disabled { opacity: .55; cursor: not-allowed; }
+    .request-session { padding: 16px; display: grid; gap: 12px; }
+    .request-form { display: grid; gap: 12px; padding: 16px; }
+    .request-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+    .request-form label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .request-form input,
+    .request-form select,
+    .request-form textarea {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 10px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+    }
+    .request-form textarea { min-height: 96px; resize: vertical; }
+    .request-form fieldset:disabled { opacity: .62; }
+    .request-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+    .request-span-2 { grid-column: span 2; }
+    .request-span-4 { grid-column: span 4; }
+    .request-span-6 { grid-column: span 6; }
+    .request-span-12 { grid-column: 1 / -1; }
+    .request-help { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .request-field-title { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    .request-table-wrap { overflow: auto; padding: 0 16px 16px; }
+    .request-table { width: 100%; border-collapse: collapse; }
+    .request-table th,
+    .request-table td {
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    .request-table th {
+      background: #eef2f5;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    @media (max-width: 840px) {
+      .request-grid { grid-template-columns: 1fr; }
+      .request-span-2,
+      .request-span-4,
+      .request-span-6,
+      .request-span-12 { grid-column: 1 / -1; }
+      .request-panel-head { display: grid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="request-main">
+    <section class="request-hero">
+      <span class="request-eyebrow">Escuela 1077</span>
+      <h1>Solicitud de Creación de Actividades</h1>
+      <p>Formulario para que DRT y docentes de grado indiquen la necesidad pedagógica. El AIE revisará la configuración técnica antes de generar la actividad.</p>
+    </section>
+
+    <div id="requestStatus" class="request-status" role="status" aria-live="polite">Comprobando sesión Google.</div>
+
+    <section class="request-panel">
+      <div class="request-panel-head">
+        <div>
+          <h2>Sesión</h2>
+          <p>Debe ingresar con una cuenta Google para registrar y consultar solicitudes.</p>
+        </div>
+      </div>
+      <div class="request-session">
+        <strong id="requestSessionText">Sin sesión iniciada.</strong>
+        <div class="request-actions">
+          <button type="button" class="request-button" id="solicitudLoginGoogle">Iniciar sesión con Google</button>
+          <button type="button" class="request-button secondary" id="solicitudLogoutGoogle" disabled>Cerrar sesión</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="request-panel">
+      <div class="request-panel-head">
+        <div>
+          <h2>Nueva solicitud</h2>
+          <p>Complete la necesidad pedagógica tal como deberá interpretarse en el generador local.</p>
+        </div>
+      </div>
+      <form id="requestForm" class="request-form">
+        <fieldset id="requestFields" class="request-fields" disabled>
+          <div class="request-grid">
+            <label class="request-span-4">
+              <span class="request-field-title">Correo Gmail docente <span class="request-help">Se completa desde la sesión Google.</span></span>
+              <input name="correoDocente" type="email" autocomplete="email" readonly>
+            </label>
+            <label class="request-span-4">
+              Apellido y nombres
+              <input name="docente" type="text" autocomplete="name" required>
+            </label>
+            <label class="request-span-2">
+              Función
+              <select name="funcionSolicitante" required>
+                <option value="drt">DRT</option>
+                <option value="docente_grado">Docente de grado</option>
+              </select>
+            </label>
+            <label class="request-span-2">
+              Turno
+              <select name="turnoSolicitud" required>
+                <option value="manana">Mañana</option>
+                <option value="tarde">Tarde</option>
+                <option value="vespertino">Vespertino</option>
+              </select>
+            </label>
+
+            <label class="request-span-2">
+              Grado
+              <select name="grado" required></select>
+            </label>
+            <label class="request-span-4">
+              Área
+              <select name="area" required></select>
+            </label>
+            <label class="request-span-6">
+              Tema solicitado
+              <input name="tema" type="text" required placeholder="Ej.: sustantivos y adjetivos, fracciones equivalentes">
+            </label>
+
+            <label class="request-span-12">
+              Requisitos didácticos de la actividad
+              <textarea name="requisitosDidacticos" placeholder="Opcional. Ej.: clasificar palabras, usar un texto breve, arrastrar respuestas, incluir ejemplos."></textarea>
+            </label>
+
+            <label class="request-span-12">
+              Observaciones docentes
+              <input name="observacionesDocente" type="text" placeholder="Opcional">
+            </label>
+
+            <label class="request-span-12">
+              Texto base proporcionado por la docente
+              <span class="request-help">Pegue el texto específico que desee utilizar; de lo contrario, se utilizarán modelos avanzados de IA para generarlo. Se sugiere no utilizar modelos de IA precarios o gratuitos para generar el texto.</span>
+              <textarea name="textoBaseDocente" maxlength="5200" placeholder="Opcional. Máximo aproximado: 700 palabras."></textarea>
+              <span id="requestWordHelp" class="request-help">0 / 700 palabras.</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="request-actions">
+          <button type="button" class="request-button secondary" id="requestReload" disabled>Actualizar mis solicitudes</button>
+          <button type="submit" class="request-button" id="requestSubmit" disabled>Enviar solicitud</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="request-panel">
+      <div class="request-panel-head">
+        <div>
+          <h2>Mis últimas solicitudes</h2>
+          <p>Solo se muestran las solicitudes correspondientes a la cuenta Google autenticada.</p>
+        </div>
+      </div>
+      <div class="request-table-wrap">
+        <table class="request-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th>Función</th>
+              <th>Grado</th>
+              <th>Área</th>
+              <th>Tema</th>
+            </tr>
+          </thead>
+          <tbody id="requestRows">
+            <tr><td colspan="6">Inicie sesión para consultar sus solicitudes.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="aie-public-config.js"></script>
+  <script src="aie-runtime.js"></script>
+  <script src="solicitud-actividad.js"></script>
+  <script src="aie-login-redirect.js"></script>
+</body>
+</html>

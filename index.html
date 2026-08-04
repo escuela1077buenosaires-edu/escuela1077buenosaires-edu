@@ -39,7 +39,7 @@
     <section class="student-index-panel">
       <div id="hubNotice" class="hub-notice" role="status" aria-live="polite"></div>
       <div class="hub-grid">
-        <a class="hub-card pending" href="#" data-solicitud-creacion="true" data-notice="Solicitud de Creación de Actividades: el acceso todavía no está disponible."><div class="hub-icon">AB</div><small>Con login Google</small><strong>Solicitud de Creación de Actividades</strong><span>Pedidos docentes de nuevas actividades educativas.</span></a>
+        <a class="hub-card" href="solicitud-actividad.html?login=1"><div class="hub-icon">AB</div><small>Con login Google</small><strong>Solicitud de Creación de Actividades</strong><span>Pedidos docentes de nuevas actividades educativas.</span></a>
         <a class="hub-card" href="portal-docente.html?rol=drt&login=1"><div class="hub-icon">DRT</div><small>Con login Google</small><strong>Docentes DRT</strong><span>Habilitar indice, actividades, gestionar alumnos de apoyo y consultar resultados.</span></a>
         <a class="hub-card" href="portal-docente.html?rol=directora&login=1"><div class="hub-icon">DIR</div><small>Con login Google</small><strong>Personal Directivo</strong><span>Habilitar o cerrar el indice, administrar disponibilidad y ver resultados.</span></a>
         <a class="hub-card" href="portal-docente.html?rol=supervisora&login=1"><div class="hub-icon">SUP</div><small>Con login Google</small><strong>Personal de Supervision</strong><span>Acceso autorizado para seguimiento, consulta de resultados y control del indice.</span></a>
@@ -68,17 +68,6 @@
         coverImage.onload = function () { cover.classList.add("show"); cover.setAttribute("aria-hidden", "false"); };
         coverImage.onerror = function () { cover.classList.remove("show"); cover.setAttribute("aria-hidden", "true"); };
         coverImage.src = coverPath;
-      }
-      var solicitudUrl = config.solicitudCreacionUrl || "";
-      var solicitudCards = document.querySelectorAll("[data-solicitud-creacion]");
-      for (var s = 0; s < solicitudCards.length; s++) {
-        if (solicitudUrl) {
-          solicitudCards[s].href = solicitudUrl;
-          solicitudCards[s].target = "_blank";
-          solicitudCards[s].rel = "noopener";
-          solicitudCards[s].classList.remove("pending");
-          solicitudCards[s].removeAttribute("data-notice");
-        }
       }
       var blocked = document.querySelectorAll("[data-notice]");
       for (var i = 0; i < blocked.length; i++) {

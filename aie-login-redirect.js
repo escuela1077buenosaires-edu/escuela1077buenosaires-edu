@@ -22,6 +22,9 @@
     if (document.getElementById('qrLoginGoogle')) {
       return { buttonId: 'qrLoginGoogle', sessionKey: 'aieQr1077AccessToken' };
     }
+    if (document.getElementById('solicitudLoginGoogle')) {
+      return { buttonId: 'solicitudLoginGoogle', sessionKey: 'aieSolicitud1077AccessToken' };
+    }
     return null;
   }
 
