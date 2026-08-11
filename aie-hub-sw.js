@@ -1,4 +1,4 @@
-var CACHE_NAME = 'aie-pages-1077-v36';
+var CACHE_NAME = 'aie-pages-1077-v37';
 var STATIC_FILES = [
   './',
   './index.html',
@@ -47,12 +47,22 @@ self.addEventListener('activate', function (event) {
 
 self.addEventListener('fetch', function (event) {
   var url = new URL(event.request.url);
-  if (event.request.method !== 'GET' || url.pathname.indexOf('/api/') >= 0) {
+  if (event.request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.indexOf('/api/') >= 0) {
     return;
   }
   event.respondWith(
-    caches.match(event.request).then(function (cached) {
-      return cached || fetch(event.request);
+    fetch(event.request).then(function (response) {
+      if (response && response.ok) {
+        var copy = response.clone();
+        caches.open(CACHE_NAME).then(function (cache) {
+          cache.put(event.request, copy);
+        });
+      }
+      return response;
+    }).catch(function () {
+      return caches.match(event.request, { ignoreSearch: true }).then(function (cached) {
+        return cached || caches.match(event.request);
+      });
     })
   );
 });
