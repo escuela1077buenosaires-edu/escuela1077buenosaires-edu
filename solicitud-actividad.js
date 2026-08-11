@@ -3,6 +3,7 @@
   var state = {
     accessToken: '',
     email: '',
+    docente: null,
     submitting: false
   };
 
@@ -54,6 +55,7 @@
   function clearToken() {
     state.accessToken = '';
     state.email = '';
+    state.docente = null;
     var store = storage();
     if (store) store.removeItem(SESSION_KEY);
   }
@@ -107,18 +109,87 @@
     return item;
   }
 
+  function blankOption() {
+    var item = option('', '', true);
+    item.disabled = true;
+    return item;
+  }
+
   function fillOptions(options) {
     var form = $('requestForm');
     var grade = form.elements.grado;
     var area = form.elements.area;
     grade.textContent = '';
     area.textContent = '';
+    grade.appendChild(blankOption());
+    area.appendChild(blankOption());
     (options.grados || []).forEach(function (item) {
-      grade.appendChild(option(item, item, item === '4'));
+      grade.appendChild(option(item, item));
     });
     (options.areas || []).forEach(function (item) {
       area.appendChild(option(item, item));
     });
+  }
+
+  function functionLabel(value) {
+    return value === 'drt' ? 'DRT' : value === 'docente_grado' ? 'Docente de grado' : value;
+  }
+
+  function shiftLabel(value) {
+    return value === 'manana' ? 'Mañana' : value === 'tarde' ? 'Tarde' : value === 'vespertino' ? 'Vespertino' : value;
+  }
+
+  function fillShifts() {
+    var form = $('requestForm');
+    var role = form.elements.funcionSolicitante.value;
+    var shift = form.elements.turnoSolicitud;
+    var assignments = state.docente && state.docente.asignaciones || [];
+    var seen = {};
+    shift.textContent = '';
+    shift.appendChild(blankOption());
+    assignments.forEach(function (item) {
+      if (item.funcion !== role || seen[item.turno]) return;
+      seen[item.turno] = true;
+      shift.appendChild(option(item.turno, shiftLabel(item.turno)));
+    });
+    shift.disabled = !role;
+  }
+
+  function fillTeacher(profile) {
+    var form = $('requestForm');
+    var role = form.elements.funcionSolicitante;
+    var assignments;
+    var seen = {};
+    state.docente = profile || { registrado: false, nombre: '', asignaciones: [] };
+    form.elements.docente.value = clean(state.docente.nombre);
+    role.textContent = '';
+    role.appendChild(blankOption());
+    assignments = state.docente.asignaciones || [];
+    assignments.forEach(function (item) {
+      if (!item.funcion || seen[item.funcion]) return;
+      seen[item.funcion] = true;
+      role.appendChild(option(item.funcion, functionLabel(item.funcion)));
+    });
+    fillShifts();
+  }
+
+  function compactMendozaDate(item) {
+    var iso = clean(item && item.registrado_en_iso);
+    var parsed = iso ? new Date(iso) : null;
+    if (parsed && !Number.isNaN(parsed.getTime())) {
+      return new Intl.DateTimeFormat('es-AR', {
+        timeZone: 'America/Argentina/Mendoza',
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+      }).format(parsed).replace(',', '');
+    }
+    var date = clean(item && item.fecha_local).replace(/^(\d{2}\/\d{2})\/\d{2}(\d{2})$/, '$1/$2');
+    var time = clean(item && item.hora_local).slice(0, 5);
+    return [date, time].filter(Boolean).join(' ');
   }
 
   function renderRequests(rows) {
@@ -136,7 +207,7 @@
     rows.forEach(function (item) {
       var row = document.createElement('tr');
       [
-        [item.fecha_local, item.hora_local].filter(Boolean).join(' - '),
+        compactMendozaDate(item),
         item.estado_gestion,
         item.funcion_solicitante,
         item.grado,
@@ -152,13 +223,15 @@
   }
 
   function setAuthenticated(authenticated) {
-    $('requestFields').disabled = !authenticated;
-    $('requestSubmit').disabled = !authenticated || state.submitting;
+    var registered = !!(state.docente && state.docente.registrado);
+    var enabled = authenticated && registered;
+    $('requestFields').disabled = !enabled;
+    $('requestSubmit').disabled = !enabled || state.submitting;
     $('requestReload').disabled = !authenticated || state.submitting;
     $('solicitudLoginGoogle').disabled = authenticated;
     $('solicitudLogoutGoogle').disabled = !authenticated;
     $('requestSessionText').textContent = authenticated
-      ? state.email + ' | sesión Google autorizada'
+      ? state.email + (registered ? ' | sesión Google autorizada' : ' | cuenta sin registro docente activo')
       : 'Sin sesión iniciada.';
   }
 
@@ -184,9 +257,14 @@
       state.email = clean(result.email).toLowerCase();
       $('requestForm').elements.correoDocente.value = state.email;
       fillOptions(result.opciones || {});
+      fillTeacher(result.docente || null);
       renderRequests(result.solicitudes || []);
       setAuthenticated(true);
-      setStatus('Sesión Google autorizada. El formulario está listo.', 'ok');
+      if (state.docente && state.docente.registrado) {
+        setStatus('Sesión Google autorizada. El formulario está listo.', 'ok');
+      } else {
+        setStatus('La cuenta Google no está registrada como docente activa. Comuníquese con el AIE.', 'error');
+      }
     }).catch(function (error) {
       if (handleAuthError(error)) return;
       setAuthenticated(false);
@@ -214,8 +292,11 @@
     var form = $('requestForm');
     form.reset();
     form.elements.correoDocente.value = state.email;
+    fillTeacher(state.docente);
     $('requestWordHelp').textContent = '0 / 700 palabras.';
   }
+
+  $('requestForm').elements.funcionSolicitante.addEventListener('change', fillShifts);
 
   $('solicitudLoginGoogle').addEventListener('click', function () {
     var url = loginUrl();

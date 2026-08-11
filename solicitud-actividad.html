@@ -152,6 +152,11 @@
       font-size: 12px;
       text-transform: uppercase;
     }
+    .request-table th:first-child,
+    .request-table td:first-child {
+      width: 112px;
+      white-space: nowrap;
+    }
     @media (max-width: 840px) {
       .request-grid { grid-template-columns: 1fr; }
       .request-span-2,
@@ -204,21 +209,19 @@
             </label>
             <label class="request-span-4">
               Apellido y nombres
-              <input name="docente" type="text" autocomplete="name" required>
+              <span class="request-help">Se completa según el correo Gmail autenticado.</span>
+              <input name="docente" type="text" autocomplete="name" readonly required>
             </label>
             <label class="request-span-2">
               Función
               <select name="funcionSolicitante" required>
-                <option value="drt">DRT</option>
-                <option value="docente_grado">Docente de grado</option>
+                <option value="" selected disabled></option>
               </select>
             </label>
             <label class="request-span-2">
               Turno
               <select name="turnoSolicitud" required>
-                <option value="manana">Mañana</option>
-                <option value="tarde">Tarde</option>
-                <option value="vespertino">Vespertino</option>
+                <option value="" selected disabled></option>
               </select>
             </label>
 
@@ -242,6 +245,7 @@
 
             <label class="request-span-12">
               Observaciones docentes
+              <span class="request-help">Opcional. Ej.: el grupo necesita consignas breves, apoyo visual o mayor tiempo para resolver.</span>
               <input name="observacionesDocente" type="text" placeholder="Opcional">
             </label>
 
@@ -272,7 +276,7 @@
         <table class="request-table">
           <thead>
             <tr>
-              <th>Fecha</th>
+              <th title="Fecha y hora de Mendoza, Argentina">Fecha</th>
               <th>Estado</th>
               <th>Función</th>
               <th>Grado</th>
