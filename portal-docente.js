@@ -2013,7 +2013,7 @@
     if (title.indexOf('Resumen por') === 0 && title.toLowerCase().indexOf('rea') >= 0) {
       return {
         className: 'portal-analytics-table-area',
-        description: 'Agrupa los resultados por área para comparar rápidamente dónde el grupo muestra mejores o peores desempeños.',
+        description: 'Agrupa los resultados por área para comparar rápidamente dónde el grupo muestra mejores o peores desempeños. Muestra cómo les está yendo, en general, a los alumnos en cada área. Sirve para identificar rápidamente dónde existen mayores dificultades y podría ser necesario reforzar la enseñanza. Para interpretarlo correctamente, también deben considerarse la cantidad de alumnos, las actividades realizadas y el número de resultados registrados.',
         headers: [
           { label: 'Área' },
           { label: 'Cantidad de ejecuciones', explanation: 'Cantidad total de veces que los alumnos finalizaron actividades del área. Pueden ser actividades iguales o diferentes; cada finalización cuenta una vez' },
