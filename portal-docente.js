@@ -2013,7 +2013,7 @@
     if (title.indexOf('Resumen por') === 0 && title.toLowerCase().indexOf('rea') >= 0) {
       return {
         className: 'portal-analytics-table-area',
-        description: 'Agrupa los resultados por área para comparar rápidamente dónde el grupo muestra mejores o peores desempeños. Muestra cómo les está yendo, en general, a los alumnos en cada área. Sirve para identificar rápidamente dónde existen mayores dificultades y podría ser necesario reforzar la enseñanza. Para interpretarlo correctamente, también deben considerarse la cantidad de alumnos, las actividades realizadas y el número de resultados registrados.',
+        description: 'Agrupa los resultados por área para comparar rápidamente dónde el grupo muestra mejores o peores desempeños. Muestra cómo les está yendo, en general, a los alumnos en cada área. Sirve para identificar rápidamente dónde existen mayores dificultades y podría ser necesario reforzar la enseñanza. Para interpretarlo correctamente, también deben considerarse la cantidad de alumnos, las actividades realizadas y el número de resultados registrados. Ejemplo ilustrativo: si Matemática tiene un promedio de 6 con 30 ejecuciones realizadas por 10 alumnos, mientras Lengua tiene un promedio de 8 con solo 5 ejecuciones realizadas por 3 alumnos, Matemática podría necesitar refuerzo, pero la comparación debe considerar que en Lengua todavía hay pocos datos.',
         headers: [
           { label: 'Área' },
           { label: 'Cantidad de ejecuciones', explanation: 'Indica cuántas veces los alumnos completaron una actividad del área y enviaron su resultado al sistema. Cada actividad puede contener entre 5 y 20 consignas. Si un alumno vuelve a completar la misma actividad, se registra una nueva ejecución' },
@@ -2026,7 +2026,7 @@
     if (title === 'Resumen por grado') {
       return {
         className: 'portal-analytics-table-grade',
-        description: 'Agrupa los resultados según el grado de los alumnos y muestra cómo se desempeña, en general, cada grupo escolar. Es importante porque permite detectar grados que podrían necesitar mayor acompañamiento, revisar si las actividades propuestas tienen una dificultad adecuada y orientar mejor las acciones de refuerzo. Para interpretarlo correctamente, deben considerarse la cantidad de alumnos y ejecuciones de cada grado, ya que un grupo con pocos registros no puede compararse directamente con otro que realizó muchas actividades.',
+        description: 'Agrupa los resultados según el grado de los alumnos y muestra cómo se desempeña, en general, cada grupo escolar. Es importante porque permite detectar grados que podrían necesitar mayor acompañamiento, revisar si las actividades propuestas tienen una dificultad adecuada y orientar mejor las acciones de refuerzo. Para interpretarlo correctamente, deben considerarse la cantidad de alumnos y ejecuciones de cada grado, ya que un grupo con pocos registros no puede compararse directamente con otro que registró muchas ejecuciones. Ejemplo ilustrativo: si 4.º grado tiene un promedio de 6,5 con 25 ejecuciones realizadas por 8 alumnos y 5.º grado tiene un promedio de 8 con solo 4 ejecuciones realizadas por 2 alumnos, el resultado de 4.º representa a un grupo más amplio; conviene reunir más datos de 5.º antes de concluir que su desempeño es mejor.',
         gradeIndexes: [0],
         headers: [
           { label: 'Grado', explanation: 'Grado escolar asociado a los resultados registrados' },
@@ -2040,7 +2040,7 @@
     if (title === 'Tendencia mensual') {
       return {
         className: 'portal-analytics-table-month',
-        description: 'Ordena los resultados por mes y muestra cómo cambia el rendimiento a lo largo del tiempo, según los filtros aplicados. Es importante porque permite observar avances, retrocesos, períodos sin actividad o cambios en el tiempo necesario para resolver las propuestas. La comparación debe considerar la cantidad de ejecuciones de cada mes: un promedio basado en pocos resultados es menos representativo que otro calculado con mayor cantidad de registros.',
+        description: 'Ordena los resultados por mes y muestra cómo cambia el rendimiento a lo largo del tiempo, según los filtros aplicados. Es importante porque permite observar avances, retrocesos, períodos sin actividad o cambios en el tiempo necesario para resolver las propuestas. La comparación debe considerar la cantidad de ejecuciones de cada mes: un promedio basado en pocos resultados es menos representativo que otro calculado con mayor cantidad de registros. Ejemplo ilustrativo: si el promedio pasa de 6 en mayo a 7 en junio y 8 en julio, con una cantidad similar de ejecuciones cada mes, podría indicar una mejora sostenida. Si julio tiene solamente 2 ejecuciones, todavía no alcanza para afirmar que el rendimiento general mejoró.',
         gradeIndexes: [0],
         headers: [
           { label: 'Mes y año', explanation: 'Período en el que se registraron los resultados' },
