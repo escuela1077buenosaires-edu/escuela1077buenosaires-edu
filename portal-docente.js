@@ -2016,7 +2016,7 @@
         description: 'Agrupa los resultados por área para comparar rápidamente dónde el grupo muestra mejores o peores desempeños. Muestra cómo les está yendo, en general, a los alumnos en cada área. Sirve para identificar rápidamente dónde existen mayores dificultades y podría ser necesario reforzar la enseñanza. Para interpretarlo correctamente, también deben considerarse la cantidad de alumnos, las actividades realizadas y el número de resultados registrados.',
         headers: [
           { label: 'Área' },
-          { label: 'Cantidad de ejecuciones', explanation: 'Cantidad total de veces que los alumnos finalizaron actividades del área. Pueden ser actividades iguales o diferentes; cada finalización cuenta una vez' },
+          { label: 'Cantidad de ejecuciones', explanation: 'Indica cuántas veces los alumnos completaron una actividad del área y enviaron su resultado al sistema. Cada actividad puede contener entre 5 y 20 consignas. Si un alumno vuelve a completar la misma actividad, se registra una nueva ejecución' },
           { label: 'Cantidad de alumnos', explanation: 'Cantidad de alumnos distintos que finalizaron al menos una actividad del área. Cada alumno se cuenta una sola vez, aunque tenga varias ejecuciones' },
           { label: 'Promedio de nota', explanation: 'Suma de las notas obtenidas en el área dividida por la cantidad total de ejecuciones registradas' },
           { label: 'Tiempo promedio en minutos', explanation: 'Suma de los minutos empleados en el área dividida por la cantidad total de ejecuciones registradas' }
@@ -2030,7 +2030,7 @@
         gradeIndexes: [0],
         headers: [
           { label: 'Grado', explanation: 'Grado escolar asociado a los resultados registrados' },
-          { label: 'Cantidad de ejecuciones', explanation: 'Cantidad total de veces que los alumnos del grado finalizaron actividades. Pueden ser actividades iguales o diferentes; cada finalización registrada cuenta una vez, no cada ejercicio individual' },
+          { label: 'Cantidad de ejecuciones', explanation: 'Indica cuántas veces los alumnos del grado completaron una actividad y enviaron su resultado al sistema. Cada actividad puede contener entre 5 y 20 consignas. Si un alumno vuelve a completar la misma actividad, se registra una nueva ejecución' },
           { label: 'Cantidad de alumnos', explanation: 'Cantidad de alumnos distintos del grado que finalizaron al menos una actividad. Cada alumno se cuenta una sola vez, aunque tenga varias ejecuciones' },
           { label: 'Promedio de nota', explanation: 'Suma de las notas obtenidas por el grado dividida por la cantidad total de ejecuciones registradas' },
           { label: 'Tiempo promedio en minutos', explanation: 'Suma de los minutos empleados por el grado dividida por la cantidad total de ejecuciones registradas' }
@@ -2044,7 +2044,7 @@
         gradeIndexes: [0],
         headers: [
           { label: 'Mes y año', explanation: 'Período en el que se registraron los resultados' },
-          { label: 'Cantidad de ejecuciones', explanation: 'Cantidad total de actividades finalizadas y registradas durante el mes. Cada finalización cuenta una vez, aunque corresponda a una actividad repetida; no representa la cantidad de ejercicios individuales' },
+          { label: 'Cantidad de ejecuciones', explanation: 'Indica cuántas actividades completas fueron realizadas y registradas durante el mes. Cada actividad puede incluir entre 5 y 20 consignas y cada repetición se cuenta como una nueva ejecución' },
           { label: 'Promedio de nota', explanation: 'Suma de las notas registradas durante el mes dividida por la cantidad total de ejecuciones del período' },
           { label: 'Tiempo promedio en minutos', explanation: 'Suma de los minutos registrados durante el mes dividida por la cantidad total de ejecuciones del período' }
         ]
