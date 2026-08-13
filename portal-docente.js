@@ -2016,10 +2016,10 @@
         description: 'Agrupa los resultados por área para comparar rápidamente dónde el grupo muestra mejores o peores desempeños.',
         headers: [
           { label: 'Área' },
-          { label: 'Cantidad de ejecuciones', explanation: 'Total de resultados registrados en esta área' },
-          { label: 'Cantidad de alumnos', explanation: 'Alumnos distintos que realizaron actividades del área' },
-          { label: 'Promedio de nota', explanation: 'Promedio de las notas obtenidas en el área' },
-          { label: 'Tiempo promedio en minutos', explanation: 'Tiempo promedio empleado en cada ejecución' }
+          { label: 'Cantidad de ejecuciones', explanation: 'Cantidad total de veces que los alumnos finalizaron actividades del área. Pueden ser actividades iguales o diferentes; cada finalización cuenta una vez' },
+          { label: 'Cantidad de alumnos', explanation: 'Cantidad de alumnos distintos que finalizaron al menos una actividad del área. Cada alumno se cuenta una sola vez, aunque tenga varias ejecuciones' },
+          { label: 'Promedio de nota', explanation: 'Suma de las notas obtenidas en el área dividida por la cantidad total de ejecuciones registradas' },
+          { label: 'Tiempo promedio en minutos', explanation: 'Suma de los minutos empleados en el área dividida por la cantidad total de ejecuciones registradas' }
         ]
       };
     }
