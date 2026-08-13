@@ -2026,27 +2026,27 @@
     if (title === 'Resumen por grado') {
       return {
         className: 'portal-analytics-table-grade',
-        description: 'Resume el desempeño por grado para detectar diferencias entre grupos escolares.',
+        description: 'Agrupa los resultados según el grado de los alumnos y muestra cómo se desempeña, en general, cada grupo escolar. Es importante porque permite detectar grados que podrían necesitar mayor acompañamiento, revisar si las actividades propuestas tienen una dificultad adecuada y orientar mejor las acciones de refuerzo. Para interpretarlo correctamente, deben considerarse la cantidad de alumnos y ejecuciones de cada grado, ya que un grupo con pocos registros no puede compararse directamente con otro que realizó muchas actividades.',
         gradeIndexes: [0],
         headers: [
-          { label: 'G', title: 'Grado' },
-          { label: 'Cant. ejec.', title: 'Cantidad de ejecuciones del grado' },
-          { label: 'Cant. alum.', title: 'Cantidad de alumnos del grado' },
-          { label: 'Prom. nota', title: 'Promedio de nota del grado' },
-          { label: 'T/min', title: 'Tiempo promedio en minutos' }
+          { label: 'Grado', explanation: 'Grado escolar asociado a los resultados registrados' },
+          { label: 'Cantidad de ejecuciones', explanation: 'Cantidad total de veces que los alumnos del grado finalizaron actividades. Pueden ser actividades iguales o diferentes; cada finalización registrada cuenta una vez, no cada ejercicio individual' },
+          { label: 'Cantidad de alumnos', explanation: 'Cantidad de alumnos distintos del grado que finalizaron al menos una actividad. Cada alumno se cuenta una sola vez, aunque tenga varias ejecuciones' },
+          { label: 'Promedio de nota', explanation: 'Suma de las notas obtenidas por el grado dividida por la cantidad total de ejecuciones registradas' },
+          { label: 'Tiempo promedio en minutos', explanation: 'Suma de los minutos empleados por el grado dividida por la cantidad total de ejecuciones registradas' }
         ]
       };
     }
     if (title === 'Tendencia mensual') {
       return {
         className: 'portal-analytics-table-month',
-        description: 'Muestra cómo evoluciona el rendimiento mes a mes, en formato mes-año, según los filtros aplicados. Ayuda a ver avances, retrocesos o falta de registros.',
+        description: 'Ordena los resultados por mes y muestra cómo cambia el rendimiento a lo largo del tiempo, según los filtros aplicados. Es importante porque permite observar avances, retrocesos, períodos sin actividad o cambios en el tiempo necesario para resolver las propuestas. La comparación debe considerar la cantidad de ejecuciones de cada mes: un promedio basado en pocos resultados es menos representativo que otro calculado con mayor cantidad de registros.',
         gradeIndexes: [0],
         headers: [
-          { label: 'Mes' },
-          { label: 'Cant. ejec.', title: 'Cantidad de ejecuciones del mes' },
-          { label: 'Prom. nota', title: 'Promedio de nota del mes' },
-          { label: 'T/min', title: 'Tiempo promedio en minutos' }
+          { label: 'Mes y año', explanation: 'Período en el que se registraron los resultados' },
+          { label: 'Cantidad de ejecuciones', explanation: 'Cantidad total de actividades finalizadas y registradas durante el mes. Cada finalización cuenta una vez, aunque corresponda a una actividad repetida; no representa la cantidad de ejercicios individuales' },
+          { label: 'Promedio de nota', explanation: 'Suma de las notas registradas durante el mes dividida por la cantidad total de ejecuciones del período' },
+          { label: 'Tiempo promedio en minutos', explanation: 'Suma de los minutos registrados durante el mes dividida por la cantidad total de ejecuciones del período' }
         ]
       };
     }

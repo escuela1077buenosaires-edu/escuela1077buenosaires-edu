@@ -3151,13 +3151,15 @@ body {
 }
 
 .portal-analytics-table-grade {
-  grid-template-columns: 50px 106px 96px 92px 72px;
-  min-width: 430px;
+  grid-template-columns: 150px 250px 220px 220px 230px;
+  width: min(100%, 1070px);
+  min-width: 1070px;
 }
 
 .portal-analytics-table-month {
-  grid-template-columns: 90px 106px 92px 72px;
-  min-width: 390px;
+  grid-template-columns: 130px 290px 240px 250px;
+  width: min(100%, 910px);
+  min-width: 910px;
 }
 
 .portal-interface-grid {
