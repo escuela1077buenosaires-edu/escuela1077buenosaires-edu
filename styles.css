@@ -3117,9 +3117,21 @@ body {
 }
 
 .portal-analytics-table .portal-table-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
   white-space: normal;
   line-height: 1.15;
   border-color: #d5dee6;
+}
+
+.portal-analytics-table .portal-table-header small {
+  color: #6b7780;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: none;
 }
 
 .portal-analytics-table-activities {
@@ -3133,8 +3145,9 @@ body {
 }
 
 .portal-analytics-table-area {
-  grid-template-columns: minmax(110px, 0.8fr) 106px 96px 92px 72px;
-  min-width: 520px;
+  grid-template-columns: minmax(90px, 0.65fr) repeat(4, minmax(160px, 1.2fr));
+  width: 100%;
+  min-width: 820px;
 }
 
 .portal-analytics-table-grade {

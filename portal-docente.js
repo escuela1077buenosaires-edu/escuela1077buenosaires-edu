@@ -810,6 +810,19 @@
     return cell('portal-table-header', text, title);
   }
 
+  function analyticsHeaderCell(header) {
+    var div = headerCell('', header.title || header.label);
+    var label = document.createElement('span');
+    label.textContent = header.label;
+    div.appendChild(label);
+    if (header.explanation) {
+      var explanation = document.createElement('small');
+      explanation.textContent = '(' + header.explanation + ')';
+      div.appendChild(explanation);
+    }
+    return div;
+  }
+
   function permission(state, key) {
     var profile = state && state.perfil || {};
     var permissions = profile.permisos || {};
@@ -2003,10 +2016,10 @@
         description: 'Agrupa los resultados por área para comparar rápidamente dónde el grupo muestra mejores o peores desempeños.',
         headers: [
           { label: 'Área' },
-          { label: 'Cant. ejec.', title: 'Cantidad de ejecuciones del área' },
-          { label: 'Cant. alum.', title: 'Cantidad de alumnos del área' },
-          { label: 'Prom. nota', title: 'Promedio de nota del área' },
-          { label: 'T/min', title: 'Tiempo promedio en minutos' }
+          { label: 'Cantidad de ejecuciones', explanation: 'Total de resultados registrados en esta área' },
+          { label: 'Cantidad de alumnos', explanation: 'Alumnos distintos que realizaron actividades del área' },
+          { label: 'Promedio de nota', explanation: 'Promedio de las notas obtenidas en el área' },
+          { label: 'Tiempo promedio en minutos', explanation: 'Tiempo promedio empleado en cada ejecución' }
         ]
       };
     }
@@ -2066,7 +2079,7 @@
     var table = document.createElement('div');
     table.className = 'portal-table portal-analytics-table ' + (tableClassName || '');
     headers.forEach(function (header) {
-      table.appendChild(headerCell(header.label, header.title || header.label));
+      table.appendChild(analyticsHeaderCell(header));
     });
     rows.forEach(function (row) {
       mapper(row).forEach(function (item, index) {
