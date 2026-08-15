@@ -1,7 +1,9 @@
 Paquete GitHub Pages 1077
 
 Contenido:
-- index.html: PWA centralizadora de accesos por perfil.
+- index.html: punto de entrada unico para alumnos y personal docente.
+- acceso-alumnos.html: accesos al indice de actividades y a la ayuda de Eduten.
+- portal-funcional.html: PWA centralizadora de funciones del personal docente.
 - lector-qr.html: PWA para docentes/directivos autorizados.
 - portal-docente.html: portal para habilitar indice, actividades y alumnos.
 - alumnos.html: indice publico de actividades habilitadas.

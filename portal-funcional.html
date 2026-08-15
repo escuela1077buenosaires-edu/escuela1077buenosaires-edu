@@ -15,6 +15,20 @@
     .hub-hero { overflow: hidden; position: relative; }
     .hub-hero:after { content: ""; position: absolute; right: -80px; top: -90px; width: 250px; height: 250px; border-radius: 50%; background: rgba(23,111,115,.12); }
     .hub-eyebrow { display: inline-flex; gap: 8px; align-items: center; padding: 7px 10px; border-radius: 999px; background: #e7f3f3; color: var(--accent); font-weight: 800; text-transform: uppercase; letter-spacing: .02em; }
+    .hub-hidden { display: none !important; }
+    .hub-auth { display: grid; gap: 14px; padding: 18px; border: 3px solid #6d263d; border-radius: 16px; background: #fff; }
+    .hub-auth h2, .hub-auth p { margin: 0; }
+    .hub-auth-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+    .hub-auth-actions button { min-height: 44px; }
+    .hub-role-field { display: grid; flex: 1 1 330px; gap: 6px; }
+    .hub-role-field select { width: 100%; min-height: 44px; }
+    .hub-session { display: grid; gap: 4px; padding: 12px; border: 1px solid #d8e2e4; border-radius: 12px; background: #f7fafb; }
+    .hub-status { padding: 12px; border-radius: 10px; background: #edf4f5; color: #334b50; font-weight: 700; }
+    .hub-status.ok { background: #e4f3e7; color: #176b2e; }
+    .hub-status.error { background: #f8e4e4; color: #922828; }
+    .hub-status.warning { background: #fff1d8; color: #81510b; }
+    .hub-functions { display: grid; gap: 14px; margin-top: 16px; padding: 18px; border: 3px solid #176f73; border-radius: 16px; background: #fff; }
+    .hub-functions h2, .hub-functions p { margin: 0; }
     .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
     .hub-card { position: relative; display: grid; min-height: 170px; gap: 10px; align-content: start; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(135deg, #fff, #f6fbfb); color: var(--ink); text-decoration: none; box-shadow: 0 10px 22px rgba(20,25,30,.07); }
     .hub-card:hover { border-color: #8fc7cc; transform: translateY(-1px); }
@@ -33,39 +47,40 @@
       <a class="hub-back" href="./">Volver a la p&aacute;gina principal</a>
       <div class="hub-eyebrow">Escuela 1077</div>
       <h1>Portal funcional del personal docente - Escuela 1077 "Provincia de Buenos Aires"</h1>
-      <p>Acceso a las funciones disponibles para docentes, DRT, personal directivo y supervisi&oacute;n. Las acciones sensibles requieren inicio de sesi&oacute;n con Google y permisos asignados por el AIE.</p>
+      <p>Acceso exclusivo para personal autorizado. La cuenta Google, la funci&oacute;n activa, el horario y los permisos determinan las herramientas disponibles.</p>
     </section>
+
     <section class="student-index-panel">
-      <div class="hub-grid">
-        <a class="hub-card" href="solicitud-actividad.html?login=1"><div class="hub-icon">AB</div><small>Con login Google</small><strong>Solicitud de Creaci&oacute;n de Actividades</strong><span>Pedidos docentes de nuevas actividades educativas.</span></a>
-        <a class="hub-card" href="portal-docente.html?rol=drt&amp;login=1"><div class="hub-icon">DRT</div><small>Con login Google</small><strong>Docentes DRT</strong><span>Habilitar &iacute;ndice, actividades, gestionar alumnos de apoyo y consultar resultados.</span></a>
-        <a class="hub-card" href="portal-docente.html?rol=directora&amp;login=1"><div class="hub-icon">DIR</div><small>Con login Google</small><strong>Personal Directivo</strong><span>Habilitar o cerrar el &iacute;ndice, administrar disponibilidad y ver resultados.</span></a>
-        <a class="hub-card" href="portal-docente.html?rol=supervisora&amp;login=1"><div class="hub-icon">SUP</div><small>Con login Google</small><strong>Personal de Supervisi&oacute;n</strong><span>Acceso autorizado para seguimiento, consulta de resultados y control del &iacute;ndice.</span></a>
-        <a class="hub-card" href="lector-qr.html?login=1"><div class="hub-icon">QR</div><small>PWA</small><strong>Lector QR</strong><span>Escaneo desde celular para registrar resultados de actividades en Base de Datos.</span></a>
-        <a class="hub-card" href="alumnos.html"><div class="hub-icon">AL</div><small>Alumnos</small><strong>Actividades habilitadas</strong><span>&Iacute;ndice visible solo cuando una persona autorizada lo habilita.</span></a>
-        <a class="hub-card" href="https://periodicoescuelabsas.blogspot.com/2025/05/como-crecen-las-plantas-alguna-vez-te.html" target="_blank" rel="noopener noreferrer"><div class="hub-icon">BLOG</div><strong>Blog de la Escuela</strong><span>Acceso a publicaciones educativas.</span></a>
-        <a class="hub-card" href="https://escuela1077buenosaires-edu.github.io/explicaciones-1077/" target="_blank" rel="noopener noreferrer"><div class="hub-icon">AYUDA</div><strong>Ayuda - Resoluci&oacute;n de Actividades Eduten</strong></a>
-        <a class="hub-card" href="http://localhost:3131/#admin"><div class="hub-icon">ADM</div><strong>Administrador del Sistema</strong><span>Funcionalidades del AIE.</span></a>
+      <div class="hub-auth">
+        <h2>Identificaci&oacute;n del personal</h2>
+        <p>Inicie sesi&oacute;n con la cuenta Gmail registrada por el AIE.</p>
+        <div id="portalFunctionalStatus" class="hub-status" role="status" aria-live="polite">Sin sesi&oacute;n iniciada.</div>
+        <div id="portalFunctionalSession" class="hub-session hub-hidden">
+          <strong id="portalFunctionalName"></strong>
+          <span id="portalFunctionalEmail"></span>
+          <span id="portalFunctionalSchedule"></span>
+        </div>
+        <div class="hub-auth-actions">
+          <button type="button" id="portalFunctionalLogin">Iniciar sesi&oacute;n con Google</button>
+          <button type="button" id="portalFunctionalLogout" disabled>Cerrar sesi&oacute;n</button>
+          <label id="portalFunctionalRoleWrap" class="hub-role-field hub-hidden">
+            <span>Funci&oacute;n activa</span>
+            <select id="portalFunctionalRole"></select>
+          </label>
+        </div>
       </div>
+
+      <section id="portalFunctionalTools" class="hub-functions hub-hidden">
+        <h2>Funciones autorizadas</h2>
+        <p>Solo se muestran las herramientas habilitadas para la funci&oacute;n seleccionada.</p>
+        <div id="portalFunctionalCards" class="hub-grid"></div>
+      </section>
+
       <p class="hub-footnote">&copy; 2026 AIE - Escuela 1077 "Provincia de Buenos Aires". Todos los derechos reservados.</p>
     </section>
   </main>
   <script src="aie-public-config.js"></script>
-  <script>
-    (function () {
-      var config = window.AIE_PUBLIC_CONFIG || {};
-      var coverPath = config.imagenSuperior || "";
-      var cover = document.getElementById("hubCover");
-      var image = document.getElementById("hubCoverImage");
-      if (coverPath && cover && image) {
-        image.onload = function () { cover.classList.add("show"); cover.setAttribute("aria-hidden", "false"); };
-        image.onerror = function () { cover.classList.remove("show"); cover.setAttribute("aria-hidden", "true"); };
-        image.src = coverPath;
-      }
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("aie-hub-sw.js").catch(function () {});
-      }
-    }());
-  </script>
+  <script src="aie-runtime.js"></script>
+  <script src="portal-funcional.js"></script>
 </body>
 </html>

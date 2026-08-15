@@ -1,6 +1,6 @@
 {
   "escuelaId": "1077",
-  "generadoEn": "2026-08-04T00:00:37.445Z",
+  "generadoEn": "2026-08-15T03:35:20.308Z",
   "githubPagesBasePath": "/escuela1077buenosaires-edu/",
   "backendBaseUrlConfigurado": false,
   "supabasePublicConfigConfigurada": true,
@@ -8,13 +8,18 @@
   "archivos": [
     {
       "nombre": "README-PUBLICACION.txt",
-      "bytes": 1431,
-      "sha256": "71057532c9f450887eb8101de9f6094fe834d9cd68aece6af623430c730df714"
+      "bytes": 1604,
+      "sha256": "fc60cbd6ac0bf5c7b544b59e8f566dd234ea6bd9ff3b6d28437c0837ed5fb97d"
+    },
+    {
+      "nombre": "acceso-alumnos.html",
+      "bytes": 3231,
+      "sha256": "37a316576a6f3dec12de6a26d3b59c1d3090290b0a6e6e05e995290603c362e6"
     },
     {
       "nombre": "aie-hub-sw.js",
-      "bytes": 1400,
-      "sha256": "05efa2890d9b8c4c07f255f74be06f0c4f5b75fb1b86a9c70f4c4f0f2545471b"
+      "bytes": 1868,
+      "sha256": "bca34914f15cf48e72b909f5fc986d1bfa9c23d15b8034dc44ebcef813ac9005"
     },
     {
       "nombre": "aie-hub.webmanifest",
@@ -23,8 +28,8 @@
     },
     {
       "nombre": "aie-login-redirect.js",
-      "bytes": 2950,
-      "sha256": "6f77c41a56a3b3ba3a92d10ee21cf7ff5cb40a77c856a4c642df91ca7b0aaa78"
+      "bytes": 3024,
+      "sha256": "fa89332406e011a3de44be0bc106c97c2bffefebd7857f9e7b913ec9ae1c1154"
     },
     {
       "nombre": "aie-public-config.js",
@@ -48,8 +53,8 @@
     },
     {
       "nombre": "index.html",
-      "bytes": 6609,
-      "sha256": "5b67dfc13e9f87b61d7151388db9f0cacc377d5cefcee9d2a6997e8b13a568be"
+      "bytes": 5380,
+      "sha256": "912e1e541543e712eff180123115ebcb773931311e5d6652bcfedd0b03698fa7"
     },
     {
       "nombre": "jsQR.LICENSE",
@@ -88,8 +93,8 @@
     },
     {
       "nombre": "manifest-publicacion.json",
-      "bytes": 3487,
-      "sha256": "9aa6b778f41a7d7d215d3a6022278d6ad88123bf4f3ebb88d7d7c2f64c52bd99"
+      "bytes": 4280,
+      "sha256": "eaac9df2fcb456066256416f1a6acd072f8c8cb3dabc8f650ed90cebf9456806"
     },
     {
       "nombre": "portal-docente-fixes.js",
@@ -99,27 +104,37 @@
     {
       "nombre": "portal-docente.html",
       "bytes": 32709,
-      "sha256": "febdaeac056ee9cf9f1930474f886034048d850f7a5f4f80a6e1bf15669d2646"
+      "sha256": "5081ab7c670b8873d9ff95a3f783a35d3cdea41421f6894c0d8424ffc20c12e0"
     },
     {
       "nombre": "portal-docente.js",
-      "bytes": 140285,
-      "sha256": "ffacf221ad8cd86f66aa978c18a88aceb18f9bc44b5be9652665f4119e69cef9"
+      "bytes": 144293,
+      "sha256": "69cd07005c36e6a039c05e3df6b432e0c27a55b00753b927698f0e497c918438"
+    },
+    {
+      "nombre": "portal-funcional.html",
+      "bytes": 5892,
+      "sha256": "f4ec622818a19abfafa3cde983407a5fbfea41f0a5ba7fc361c23cb970adff25"
+    },
+    {
+      "nombre": "portal-funcional.js",
+      "bytes": 13617,
+      "sha256": "e3af6c74ac8faf15c984892463b51fdf4f364e5ca6d7fbbf99c97b7791e51d5f"
     },
     {
       "nombre": "solicitud-actividad.html",
-      "bytes": 10587,
-      "sha256": "c09ff62581f4779d891373e5d7207d8e15cc60a2e719dd7d9d478c7eea3ef325"
+      "bytes": 10830,
+      "sha256": "b14256c46b9e10887b7db4ad07d90ff1bb8696390f7300d05db3cdc3fad475fd"
     },
     {
       "nombre": "solicitud-actividad.js",
-      "bytes": 8915,
-      "sha256": "438e9bbb49f3ff5c2b96ef4f4db2fe743734f1d61446bec3946494e135ec83fd"
+      "bytes": 11815,
+      "sha256": "2623760b2a472221f3dee9b88badc6865f173601a4b0c90b0e95a88eb0c6ba2c"
     },
     {
       "nombre": "styles.css",
-      "bytes": 80549,
-      "sha256": "6cd9b272ba1913f5a5e7cf679c847c9d8e7a3b54ba1e213ad1fd83715ef9b19b"
+      "bytes": 83448,
+      "sha256": "3e949ef9d20f470e3dda075ed35851387d91077a10319c8fa5d25ee2dd78fe1c"
     }
   ]
 }

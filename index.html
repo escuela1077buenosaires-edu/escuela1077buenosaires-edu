@@ -42,7 +42,7 @@
           <strong>Acceso Alumnos</strong>
           <span>Actividades educativas habilitadas y ayuda para resolver propuestas.</span>
         </a>
-        <a class="entry-card staff" href="portal-funcional.html">
+        <a class="entry-card staff" href="portal-funcional.html?login=1">
           <div class="entry-icon">DOC</div>
           <strong>Acceso Docentes, Equipo Directivo y Equipo de Supervisi&oacute;n</strong>
           <span>Ingreso al Portal Funcional del Personal Docente.</span>
@@ -54,6 +54,25 @@
   <script src="aie-public-config.js"></script>
   <script>
     (function () {
+      var pendingKey = "aiePortalHub1077PendingLogin";
+      var tokenKey = "aiePortalHub1077AccessToken";
+      var pending = false;
+      var token = "";
+      try {
+        pending = window.sessionStorage && window.sessionStorage.getItem(pendingKey) === "1";
+        if (pending && window.location.hash.indexOf("access_token=") >= 0) {
+          token = new URLSearchParams(window.location.hash.replace(/^#/, "")).get("access_token") || "";
+        }
+        if (pending && token) {
+          window.sessionStorage.setItem(tokenKey, token);
+          window.sessionStorage.removeItem(pendingKey);
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, "", window.location.pathname);
+          }
+          window.location.replace("portal-funcional.html");
+          return;
+        }
+      } catch (error) {}
       var config = window.AIE_PUBLIC_CONFIG || {};
       var coverPath = config.imagenSuperior || "";
       var cover = document.getElementById("entryCover");

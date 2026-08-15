@@ -44,6 +44,7 @@
     if (role === 'directivo' || role === 'directora' || role === 'director') return 'directora';
     if (role === 'supervision' || role === 'supervisor' || role === 'supervisora') return 'supervisora';
     if (role === 'drt') return 'drt';
+    if (role === 'docente' || role === 'docente_grado') return 'docente';
     if (role === 'administrador') return 'administrador';
     return '';
   }
