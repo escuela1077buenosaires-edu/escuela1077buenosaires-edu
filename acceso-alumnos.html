@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Acceso Alumnos - Escuela 1077</title>
+  <meta name="theme-color" content="#176f73">
+  <link rel="manifest" href="aie-hub.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .student-access-main { width: min(980px, calc(100% - 28px)); }
+    .student-access-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .student-access-back { padding: 10px 14px; border-radius: 10px; background: #e7eef0; color: var(--ink); font-weight: 800; text-decoration: none; }
+    .student-access-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .student-access-card { display: grid; min-height: 210px; align-content: center; justify-items: center; gap: 14px; padding: 26px; border: 3px solid #176f73; border-radius: 20px; background: linear-gradient(145deg, #fff, #f2fafa); color: var(--ink); text-align: center; text-decoration: none; box-shadow: 0 12px 26px rgba(20,25,30,.09); }
+    .student-access-card.help { border-color: #a66a08; background: linear-gradient(145deg, #fff, #fff8eb); }
+    .student-access-icon { width: 60px; height: 60px; display: grid; place-items: center; border-radius: 18px; background: #dff0f1; color: #10575b; font-size: 18px; font-weight: 900; }
+    .student-access-card.help .student-access-icon { background: #f9e8c8; color: #7a4a00; }
+    .student-access-card strong { font-size: 25px; line-height: 1.15; }
+    .student-access-card span { color: var(--muted); font-size: 16px; line-height: 1.4; }
+    @media (max-width: 720px) { .student-access-grid { grid-template-columns: 1fr; } .student-access-head { align-items: flex-start; flex-direction: column; } }
+  </style>
+</head>
+<body class="student-index-body">
+  <main class="student-index student-access-main">
+    <section class="student-index-hero">
+      <div class="student-access-head">
+        <div>
+          <p><strong>Escuela 1077</strong></p>
+          <h1>Acceso Alumnos</h1>
+          <p>Seleccione la opci&oacute;n que necesita.</p>
+        </div>
+        <a class="student-access-back" href="./">Volver a la p&aacute;gina principal</a>
+      </div>
+    </section>
+    <section class="student-index-panel">
+      <div class="student-access-grid">
+        <a class="student-access-card" href="alumnos.html">
+          <div class="student-access-icon">ACT</div>
+          <strong>&Iacute;ndice de Actividades</strong>
+          <span>Acceso a las actividades que fueron habilitadas por personal autorizado.</span>
+        </a>
+        <a class="student-access-card help" href="https://escuela1077buenosaires-edu.github.io/explicaciones-1077/" target="_blank" rel="noopener noreferrer">
+          <div class="student-access-icon">AY</div>
+          <strong>Ayuda - Resoluci&oacute;n de Actividades Eduten</strong>
+          <span>Explicaciones y orientaciones para resolver las actividades.</span>
+        </a>
+      </div>
+    </section>
+  </main>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("aie-hub-sw.js").catch(function () {});
+    }
+  </script>
+</body>
+</html>
