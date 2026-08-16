@@ -84,10 +84,10 @@
     var select = document.createElement('select');
     select.id = 'portalStudentDivision';
     select.appendChild(option('', 'Sin dato'));
-    ['A', 'B', 'C', 'D', 'E', 'F'].forEach(function (letter) {
+    ['A', 'B', 'C', 'D', 'E', 'F', 'U'].forEach(function (letter) {
       select.appendChild(option(letter, letter));
     });
-    select.value = /^[A-F]$/.test(value) ? value : '';
+    select.value = /^[A-FU]$/.test(value) ? value : '';
     current.parentNode.replaceChild(select, current);
   }
 
