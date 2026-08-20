@@ -50,6 +50,48 @@
     return value || 'Funci\u00f3n';
   }
 
+  function shiftLabel(shift) {
+    var value = clean(shift).toLowerCase();
+    if (value === 'manana') return 'Ma\u00f1ana';
+    if (value === 'tarde') return 'Tarde';
+    if (value === 'vespertino') return 'Vespertino';
+    return '';
+  }
+
+  function daysLabel(days) {
+    var values = (days || []).map(Number).filter(function (day) { return day >= 1 && day <= 7; });
+    var names = { 1: 'lun.', 2: 'mar.', 3: 'mi\u00e9.', 4: 'jue.', 5: 'vie.', 6: 's\u00e1b.', 7: 'dom.' };
+    if (values.join(',') === '1,2,3,4,5') return 'lunes a viernes';
+    if (values.join(',') === '1,2,3,4,5,6,7') return 'todos los d\u00edas';
+    return values.map(function (day) { return names[day]; }).join(', ');
+  }
+
+  function roleScheduleLabel(role) {
+    var groups = {};
+    var windows = Array.isArray(role && role.horarios) ? role.horarios : [];
+    var heading = roleLabel(role && role.rol);
+    var shift = shiftLabel(role && role.turno);
+    windows.forEach(function (window) {
+      var from = clean(window && window.desde).slice(0, 5);
+      var to = clean(window && window.hasta).slice(0, 5);
+      var key = from + '|' + to;
+      if (!groups[key]) groups[key] = { from: from, to: to, days: [] };
+      (window && window.dias || []).forEach(function (day) {
+        if (groups[key].days.indexOf(Number(day)) < 0) groups[key].days.push(Number(day));
+      });
+    });
+    var detail = Object.keys(groups).map(function (key) {
+      var group = groups[key];
+      group.days.sort(function (a, b) { return a - b; });
+      return daysLabel(group.days) + ' de ' + group.from + ' a ' + group.to;
+    }).join('; ');
+    return heading + (shift ? ' (' + shift + ')' : '') + ': ' + (detail || 'sin restricci\u00f3n horaria');
+  }
+
+  function assignedSchedulesLabel() {
+    return state.roles.map(roleScheduleLabel).join(' | ');
+  }
+
   function targetSessionKey(target) {
     if (target === 'portal') return 'aiePortal1077AccessToken';
     if (target === 'qr') return 'aieQr1077AccessToken';
@@ -248,9 +290,17 @@
     var select = $('portalFunctionalRole');
     var wrap = $('portalFunctionalRoleWrap');
     select.innerHTML = '';
+    if (!state.activeRole && state.roles.length) {
+      var placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'Fuera del horario habilitado';
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      select.appendChild(placeholder);
+    }
     state.roles.forEach(function (role) {
       var option = document.createElement('option');
-      var shift = clean(role.turno);
+      var shift = shiftLabel(role.turno);
       option.value = role.id;
       option.textContent = roleLabel(role.rol) + (shift ? ' - ' + shift : '') + (role.disponibleAhora ? '' : ' - fuera de horario');
       option.disabled = role.disponibleAhora !== true;
@@ -267,11 +317,13 @@
     $('portalFunctionalLogout').disabled = false;
     $('portalFunctionalName').textContent = clean(state.profile && state.profile.nombre) || 'Personal autorizado';
     $('portalFunctionalEmail').textContent = clean(state.profile && state.profile.email);
-    $('portalFunctionalSchedule').textContent = role ? roleLabel(role.rol) + '. ' + (clean(role.detalleHorario) || 'Sin restricci\u00f3n horaria.') : '';
+    $('portalFunctionalSchedule').textContent = role
+      ? roleScheduleLabel(role)
+      : 'Funciones y horarios asignados: ' + assignedSchedulesLabel() + '.';
     setHidden($('portalFunctionalSession'), false);
     renderRoleSelector();
     if (!role) {
-      setStatus('La cuenta est\u00e1 registrada, pero no tiene una funci\u00f3n disponible en este momento.', 'warning');
+      setStatus('Fuera del horario habilitado, no se ver\u00e1n las funcionalidades a las que tiene acceso.', 'warning');
       setHidden($('portalFunctionalTools'), true);
       return;
     }
