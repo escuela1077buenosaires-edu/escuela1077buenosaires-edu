@@ -11,11 +11,13 @@
     .student-access-main { width: min(980px, calc(100% - 28px)); }
     .student-access-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
     .student-access-back { padding: 10px 14px; border-radius: 10px; background: #e7eef0; color: var(--ink); font-weight: 800; text-decoration: none; }
-    .student-access-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .student-access-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
     .student-access-card { display: grid; min-height: 210px; align-content: center; justify-items: center; gap: 14px; padding: 26px; border: 3px solid #176f73; border-radius: 20px; background: linear-gradient(145deg, #fff, #f2fafa); color: var(--ink); text-align: center; text-decoration: none; box-shadow: 0 12px 26px rgba(20,25,30,.09); }
     .student-access-card.help { border-color: #a66a08; background: linear-gradient(145deg, #fff, #fff8eb); }
+    .student-access-card.courses { border-color: #74283e; background: linear-gradient(145deg, #fff, #fcf4f7); }
     .student-access-icon { width: 60px; height: 60px; display: grid; place-items: center; border-radius: 18px; background: #dff0f1; color: #10575b; font-size: 18px; font-weight: 900; }
     .student-access-card.help .student-access-icon { background: #f9e8c8; color: #7a4a00; }
+    .student-access-card.courses .student-access-icon { background: #f1dfe5; color: #74283e; }
     .student-access-card strong { font-size: 25px; line-height: 1.15; }
     .student-access-card span { color: var(--muted); font-size: 16px; line-height: 1.4; }
     @media (max-width: 720px) { .student-access-grid { grid-template-columns: 1fr; } .student-access-head { align-items: flex-start; flex-direction: column; } }
@@ -44,6 +46,11 @@
           <div class="student-access-icon">AY</div>
           <strong>Ayuda - Resoluci&oacute;n de Actividades Eduten</strong>
           <span>Explicaciones y orientaciones para resolver las actividades.</span>
+        </a>
+        <a class="student-access-card courses" href="https://escuela1077buenosaires-edu.github.io/recorridos-aula/">
+          <div class="student-access-icon">CUR</div>
+          <strong>Actividades por Grado y Divisi&oacute;n</strong>
+          <span>Seleccione su turno, grado y divisi&oacute;n para encontrar las actividades indicadas.</span>
         </a>
       </div>
     </section>
