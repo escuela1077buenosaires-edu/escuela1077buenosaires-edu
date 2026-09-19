@@ -262,6 +262,13 @@
     }
 
     addCard({
+      icon: 'ENT',
+      title: 'Revisi\u00f3n de entregas por curso',
+      description: 'Control de los resultados declarados y de las evidencias enviadas por los alumnos.',
+      href: 'https://script.google.com/macros/s/AKfycbwfFc8jbzDbCxQhLP3UoljpnhP9nh6wKm0DA9MntcLkZiI_fV_fmaMr-yGnExg0aXnTnw/exec?vista=revision'
+    });
+
+    addCard({
       icon: 'BLOG',
       title: 'Blog de la Escuela',
       description: 'Acceso a publicaciones educativas.',
