@@ -170,6 +170,26 @@
     return !!(role.permisos && role.permisos[name] === true);
   }
 
+  function submitReviewAccess(url) {
+    var form = document.createElement('form');
+    function hidden(name, value) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    }
+    form.method = 'post';
+    form.action = url;
+    form.target = '_blank';
+    hidden('action', 'revision-google');
+    hidden('access_token', state.accessToken);
+    hidden('role_id', state.activeRole && state.activeRole.id || '');
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+  }
+
   function addCard(options) {
     var grid = $('portalFunctionalCards');
     var link = document.createElement('a');
@@ -188,7 +208,14 @@
     link.appendChild(badge);
     link.appendChild(title);
     if (options.description) link.appendChild(description);
-    if (options.target) {
+    if (options.googleReview) {
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.addEventListener('click', function (event) {
+        event.preventDefault();
+        submitReviewAccess(options.href);
+      });
+    } else if (options.target) {
       link.addEventListener('click', function (event) {
         var store = storage();
         var key = targetSessionKey(options.target);
@@ -265,7 +292,8 @@
       icon: 'ENT',
       title: 'Revisi\u00f3n de entregas por curso',
       description: 'Control de los resultados declarados y de las evidencias enviadas por los alumnos.',
-      href: 'https://script.google.com/macros/s/AKfycbwfFc8jbzDbCxQhLP3UoljpnhP9nh6wKm0DA9MntcLkZiI_fV_fmaMr-yGnExg0aXnTnw/exec?vista=revision'
+      href: 'https://script.google.com/macros/s/AKfycbwfFc8jbzDbCxQhLP3UoljpnhP9nh6wKm0DA9MntcLkZiI_fV_fmaMr-yGnExg0aXnTnw/exec',
+      googleReview: true
     });
 
     addCard({
