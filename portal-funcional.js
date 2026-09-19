@@ -288,13 +288,15 @@
       });
     }
 
-    addCard({
-      icon: 'ENT',
-      title: 'Revisi\u00f3n de entregas por curso',
-      description: 'Control de los resultados declarados y de las evidencias enviadas por los alumnos.',
-      href: 'https://script.google.com/macros/s/AKfycbwfFc8jbzDbCxQhLP3UoljpnhP9nh6wKm0DA9MntcLkZiI_fV_fmaMr-yGnExg0aXnTnw/exec',
-      googleReview: true
-    });
+    if (role.permisos && role.permisos.puede_revisar_entregas_qr === true) {
+      addCard({
+        icon: 'ENT',
+        title: 'Revisi\u00f3n de entregas por curso',
+        description: 'Control de los resultados declarados y de las evidencias enviadas por los alumnos.',
+        href: 'https://script.google.com/macros/s/AKfycbwfFc8jbzDbCxQhLP3UoljpnhP9nh6wKm0DA9MntcLkZiI_fV_fmaMr-yGnExg0aXnTnw/exec',
+        googleReview: true
+      });
+    }
 
     addCard({
       icon: 'BLOG',
